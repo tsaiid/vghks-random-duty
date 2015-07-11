@@ -114,6 +114,9 @@
 })(window.shannon = window.shannon || Object.create(null));
 
 $(function() {
+  function get_calendar_height() {
+    return $(window).height() - 300;
+  }
 
   $("#cal1").fullCalendar({
     editable: true,
