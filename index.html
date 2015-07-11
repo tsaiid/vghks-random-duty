@@ -49,6 +49,7 @@
             <div class="col-sm-3 col-md-2 sidebar">
                 <button id="func_generate_array" class="btn btn-default" type="submit">Generate Array</button>
                 <button id="func_toggle_calendar" class="btn btn-default" type="submit">Test Calendar</button>
+                <button id="func_clear_calendar" class="btn btn-default" type="submit">Clear Calendar</button>
             </div>
             <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
                 <div id="calEventDialog">
@@ -209,9 +210,11 @@
             eventSources: [{
                 googleCalendarId: 'taiwan__zh-TW@holiday.calendar.google.com',
                 backgroundColor: '#f5dfe2',
-                rendering: 'background'
+                rendering: 'background',
+                className: 'gcal-holiday-background'
             }, {
                 googleCalendarId: 'taiwan__zh-TW@holiday.calendar.google.com',
+                className: 'gcal-holiday'
             }],
             selectable: true,
             dayClick: function(date, jsEvent, view) {
@@ -382,13 +385,13 @@
         });
 
         duty_colors = [
-          "#000000",
-          "#2D6100",
-          "#705A00",
-          "#943700",
-          "#6E043A",
-          "#20006E",
-          "#20006E",
+            "#000000",
+            "#2D6100",
+            "#705A00",
+            "#943700",
+            "#6E043A",
+            "#20006E",
+            "#20006E",
         ];
 
         $('#func_toggle_calendar').click(function() {
@@ -401,18 +404,29 @@
                 c++;
             }
 
-            duties.forEach(function(element){
-              var event = {
-                  title: element,
-                  start: moment,
-                  color: duty_colors[element]
-              };
-              $('#cal1').fullCalendar('renderEvent', event, true);
-              moment.add(1, 'd');
+            duties.forEach(function(element) {
+                var event = {
+                    title: element,
+                    start: moment,
+                    color: duty_colors[element],
+                    className: "duty-event"
+                };
+                $('#cal1').fullCalendar('renderEvent', event, true);
+                moment.add(1, 'd');
             });
             //alert("The current date of the calendar is " + moment.daysInMonth());
         });
 
+    });
+
+    $('#func_clear_calendar').click(function() {
+        $('#cal1').fullCalendar('removeEvents', function(event) {
+            if ($.inArray('duty-event', event.className) > -1) {
+                return true;
+            } else {
+                return false;
+            }
+        });
     });
     </script>
 </body>
