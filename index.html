@@ -1,283 +1,397 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>VGHKS Random Duty Generator</title>
-
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.3.2/fullcalendar.min.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/redmond/jquery-ui.css">
     <link rel="stylesheet" type="text/css" href="dashboard.css">
     <link rel="stylesheet" type="text/css" href="calendar.css">
-
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
-  </head>
-  <body>
-      <nav class="navbar navbar-inverse navbar-fixed-top">
-      <div class="container-fluid">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="#">VGHKS Random Duty Generator</a>
+</head>
+
+<body>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">VGHKS Random Duty Generator</a>
+            </div>
+            <div id="navbar" class="navbar-collapse collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="#">Dashboard</a></li>
+                    <li><a href="#">Settings</a></li>
+                    <li><a href="#">Profile</a></li>
+                    <li><a href="#">Help</a></li>
+                </ul>
+                <form class="navbar-form navbar-right">
+                    <input type="text" class="form-control" placeholder="Search...">
+                </form>
+            </div>
         </div>
-        <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav navbar-right">
-            <li><a href="#">Dashboard</a></li>
-            <li><a href="#">Settings</a></li>
-            <li><a href="#">Profile</a></li>
-            <li><a href="#">Help</a></li>
-          </ul>
-          <form class="navbar-form navbar-right">
-            <input type="text" class="form-control" placeholder="Search...">
-          </form>
-        </div>
-      </div>
     </nav>
-
     <div class="container-fluid">
-      <div class="row">
-        <div class="col-sm-3 col-md-2 sidebar">
-          <button id="func_generate_array" class="btn btn-default" type="submit">Generate Array</button>
-        </div>
-
-        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-          <div id="calendars" class="row">
-            <div class="col-sm-6 main">
-              <div id="cal1"></div>
+        <div class="row">
+            <div class="col-sm-3 col-md-2 sidebar">
+                <button id="func_generate_array" class="btn btn-default" type="submit">Generate Array</button>
+                <button id="func_toggle_calendar" class="btn btn-default" type="submit">Test Calendar</button>
             </div>
-            <div class="col-sm-6 main">
-              <div id="cal2"></div>
+            <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+                <div id="calEventDialog">
+                    <form>
+                        <fieldset>
+                            <label for="eventTitle">Title</label>
+                            <input type="text" name="eventTitle" id="eventTitle" />
+                            <input type="hidden" name="eventTitle" id="eventStart" />
+                        </fieldset>
+                    </form>
+                </div>
+                <div id="calEventEditDialog">
+                    <form>
+                        <fieldset>
+                            <label for="eventEditStart">Title</label>
+                            <input type="text" name="eventEditTitle" id="eventEditTitle" />
+                            <input type="hidden" name="eventEditStart" id="eventEditStart" />
+                            <input type="hidden" name="eventEditId" id="eventEditId" />
+                        </fieldset>
+                    </form>
+                </div>
+                <div id="calendars" class="row">
+                    <div class="col-sm-6 main">
+                        <div id="cal1"></div>
+                    </div>
+                    <div class="col-sm-6 main">
+                        <div id="cal2"></div>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
     </div>
-
     <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.66.0-2013.10.09/jquery.blockUI.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.3.2/fullcalendar.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.3.2/gcal.js"></script>
     <script type="text/javascript">
-// entropy.js MIT License © 2014 James Abney http://github.com/jabney
+    // entropy.js MIT License © 2014 James Abney http://github.com/jabney
 
-// Calculate the Shannon entropy of a string in bits per symbol.
-(function(shannon) {
-'use strict';
+    // Calculate the Shannon entropy of a string in bits per symbol.
+    (function(shannon) {
+        'use strict';
 
-  // Create a dictionary of character frequencies and iterate over it.
-  function process(s, evaluator) {
-    var h = Object.create(null), k;
-    s.split('').forEach(function(c) {
-      h[c] && h[c]++ || (h[c] = 1); });
-    if (evaluator) for (k in h) evaluator(k, h[k]);
-    return h;
-  };
+        // Create a dictionary of character frequencies and iterate over it.
+        function process(s, evaluator) {
+            var h = Object.create(null),
+                k;
+            s.split('').forEach(function(c) {
+                h[c] && h[c]++ || (h[c] = 1);
+            });
+            if (evaluator)
+                for (k in h) evaluator(k, h[k]);
+            return h;
+        };
 
-  // Measure the entropy of a string in bits per symbol.
-  shannon.entropy = function(s) {
-    var sum = 0,len = s.length;
-    process(s, function(k, f) {
-      var p = f/len;
-      sum -= p * Math.log(p) / Math.log(2);
-    });
-    return sum;
-  };
+        // Measure the entropy of a string in bits per symbol.
+        shannon.entropy = function(s) {
+            var sum = 0,
+                len = s.length;
+            process(s, function(k, f) {
+                var p = f / len;
+                sum -= p * Math.log(p) / Math.log(2);
+            });
+            return sum;
+        };
 
-  // Measure the entropy of a string in total bits.
-  shannon.bits = function(s) {
-    return shannon.entropy(s) * s.length;
-  };
+        // Measure the entropy of a string in total bits.
+        shannon.bits = function(s) {
+            return shannon.entropy(s) * s.length;
+        };
 
-  // Log the entropy of a string to the console.
-  shannon.log = function(s) {
-    console.log('Entropy of "' + s + '" in bits per symbol:', shannon.entropy(s));
-  };
-})(window.shannon = window.shannon || Object.create(null));
+        // Log the entropy of a string to the console.
+        shannon.log = function(s) {
+            console.log('Entropy of "' + s + '" in bits per symbol:', shannon.entropy(s));
+        };
+    })(window.shannon = window.shannon || Object.create(null));
 
-$(function() {
-  function get_calendar_height() {
-    return $(window).height() - 300;
-  }
-
-  $("#cal1").fullCalendar({
-    editable: true,
-    defaultDate: "2015-07-01",
-    firstDay: 1,
-    googleCalendarApiKey: 'AIzaSyCutCianVgUaWaCHeTDMk2VzyZ8bcNUdOY',
-    eventSources: [
-      'http://www.google.com/calendar/feeds/taiwan__zh-TW%40holiday.calendar.google.com/public/basic'
-    ]
-  });
-
-  $("#cal2").fullCalendar({
-    defaultDate: "2015-08-01",
-    firstDay: 1,
-    googleCalendarApiKey: 'AIzaSyCutCianVgUaWaCHeTDMk2VzyZ8bcNUdOY',
-    eventSources: [
-      {
-        googleCalendarId: 'taiwan__zh-TW@holiday.calendar.google.com',
-        backgroundColor: '#f5dfe2',
-        rendering: 'background'
-      },
-      {
-        googleCalendarId: 'taiwan__zh-TW@holiday.calendar.google.com',
-      }
-    ]
-  });
-
-  function randomIntFromInterval(min,max) {
-    return Math.floor(Math.random()*(max-min+1)+min);
-  }
-
-  Array.prototype.multiIndexOf = function (el) {
-    var idxs = [];
-    for (var i = this.length - 1; i >= 0; i--) {
-        if (this[i] === el) {
-            idxs.unshift(i);
+    $(function() {
+        function get_calendar_height() {
+            return $(window).height() - 300;
         }
-    }
-    return idxs;
-  };
 
-  entropy = function(arr) {
-    var counts = {};
-    for(var i = 0; i < arr.length; i++) {
-        var num = arr[i];
-        counts[num] = counts[num] ? counts[num]+1 : 1;
-    }
-    //console.log(counts);
-    var sum = 0;
-    var total = arr.length;
-    for (var k in counts) {
-      var p = counts[k] / total;
-      sum -= p * Math.log(p) / Math.log(2);
-      //console.log(sum);
-    }
-    return sum;
-  };
+        var title = $('#eventTitle');
+        var start = $('#eventStart');
+        var eventClass, color;
+        $('#calEventDialog').dialog({
+            resizable: false,
+            autoOpen: false,
+            title: 'Set Duty',
+            width: 400,
+            buttons: {
+                Save: function() {
+                    eventClass = "gbcs-allday-event";
+                    color = "#875DA8";
+                    if (title.val() !== '') {
+                        $("#cal1").fullCalendar('renderEvent', {
+                                title: title.val(),
+                                start: start.val(),
+                                allDay: true,
+                                className: eventClass,
+                                color: color
+                            }, true // make the event "stick"
+                        );
+                    }
+                    $("#cal1").fullCalendar('unselect');
+                    $(this).dialog('close');
+                },
+                Cancel: function() {
+                    $(this).dialog('close');
+                }
+            }
+        });
 
-  function standardDeviation(values){
-    var avg = average(values);
+        $('#calEventEditDialog').dialog({
+            resizable: false,
+            autoOpen: false,
+            title: 'Edit Duty',
+            width: 400,
+            buttons: {
+                Save: function() {
+                    eventClass = "gbcs-allday-event";
+                    color = "#875DA8";
+                    if ($('#eventEditTitle').val() !== '') {
+                        // have to remove old and add new
+                        $("#cal1").fullCalendar('removeEvents', $('#eventEditId').val());
 
-    var squareDiffs = values.map(function(value){
-      var diff = value - avg;
-      var sqrDiff = diff * diff;
-      return sqrDiff;
+                        $("#cal1").fullCalendar('renderEvent', {
+                                title: $('#eventEditTitle').val(),
+                                start: $('#eventEditStart').val(),
+                                allDay: true,
+                                className: eventClass,
+                                color: color
+                            }, true // make the event "stick"
+                        );
+                    }
+                    $("#cal1").fullCalendar('unselect');
+                    $(this).dialog('close');
+                },
+                Delete: function() {
+                    $("#cal1").fullCalendar('removeEvents', $('#eventEditId').val());
+                    //console.log(calEvent._id);
+                    $(this).dialog("close");
+                },
+                Cancel: function() {
+                    $(this).dialog('close');
+                }
+            }
+        });
+
+        $("#cal1").fullCalendar({
+            defaultDate: "2015-07-01",
+            firstDay: 1,
+            theme: true,
+            googleCalendarApiKey: 'AIzaSyCutCianVgUaWaCHeTDMk2VzyZ8bcNUdOY',
+            eventSources: [{
+                googleCalendarId: 'taiwan__zh-TW@holiday.calendar.google.com',
+                backgroundColor: '#f5dfe2',
+                rendering: 'background'
+            }, {
+                googleCalendarId: 'taiwan__zh-TW@holiday.calendar.google.com',
+            }],
+            selectable: true,
+            dayClick: function(date, jsEvent, view) {
+                $('#eventStart').val(date.format("YYYY-MM-DD"));
+                //console.log(date.format("YYYY-MM-DD"));
+                $('#calEventDialog').dialog('open');
+            },
+            editable: true,
+            eventClick: function(calEvent, jsEvent, view) {
+                $('#eventEditStart').val(calEvent.start.format("YYYY-MM-DD"));
+                $('#eventEditId').val(calEvent._id);
+                $('#calEventEditDialog #eventEditTitle').val(calEvent.title);
+                $("#calEventEditDialog").dialog('open');
+            },
+        });
+
+        $("#cal2").fullCalendar({
+            defaultDate: "2015-08-01",
+            firstDay: 1,
+            googleCalendarApiKey: 'AIzaSyCutCianVgUaWaCHeTDMk2VzyZ8bcNUdOY',
+            eventSources: [
+                'http://www.google.com/calendar/feeds/taiwan__zh-TW%40holiday.calendar.google.com/public/basic'
+            ]
+        });
+
+        function randomIntFromInterval(min, max) {
+            return Math.floor(Math.random() * (max - min + 1) + min);
+        }
+
+        Array.prototype.multiIndexOf = function(el) {
+            var idxs = [];
+            for (var i = this.length - 1; i >= 0; i--) {
+                if (this[i] === el) {
+                    idxs.unshift(i);
+                }
+            }
+            return idxs;
+        };
+
+        entropy = function(arr) {
+            var counts = {};
+            for (var i = 0; i < arr.length; i++) {
+                var num = arr[i];
+                counts[num] = counts[num] ? counts[num] + 1 : 1;
+            }
+            //console.log(counts);
+            var sum = 0;
+            var total = arr.length;
+            for (var k in counts) {
+                var p = counts[k] / total;
+                sum -= p * Math.log(p) / Math.log(2);
+                //console.log(sum);
+            }
+            return sum;
+        };
+
+        function standardDeviation(values) {
+            var avg = average(values);
+
+            var squareDiffs = values.map(function(value) {
+                var diff = value - avg;
+                var sqrDiff = diff * diff;
+                return sqrDiff;
+            });
+
+            var avgSquareDiff = average(squareDiffs);
+
+            var stdDev = Math.sqrt(avgSquareDiff);
+            return stdDev;
+        }
+
+        function average(data) {
+            var sum = data.reduce(function(sum, value) {
+                return sum + value;
+            }, 0);
+
+            var avg = sum / data.length;
+            return avg;
+        }
+
+        var preset_duty = {};
+        preset_duty[7] = [];
+        preset_duty[7][3] = 4;
+        preset_duty[7][4] = 3;
+        preset_duty[7][10] = 1;
+        preset_duty[7][11] = 2;
+        preset_duty[7][17] = 2;
+        preset_duty[7][18] = 3;
+        preset_duty[7][24] = 4;
+        preset_duty[7][25] = 1;
+
+        random_duty = function() {
+            var days = [];
+            for (i = 0; i < 31; i++) {
+                var duty = preset_duty[7][i] !== undefined ? preset_duty[7][i] : randomIntFromInterval(1, 4);
+                days.push(duty);
+            }
+            $('#days').html(days.join(', '));
+
+            var positions = {};
+            for (i = 1; i <= 4; i++) {
+                positions[i] = days.multiIndexOf(i);
+
+                if (positions[i].length < 7 || positions[i].length > 8)
+                    return true;
+            }
+            //console.log(positions);
+            //$('#positions').html(pos1.join(', '));
+
+            var intervals = {};
+            var max = days.length - 1;
+            for (i = 1; i <= 4; i++) {
+                intervals[i] = [];
+                for (j = 0, pos = -1; j < positions[i].length; j++) {
+                    if (pos > -1)
+                        intervals[i].push(positions[i][j] - pos);
+                    pos = positions[i][j];
+                }
+
+                if (intervals[i].indexOf(1) >= 0)
+                    return true; // 不可連值
+            }
+            //$('#intervals').html(interval1.join(', '));
+            //console.log(intervals);
+
+            std_devs = {};
+            for (i = 1; i <= 4; i++) {
+                std_devs[i] = standardDeviation(intervals[i]);
+            }
+            for (i = 1; i <= 4; i++) {
+                if (std_devs[i] > 1.8)
+                    return true;
+            }
+            //$('#std_dev').html(std_dev);
+            //console.log(std_devs);
+
+            //    var ent1 = shannon.entropy(interval1.join());
+            //var ent1 = entropy(interval1);
+            //$('#entropy').html();
+
+            console.log(positions);
+            console.log(intervals);
+            console.log(std_devs);
+
+            return false;
+            //alert(days);
+            //var test = "3454";
+            //alert(shannon.entropy(test));
+        };
+
+        $('#func_generate_array').click(function() {
+            var c = 0;
+            while (random_duty()) {
+                c++;
+            }
+            console.log("run times:" + c);
+            //var a = [11, 1, 1, 3, 1, 1, 1, 11];
+            //alert(entropy(a));
+            //console.log(standardDeviation([9,2,2,4,2,8,3]));
+            //console.log(standardDeviation([2,4,8,6,3,2,4]));
+            //console.log(standardDeviation([3,5,4,2,6,3,2,4]));
+            //console.log(standardDeviation([2,2,4,6,2,3,6]));
+            //entropy([2,2,3,3,5,5,8,8]);
+            //entropy([3,3,3,3,3,3,3,4]);
+        });
+
+        $('#func_toggle_calendar').click(function() {
+            var moment = $('#cal1').fullCalendar('getDate');
+            var total_days = moment.daysInMonth();
+
+            var event = {
+                title: '2',
+                start: "2015-07-10"
+            };
+            $('#cal1').fullCalendar('renderEvent', event, true);
+            //alert("The current date of the calendar is " + moment.daysInMonth());
+        });
+
     });
-
-    var avgSquareDiff = average(squareDiffs);
-
-    var stdDev = Math.sqrt(avgSquareDiff);
-    return stdDev;
-  }
-
-  function average(data){
-    var sum = data.reduce(function(sum, value){
-      return sum + value;
-    }, 0);
-
-    var avg = sum / data.length;
-    return avg;
-  }
-
-  var preset_duty = {};
-  preset_duty[7] = [];
-  preset_duty[7][3] = 4;
-  preset_duty[7][4] = 3;
-  preset_duty[7][10] = 1;
-  preset_duty[7][11] = 2;
-  preset_duty[7][17] = 2;
-  preset_duty[7][18] = 3;
-  preset_duty[7][24] = 4;
-  preset_duty[7][25] = 1;
-
-  random_duty = function(){
-    var days = [];
-    for (i = 0; i < 31; i++) {
-      var duty = preset_duty[7][i] !== undefined ? preset_duty[7][i] : randomIntFromInterval(1, 4);
-      days.push(duty);
-    }
-    $('#days').html(days.join(', '));
-
-    var positions = {};
-    for (i = 1; i <= 4; i++) {
-      positions[i] = days.multiIndexOf(i);
-
-      if (positions[i].length < 7 || positions[i].length > 8)
-        return true;
-    }
-    //console.log(positions);
-    //$('#positions').html(pos1.join(', '));
-
-    var intervals = {};
-    var max = days.length - 1;
-    for (i = 1; i <= 4; i++) {
-      intervals[i] = [];
-      for (j = 0, pos = -1; j < positions[i].length; j++) {
-        if (pos > -1)
-          intervals[i].push(positions[i][j] - pos);
-        pos = positions[i][j];
-      }
-
-      if (intervals[i].indexOf(1) >= 0)
-        return true;  // 不可連值
-    }
-    //$('#intervals').html(interval1.join(', '));
-    //console.log(intervals);
-
-    std_devs = {};
-    for (i = 1; i <= 4; i++) {
-      std_devs[i] = standardDeviation(intervals[i]);
-    }
-    for (i = 1; i <= 4; i++) {
-      if (std_devs[i] > 1.8)
-        return true;
-    }
-    //$('#std_dev').html(std_dev);
-    //console.log(std_devs);
-
-//    var ent1 = shannon.entropy(interval1.join());
-    //var ent1 = entropy(interval1);
-    //$('#entropy').html();
-
-    console.log(positions);
-    console.log(intervals);
-    console.log(std_devs);
-
-    return false;
-    //alert(days);
-    //var test = "3454";
-    //alert(shannon.entropy(test));
-  };
-
-  $('#func_generate_array').click(function(){
-    var c = 0;
-    while (random_duty()) {
-      c++;
-    }
-    console.log("run times:" + c);
-    //var a = [11, 1, 1, 3, 1, 1, 1, 11];
-    //alert(entropy(a));
-    //console.log(standardDeviation([9,2,2,4,2,8,3]));
-    //console.log(standardDeviation([2,4,8,6,3,2,4]));
-    //console.log(standardDeviation([3,5,4,2,6,3,2,4]));
-    //console.log(standardDeviation([2,2,4,6,2,3,6]));
-    //entropy([2,2,3,3,5,5,8,8]);
-    //entropy([3,3,3,3,3,3,3,4]);
-  });
-});
     </script>
-  </body>
+</body>
+
 </html>
