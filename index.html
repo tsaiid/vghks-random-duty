@@ -303,26 +303,26 @@
         preset_duty[7][24] = 4;
         preset_duty[7][25] = 1;
 
-        random_duty = function() {
-            var days = [];
-            for (i = 0; i < 31; i++) {
+        random_duty = function(total_days) {
+            var duties = [];
+            for (i = 0; i < total_days; i++) {
                 var duty = preset_duty[7][i] !== undefined ? preset_duty[7][i] : randomIntFromInterval(1, 4);
-                days.push(duty);
+                duties.push(duty);
             }
-            $('#days').html(days.join(', '));
+            //$('#days').html(duties.join(', '));
 
             var positions = {};
             for (i = 1; i <= 4; i++) {
-                positions[i] = days.multiIndexOf(i);
+                positions[i] = duties.multiIndexOf(i);
 
                 if (positions[i].length < 7 || positions[i].length > 8)
-                    return true;
+                    return false;
             }
             //console.log(positions);
             //$('#positions').html(pos1.join(', '));
 
             var intervals = {};
-            var max = days.length - 1;
+            var max = duties.length - 1;
             for (i = 1; i <= 4; i++) {
                 intervals[i] = [];
                 for (j = 0, pos = -1; j < positions[i].length; j++) {
@@ -332,7 +332,7 @@
                 }
 
                 if (intervals[i].indexOf(1) >= 0)
-                    return true; // 不可連值
+                    return false; // 不可連值
             }
             //$('#intervals').html(interval1.join(', '));
             //console.log(intervals);
@@ -343,7 +343,7 @@
             }
             for (i = 1; i <= 4; i++) {
                 if (std_devs[i] > 1.8)
-                    return true;
+                    return false;
             }
             //$('#std_dev').html(std_dev);
             //console.log(std_devs);
@@ -356,17 +356,20 @@
             console.log(intervals);
             console.log(std_devs);
 
-            return false;
-            //alert(days);
+            return duties;
+            //alert(duties);
             //var test = "3454";
             //alert(shannon.entropy(test));
         };
 
         $('#func_generate_array').click(function() {
             var c = 0;
-            while (random_duty()) {
+            var duties;
+            while (!(duties = random_duty(31))) {
                 c++;
             }
+            console.log(duties);
+            console.log(duties.length);
             console.log("run times:" + c);
             //var a = [11, 1, 1, 3, 1, 1, 1, 11];
             //alert(entropy(a));
@@ -378,15 +381,35 @@
             //entropy([3,3,3,3,3,3,3,4]);
         });
 
+        duty_colors = [
+          "#000000",
+          "#2D6100",
+          "#705A00",
+          "#943700",
+          "#6E043A",
+          "#20006E",
+          "#20006E",
+        ];
+
         $('#func_toggle_calendar').click(function() {
             var moment = $('#cal1').fullCalendar('getDate');
             var total_days = moment.daysInMonth();
+            var duties;
+            var c = 0;
 
-            var event = {
-                title: '2',
-                start: "2015-07-10"
-            };
-            $('#cal1').fullCalendar('renderEvent', event, true);
+            while (!(duties = random_duty(31))) {
+                c++;
+            }
+
+            duties.forEach(function(element){
+              var event = {
+                  title: element,
+                  start: moment,
+                  color: duty_colors[element]
+              };
+              $('#cal1').fullCalendar('renderEvent', event, true);
+              moment.add(1, 'd');
+            });
             //alert("The current date of the calendar is " + moment.daysInMonth());
         });
 
