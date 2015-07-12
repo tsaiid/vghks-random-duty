@@ -62,6 +62,7 @@
                         </div>
                     </div>
                 </form>
+                <div id="suggested_pattern"></div>
             </div>
             <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
                 <div id="calEventDialog">
@@ -541,7 +542,6 @@
             }
 
             var patterns = [];
-            var residual_ordinary_count = ordinary_count;
             for (i = 1; i <= people; i++) {
                 var o_count;
                 var f_count = friday_duties.multiIndexOf(i).length;
@@ -555,15 +555,17 @@
                     }
 
                     o_count = parseInt(ordinary_count / people);
-                    if (residual_ordinary_count % people != 0) {
-                        if (randomIntFromInterval(1, 2) == 1) {
-                            o_count++;
-                        }
-                        residual_ordinary_count -= o_count;
-                    }
                 }
 
                 patterns.push([o_count, f_count, h_count]);
+            }
+
+            var residual_ordinary_count = ordinary_count % people;
+            if (residual_ordinary_count != 0) {
+                patterns = patterns.sort(function(a, b) { return (a[2]*2+a[1]) - (b[2]*2+b[1]) });
+                for (i = 0; i < residual_ordinary_count; i++) {
+                    patterns[i][0]++;
+                }
             }
 
             return patterns;
@@ -607,7 +609,14 @@
                 }
             }
             console.log(c);
-            console.log(patterns.toString());
+            //console.log(patterns.toString());
+            var suggested_pattern_html = '<table class="table table-striped"><tr><th>No.</th><th>平</th><th>五</th><th>假</th><th>P</th></tr>';
+            patterns.forEach(function(pattern, index){
+                var point = parseInt(pattern[1]) + parseInt(pattern[2]) * 2;
+                suggested_pattern_html += '<tr><td>' + (index + 1) + '</td><td>' + pattern[0] + '</td><td>' + pattern[1] + '</td><td>' + pattern[2] + '</td><td>' + point + '</td></tr>';
+            });
+            suggested_pattern_html += '</table>';
+            $('#suggested_pattern').html(suggested_pattern_html);
         });
 
     });
