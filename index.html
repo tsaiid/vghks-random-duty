@@ -90,6 +90,14 @@
                         </fieldset>
                     </form>
                 </div>
+                <div id="cal_nav" style="position: absolute;">
+                    <nav>
+                        <ul class="pager">
+                            <li><a href="#" id="prev_month"><span aria-hidden="true">&larr;</span> Prev</a></li>
+                            <li><a href="#" id="next_month">Next <span aria-hidden="true">&rarr;</span></a></li>
+                        </ul>
+                    </nav>
+                </div>
                 <div id="calendars" class="row">
                     <div class="col-sm-6 first_cal">
                         <div id="cal1"></div>
@@ -237,8 +245,16 @@
             }
         });
 
+        var currMonth = moment();
+        var nextMonth = moment().add(1, 'months');
+        var nextTwoMonth = moment().add(2, 'months');
         $("#cal1").fullCalendar({
-            defaultDate: "2015-07-01",
+            defaultDate: nextMonth,
+            header: {
+                left: 'title',
+                center: '',
+                right: ''
+            },
             firstDay: 1,
             theme: true,
             googleCalendarApiKey: 'AIzaSyCutCianVgUaWaCHeTDMk2VzyZ8bcNUdOY',
@@ -277,12 +293,30 @@
         });
 
         $("#cal2").fullCalendar({
-            defaultDate: "2015-08-01",
+            defaultDate: nextTwoMonth,
+            header: {
+                left: '',
+                center: '',
+                right: 'title'
+            },
             firstDay: 1,
+            theme: true,
             googleCalendarApiKey: 'AIzaSyCutCianVgUaWaCHeTDMk2VzyZ8bcNUdOY',
             eventSources: [
                 'http://www.google.com/calendar/feeds/taiwan__zh-TW%40holiday.calendar.google.com/public/basic'
             ]
+        });
+
+        $('#next_month').click(function() {
+            //console.log('prev is clicked, do something');
+            $('#cal1').fullCalendar('next');
+            $('#cal2').fullCalendar('next');
+        });
+
+        $('#prev_month').click(function() {
+            //console.log('next is clicked, do something');
+            $('#cal1').fullCalendar('prev');
+            $('#cal2').fullCalendar('prev');
         });
 
         function randomIntFromInterval(min, max) {

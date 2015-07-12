@@ -1,3 +1,13 @@
 .fc-sat, .fc-sun {
     background-color: #f5dfe2 !important;
 }
+
+#cal_nav {
+   width: 300px;          // your login div width
+   position: absolute;
+   z-index: 999;
+   left: 50%;
+   right: 50%;
+   top: 0;
+   margin-left: -150px;   // width/2
+}
