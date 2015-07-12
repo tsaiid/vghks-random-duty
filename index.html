@@ -132,6 +132,8 @@
     })(window.shannon = window.shannon || Object.create(null));
 
     $(function() {
+        var ENABLE_CONDITIONING = false;
+
         function get_calendar_height() {
             return $(window).height() - 300;
         }
@@ -323,8 +325,10 @@
                 positions[i] = duties.multiIndexOf(i);
 
                 // check if fit duty counts.
-                if (positions[i].length < total_days / 4 - 1 || positions[i].length > total_days / 4 + 1)
-                    return false;
+                if (ENABLE_CONDITIONING) {
+                    if (positions[i].length < total_days / 4 - 1 || positions[i].length > total_days / 4 + 1)
+                        return false;
+                }
             }
             //console.log(positions);
             //$('#positions').html(pos1.join(', '));
@@ -338,8 +342,10 @@
                         intervals[i].push(positions[i][j] - pos);
                     pos = positions[i][j];
                 }
-                if (intervals[i].indexOf(1) >= 0)
-                    return false; // 不可連值
+                if (ENABLE_CONDITIONING) {
+                    if (intervals[i].indexOf(1) >= 0)
+                        return false; // 不可連值
+                }
             }
             //$('#intervals').html(interval1.join(', '));
             //console.log(intervals);
@@ -349,9 +355,11 @@
                 std_devs[i] = standardDeviation(intervals[i]);
             }
             for (i = 1; i <= 4; i++) {
-                // set level of standard deviation.
-                if (std_devs[i] > 1.8)
-                    return false;
+                if (ENABLE_CONDITIONING) {
+                    // set level of standard deviation.
+                    if (std_devs[i] > 1.8)
+                        return false;
+                }
             }
             //$('#std_dev').html(std_dev);
             //console.log(std_devs);
@@ -409,22 +417,22 @@
             while (!(duties = random_duty(total_days, moment))) {
                 c++;
                 if (c > 999999) {
-                  console.log("run time: " + c + ". More than 1000000.");
-                  return;
+                    console.log("run time: " + c + ". More than 1000000.");
+                    return;
                 }
             }
             console.log(c);
-            //console.log(duties);
+            console.log(duties);
 
-            duties.forEach(function(element, index) {
+            duties.forEach(function(duty) {
                 if (!get_preset_duty(preset_duties, moment.year(), moment.month(), moment.date())) {
-                    var event = {
-                        title: element,
+                    $('#cal1').fullCalendar('renderEvent', {
+                        title: duty.toString(),
                         start: moment,
-                        color: duty_colors[element],
+                        allDay: true,
+                        color: duty_colors[duty],
                         className: "duty-event"
-                    };
-                    $('#cal1').fullCalendar('renderEvent', event, true);
+                    }, true);
                 }
                 moment.add(1, 'd');
             });
