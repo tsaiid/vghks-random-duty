@@ -124,7 +124,7 @@
         //
         // flags
         //
-        var ENABLE_CONDITIONING = false;
+        var ENABLE_CONDITIONING = true;
         var ENABLE_PATTERN_CONDITIONING = true;
 
         //
@@ -146,6 +146,7 @@
                     $('.first_cal').toggleClass('col-sm-6', state, 600);
                     $('.second_cal').hide();
                 }
+                calculate_suggested_patterns();
             }
         });
 
@@ -170,7 +171,7 @@
                 Save: function() {
                     if (title.val() !== '') {
                         var event = {
-                            id: CryptoJS.MD5(start + title).toString(),
+                            id: CryptoJS.MD5(start.val() + title).toString(),
                             title: title.val(),
                             start: start.val(),
                             allDay: true,
@@ -296,7 +297,7 @@
             eventAfterAllRender: function() {
                 //console.log("cal1 rendered.")
                 is_cal1_finished = true;
-                calculate_suggested_patterns();
+                //calculate_suggested_patterns();
             }
         });
 
@@ -318,7 +319,7 @@
             eventAfterAllRender: function() {
                 //console.log("cal2 rendered.")
                 is_cal2_finished = true;
-                calculate_suggested_patterns();
+                //calculate_suggested_patterns();
             }
         });
 
@@ -354,7 +355,7 @@
             return undefined;
         }
 
-        function random_duty(total_days, since_date) {
+        function random_duty(total_days, since_date, patterns) {
             var duties = [];
             var year = since_date.year();
             var month = since_date.month();
@@ -374,8 +375,10 @@
 
                 // check if fit duty counts.
                 if (ENABLE_CONDITIONING) {
-                    if (positions[i].length < total_days / 4 - 1 || positions[i].length > total_days / 4 + 1)
+                    var pattern_t_count = patterns[i - 1][0] + patterns[i - 1][1] + patterns[i - 1][2];
+                    if (positions[i].length != pattern_t_count) {
                         return false;
+                    }
                 }
             }
             //console.log(positions);
@@ -555,12 +558,15 @@
             var patterns;
             while (!(patterns = random_pattern(people, ordinary_count, friday_count, holiday_count))) {
                 c++;
+                if (!(c % 100000)) {
+                    console.log("run time: " + c + ". Still running.");
+                }
                 if (c > 999999) {
                     console.log("run time: " + c + ". More than 1000000.");
                     return;
                 }
             }
-            console.log(c);
+            console.log('rander pattern run time: ' + c);
             //console.log(patterns.toString());
             return patterns;
         }
@@ -588,14 +594,22 @@
         });
 
         $('#func_toggle_calendar').click(function() {
-            var moment = $('#cal1').fullCalendar('getDate');
-            var total_days = moment.daysInMonth();
+            var start_date = $('#cal1').fullCalendar('getDate').startOf('month');
+            var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
+            var end_date = start_date.clone().add(month_span, 'months');
+            var total_days = end_date.diff(start_date, 'days');
             var preset_duties = get_preset_duties();
+            var patterns = $('#suggested_pattern').data('patterns');
+            console.log(patterns);
             var duties;
             var c = 0;
 
-            while (!(duties = random_duty(total_days, moment))) {
+            while (!(duties = random_duty(total_days, start_date, patterns))) {
                 c++;
+                if (!(c % 10000)) {
+                    console.log("run time: " + c + ". Still running.");
+                }
+
                 if (c > 999999) {
                     console.log("run time: " + c + ". More than 1000000.");
                     return;
@@ -604,6 +618,7 @@
             console.log(c);
             console.log(duties);
 
+            var moment = start_date.clone();
             duties.forEach(function(duty) {
                 if (!get_preset_duty(preset_duties, moment.year(), moment.month(), moment.date())) {
                     $('#cal1').fullCalendar('renderEvent', {
@@ -669,6 +684,7 @@
                 var t_count = o_count + f_count + h_count;
                 suggested_pattern_html += '<tr><th>共</th><th>' + o_count + '</th><th>' + f_count + '</th><th>' + h_count + '</th><th>' + t_count + '</th></tr></table>';
                 $('#suggested_pattern').html(suggested_pattern_html);
+                $('#suggested_pattern').data("patterns", suggested_patterns); // save object for random duty to match
             }
         }
 
