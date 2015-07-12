@@ -622,7 +622,7 @@
             console.log(is_holiday(preset_holidays, moment([2015, 6, 28])));
         });
 
-        $('#func_get_holiday_condition').click(function() {
+        function calculate_suggested_patterns() {
             var start_date = $('#cal1').fullCalendar('getDate').startOf('month');
             var people = parseInt($('#inputPeople').val());
             var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
@@ -630,14 +630,28 @@
             var suggested_patterns = get_suggested_patterns(start_date, month_span, people);
             if (suggested_patterns !== undefined) {
                 var suggested_pattern_html = '<table class="table table-striped"><tr><th>No.</th><th>平</th><th>五</th><th>假</th><th>P</th></tr>';
+                var o_count = 0, f_count = 0, h_count = 0;
                 suggested_patterns.forEach(function(pattern, index) {
                     var point = parseInt(pattern[1]) + parseInt(pattern[2]) * 2;
                     suggested_pattern_html += '<tr><td>' + (index + 1) + '</td><td>' + pattern[0] + '</td><td>' + pattern[1] + '</td><td>' + pattern[2] + '</td><td>' + point + '</td></tr>';
+                    o_count += pattern[0];
+                    f_count += pattern[1];
+                    h_count += pattern[2];
                 });
-                suggested_pattern_html += '</table>';
+                var t_count = o_count + f_count + h_count;
+                suggested_pattern_html += '<tr><th>共</th><th>' + o_count + '</th><th>' + f_count + '</th><th>' + h_count + '</th><th>' + t_count + '</th></tr></table>';
                 $('#suggested_pattern').html(suggested_pattern_html);
             }
+        }
+
+        $('#func_get_holiday_condition').click(function() {
+            calculate_suggested_patterns();
         });
+
+        //
+        // Must be done at first time
+        //
+        calculate_suggested_patterns();
     });
     </script>
 </body>
