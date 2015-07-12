@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>VGHKS Random Duty Generator</title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.2/css/bootstrap3/bootstrap-switch.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.3.2/fullcalendar.min.css">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/redmond/jquery-ui.css">
     <link rel="stylesheet" type="text/css" href="dashboard.css">
@@ -53,8 +54,13 @@
                 <button id="func_get_preset_duty_events" class="btn btn-default" type="submit">Get Preset Duties</button>
                 <button id="func_test_is_holiday" class="btn btn-default" type="submit">Test Is Holiday</button>
                 <button id="func_get_holiday_condition" class="btn btn-default" type="submit">Get Holiday Condition</button>
-
                 <form class="form-horizontal">
+                    <div class="form-group">
+                        <label for="inputPeople" class="col-sm-4 control-label">模式</label>
+                        <div class="col-sm-8">
+                            <input type="checkbox" id="mode_switch" checked>
+                        </div>
+                    </div>
                     <div class="form-group">
                         <label for="inputPeople" class="col-sm-4 control-label">People</label>
                         <div class="col-sm-8">
@@ -99,6 +105,7 @@
     <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.2/js/bootstrap-switch.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.66.0-2013.10.09/jquery.blockUI.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.3.2/fullcalendar.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.3.2/gcal.js"></script>
@@ -146,6 +153,15 @@
     $(function() {
         var ENABLE_CONDITIONING = false;
         var ENABLE_PATTERN_CONDITIONING = true;
+
+        $('#mode_switch').bootstrapSwitch({
+            onText: "2 月",
+            offText: "1 月",
+            offColor: 'info',
+            onSwitchChange: function(event, state) {
+                console.log(state); // true | false
+            }
+        });
 
         function get_calendar_height() {
             return $(window).height() - 300;
@@ -562,7 +578,9 @@
 
             var residual_ordinary_count = ordinary_count % people;
             if (residual_ordinary_count != 0) {
-                patterns = patterns.sort(function(a, b) { return (a[2]*2+a[1]) - (b[2]*2+b[1]) });
+                patterns = patterns.sort(function(a, b) {
+                    return (a[2] * 2 + a[1]) - (b[2] * 2 + b[1])
+                });
                 for (i = 0; i < residual_ordinary_count; i++) {
                     patterns[i][0]++;
                 }
@@ -611,7 +629,7 @@
             console.log(c);
             //console.log(patterns.toString());
             var suggested_pattern_html = '<table class="table table-striped"><tr><th>No.</th><th>平</th><th>五</th><th>假</th><th>P</th></tr>';
-            patterns.forEach(function(pattern, index){
+            patterns.forEach(function(pattern, index) {
                 var point = parseInt(pattern[1]) + parseInt(pattern[2]) * 2;
                 suggested_pattern_html += '<tr><td>' + (index + 1) + '</td><td>' + pattern[0] + '</td><td>' + pattern[1] + '</td><td>' + pattern[2] + '</td><td>' + point + '</td></tr>';
             });
