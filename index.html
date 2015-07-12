@@ -91,10 +91,10 @@
                     </form>
                 </div>
                 <div id="calendars" class="row">
-                    <div class="col-sm-6 main">
+                    <div class="col-sm-6 first_cal">
                         <div id="cal1"></div>
                     </div>
-                    <div class="col-sm-6 main">
+                    <div class="col-sm-6 second_cal">
                         <div id="cal2"></div>
                     </div>
                 </div>
@@ -159,7 +159,14 @@
             offText: "1 月",
             offColor: 'info',
             onSwitchChange: function(event, state) {
-                console.log(state); // true | false
+                //console.log(state); // true | false
+                if (state) { // 2-month mode
+                    $('.first_cal').toggleClass('col-sm-6', state, 600);
+                    $('.second_cal').show();
+                } else { // 1-month mode
+                    $('.first_cal').toggleClass('col-sm-6', state, 600);
+                    $('.second_cal').hide();
+                }
             }
         });
 
