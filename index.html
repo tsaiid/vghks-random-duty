@@ -127,6 +127,12 @@
         var ENABLE_CONDITIONING = false;
         var ENABLE_PATTERN_CONDITIONING = true;
 
+        //
+        // global vars
+        //
+        var is_cal1_finished = false;
+        var is_cal2_finished = false;
+
         $('#mode_switch').bootstrapSwitch({
             onText: "2 月",
             offText: "1 月",
@@ -287,6 +293,11 @@
             dayClick: calDayClick,
             editable: true,
             eventClick: calEventClick,
+            eventAfterAllRender: function() {
+                //console.log("cal1 rendered.")
+                is_cal1_finished = true;
+                calculate_suggested_patterns();
+            }
         });
 
         $("#cal2").fullCalendar({
@@ -304,17 +315,26 @@
             dayClick: calDayClick,
             editable: true,
             eventClick: calEventClick,
+            eventAfterAllRender: function() {
+                //console.log("cal2 rendered.")
+                is_cal2_finished = true;
+                calculate_suggested_patterns();
+            }
         });
 
         // navigator for next and prev months
         $('#next_month').click(function() {
             //console.log('prev is clicked, do something');
+            is_cal1_finished = false;
+            is_cal2_finished = false;
             $('#cal1').fullCalendar('next');
             $('#cal2').fullCalendar('next');
         });
 
         $('#prev_month').click(function() {
             //console.log('next is clicked, do something');
+            is_cal1_finished = false;
+            is_cal2_finished = false;
             $('#cal1').fullCalendar('prev');
             $('#cal2').fullCalendar('prev');
         });
@@ -448,7 +468,7 @@
                 }
             });
 
-//            console.log(preset_holidays);
+            //            console.log(preset_holidays);
 
             var preset_holidays2 = $('#cal2').fullCalendar('clientEvents', function(event) {
                 if ($.inArray('gcal-holiday', event.className) > -1) {
@@ -623,6 +643,12 @@
         });
 
         function calculate_suggested_patterns() {
+            // check if cal1 and cal2 is all rendered.
+            if (!is_cal1_finished || !is_cal2_finished) {
+                console.log('not all calendars finish.');
+                return;
+            }
+
             var start_date = $('#cal1').fullCalendar('getDate').startOf('month');
             var people = parseInt($('#inputPeople').val());
             var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
@@ -630,7 +656,9 @@
             var suggested_patterns = get_suggested_patterns(start_date, month_span, people);
             if (suggested_patterns !== undefined) {
                 var suggested_pattern_html = '<table class="table table-striped"><tr><th>No.</th><th>平</th><th>五</th><th>假</th><th>P</th></tr>';
-                var o_count = 0, f_count = 0, h_count = 0;
+                var o_count = 0,
+                    f_count = 0,
+                    h_count = 0;
                 suggested_patterns.forEach(function(pattern, index) {
                     var point = parseInt(pattern[1]) + parseInt(pattern[2]) * 2;
                     suggested_pattern_html += '<tr><td>' + (index + 1) + '</td><td>' + pattern[0] + '</td><td>' + pattern[1] + '</td><td>' + pattern[2] + '</td><td>' + point + '</td></tr>';
@@ -651,7 +679,6 @@
         //
         // Must be done at first time
         //
-        calculate_suggested_patterns();
     });
     </script>
 </body>
