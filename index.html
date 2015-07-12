@@ -53,6 +53,7 @@
                 <button id="func_clear_calendar" class="btn btn-default" type="submit">Clear Calendar</button>
                 <button id="func_get_preset_duty_events" class="btn btn-default" type="submit">Get Preset Duties</button>
                 <button id="func_test_is_holiday" class="btn btn-default" type="submit">Test Is Holiday</button>
+                <button id="func_deploy_test_data" class="btn btn-default" type="submit">Deploy Test Data</button>
                 <button id="func_get_holiday_condition" class="btn btn-default" type="submit">Get Holiday Condition</button>
                 <form class="form-horizontal">
                     <div class="form-group">
@@ -208,7 +209,7 @@
                             title: $('#eventEditTitle').val(),
                             start: $('#eventEditStart').val(),
                             allDay: true,
-                            className: "preset_duties",
+                            className: "preset-duty-event",
                             color: duty_colors[$('#eventEditTitle').val()]
                         };
                         $("#cal1").fullCalendar('renderEvent', event, true);
@@ -690,6 +691,38 @@
 
         $('#func_get_holiday_condition').click(function() {
             calculate_suggested_patterns();
+        });
+
+        $('#func_deploy_test_data').click(function() {
+            var test_data = [
+                [1, "2015-08-08"],
+                [1, "2015-08-16"],
+                [1, "2015-08-21"],
+                [1, "2015-08-28"],
+                [2, "2015-08-02"],
+                [2, "2015-08-15"],
+                [2, "2015-08-30"],
+                [3, "2015-08-09"],
+                [3, "2015-08-14"],
+                [3, "2015-08-23"],
+                [3, "2015-08-29"],
+                [4, "2015-08-01"],
+                [4, "2015-08-07"],
+                [4, "2015-08-22"],
+                [4, "2015-08-27"],
+            ];
+
+            test_data.forEach(function(data) {
+                var event = {
+                    title: data[0].toString(),
+                    start: data[1],
+                    allDay: true,
+                    className: "preset-duty-event",
+                    color: duty_colors[data[0]]
+                };
+                $("#cal1").fullCalendar('renderEvent', event, true);
+                $("#cal2").fullCalendar('renderEvent', event, true);
+            });
         });
 
         //
