@@ -28,6 +28,7 @@ Array.prototype.multiIndexOf = function(el) {
 };
 
 // currently unused
+/*
 function entropy(arr) {
     var counts = {};
     for (var i = 0; i < arr.length; i++) {
@@ -92,3 +93,4 @@ function average(data) {
         console.log('Entropy of "' + s + '" in bits per symbol:', shannon.entropy(s));
     };
 })(window.shannon = window.shannon || Object.create(null));
+*/
