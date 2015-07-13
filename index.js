@@ -328,7 +328,7 @@ $(function() {
             preset_duties[year][month][day] = event.title;
         });
 
-        return preset_duties
+        return preset_duties;
     }
 
     function is_holiday(preset_holidays, date) {
@@ -360,6 +360,13 @@ $(function() {
         });
 
         return preset_holidays.concat(preset_holidays2);
+    }
+
+    function get_preset_holidays_in_string() {
+        var preset_holidays = get_preset_holidays().map(function(event){
+            return event.start.format("YYYY-MM-DD");
+        });
+        return preset_holidays;
     }
 
     function random_pattern(people, ordinary_count, friday_count, holiday_count) {
@@ -568,6 +575,29 @@ $(function() {
 
     $('#func_get_holiday_condition').click(function() {
         calculate_suggested_patterns();
+    });
+
+    $('#func_test_worker').click(function() {
+        calculate_suggested_patterns();
+        var patterns = $('#suggested_pattern').data("patterns");
+        var preset_holidays = get_preset_holidays_in_string();
+        var preset_duties = get_preset_duties();
+        var start_date = $('#cal1').fullCalendar('getDate').startOf('month');
+        var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
+        var end_date = start_date.clone().add(month_span, 'months');
+        var total_days = end_date.diff(start_date, 'days');
+
+        var myWorker = new Worker("worker.js");
+        myWorker.postMessage({
+            "patterns": patterns,
+            "preset_holidays": preset_holidays,
+            "preset_duties": preset_duties,
+            "since_date_str": start_date.format("YYYY-MM-DD"),
+            "total_days": total_days,
+        });
+        myWorker.onmessage = function(e) {
+            console.log(e.data);
+        }
     });
 
     $('#func_deploy_test_data').click(function() {
