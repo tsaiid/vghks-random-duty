@@ -232,14 +232,8 @@ $(function() {
 
         var preset_duties = [];
         preset_duty_events.forEach(function(event) {
-            var year = event.start.year();
-            if (preset_duties[year] === undefined)
-                preset_duties[year] = [];
-            var month = event.start.month();
-            if (preset_duties[year][month] === undefined)
-                preset_duties[year][month] = [];
-            var day = event.start.date();
-            preset_duties[year][month][day] = event.title;
+            var date = event.start.format("YYYY-MM-DD");
+            preset_duties.push([date, parseInt(event.title)]);
         });
 
         return preset_duties;
@@ -443,12 +437,12 @@ $(function() {
 
                 var moment = start_date.clone();
                 duties.forEach(function(duty) {
-                    if (!get_preset_duty(preset_duties, moment.year(), moment.month(), moment.date())) {
+                    if (get_preset_duty(preset_duties, moment.format("YYYY-MM-DD")) === undefined) {
                         var event = {
-                            title: duty.toString(),
+                            title: duty[1].toString(),
                             start: moment,
                             allDay: true,
-                            color: duty_colors[duty],
+                            color: duty_colors[duty[1]],
                             className: "duty-event"
                         };
                         $('#cal1').fullCalendar('renderEvent', event, true);

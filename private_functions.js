@@ -26,6 +26,26 @@ function standardDeviation(values) {
     return stdDev;
 }
 
+function shuffle(array) {
+    var counter = array.length, temp, index;
+
+    // While there are elements in the array
+    while (counter > 0) {
+        // Pick a random index
+        index = Math.floor(Math.random() * counter);
+
+        // Decrease counter by 1
+        counter--;
+
+        // And swap the last element with it
+        temp = array[counter];
+        array[counter] = array[index];
+        array[index] = temp;
+    }
+
+    return array;
+}
+
 Array.prototype.multiIndexOf = function(el) {
     var idxs = [];
     for (var i = this.length - 1; i >= 0; i--) {

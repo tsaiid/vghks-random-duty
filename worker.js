@@ -6,7 +6,7 @@ importScripts(
 );
 
 var ENABLE_CONDITIONING = true;
-var TEST_CONDITIONING_FUNCTION = true;
+var TEST_CONDITIONING_FUNCTION = false;
 
 onmessage = function(oEvent) {
     //console.log("patterns: " + oEvent.data["patterns"]);
@@ -17,39 +17,19 @@ onmessage = function(oEvent) {
     var preset_duties = oEvent.data["preset_duties"];
     var since_date_str = oEvent.data["since_date_str"];
     var total_days = oEvent.data["total_days"];
-    var duties;
     var c = 0;
 
-    var status = "success";
-    var msg;
-    while (!(duties = random_duty(total_days, since_date_str, preset_duties, preset_holidays, patterns))) {
-        c++;
-        if (TEST_CONDITIONING_FUNCTION) {
-            msg = "test conditioning function. run only once. ";
-            status = "test";
-            break;
-        }
-
-        if (!(c % 10000)) {
-            console.log("run time: " + c + ". Still running.");
-        }
-
-        if (c > 999999) {
-            msg = "run time: " + c + ". More than 1000000.";
-            status = "fail";
-            break;
-        }
-    }
+    var result = random_duty(total_days, since_date_str, preset_duties, preset_holidays, patterns);
 
     postMessage({
-        "status": status,
-        "msg": msg,
-        "duties": duties
+        "status": result.status,
+        "msg": result.msg,
+        "duties": result.duties
     });
 };
 
-function count_duty_pattern(duty_days, since_date_str, preset_holidays) {
-    var since_date = moment(since_date_str);
+function count_duty_pattern(duty_dates, preset_holidays) {
+    var since_date = moment(since_date_str, "YYYY-MM-DD");
     var year = since_date.year();
     var month = since_date.month();
     var ordinary_count = 0,
@@ -70,71 +50,179 @@ function count_duty_pattern(duty_days, since_date_str, preset_holidays) {
     return [ordinary_count, friday_count, holiday_count];
 }
 
-function random_duty(total_days, since_date_str, preset_duties, preset_holidays, patterns) {
-    var duties = [];
-    var since_date = moment(since_date_str);
-    var year = since_date.year();
-    var month = since_date.month();
+function is_duties_match_counts(duties, counts, people) {
+    for (i = 1; i <= people; i++) {
+        var random_ordinary_count = duties.filter(function(d) {
+            return d[1] == i
+        }).length;
+        if (random_ordinary_count != counts[i - 1]) {
+            //console.log(duties.toString());
+            //console.log(i + ": " + random_ordinary_count);
+            //console.log(counts[i - 1]);
+            //console.log(duties.toString());
+            return false;
+        }
+    }
+    return true;
+}
+
+function generate_non_preset_duty_match_patterns(total_days, since_date_str, preset_duties, preset_holidays, patterns) {
+    var people = 4;
+    var non_preset_duties = [];
+
+    //console.log(preset_duties.toString());
+
+    var tmp_duties = [];
+    patterns.forEach(function(pattern, person_no) {
+        for (var i = 0; i < pattern[0]; i++) {
+            tmp_duties.push(person_no + 1);
+        }
+    });
+
+    var since_date = moment(since_date_str, "YYYY-MM-DD");
     for (i = 0; i < total_days; i++) {
-        var duty = get_preset_duty(preset_duties, year, month, i + 1);
-        if (duty === undefined) {
-            duty = randomIntFromInterval(1, 4);
+        var the_date = since_date.format("YYYY-MM-DD");
+        if (get_preset_duty(preset_duties, the_date) === undefined) {
+            duty = tmp_duties.pop();
+            non_preset_duties.push([the_date, duty]);
         }
-        duties.push(duty);
+        since_date.add(1, 'days');
     }
 
-    var positions = {};
-    for (i = 1; i <= 4; i++) {
-        positions[i] = duties.multiIndexOf(i);
+    if (tmp_duties.length > 0) {
+        console.log("tmp_duties should not more than zero.");
+    }
 
-        // check if fit duty counts.
-        if (ENABLE_CONDITIONING) {
-            // 總班數要對
-            var pattern_t_count = patterns[i - 1][0] + patterns[i - 1][1] + patterns[i - 1][2];
-            if (positions[i].length != pattern_t_count) {
-                return false;
-            }
+    //console.log(non_preset_duties.toString());
+
+    return non_preset_duties;
+}
+
+function has_continuous_duties(duties) {
+    var sorted_duties = duties.sort(function(a, b) {
+        return a[0] > b[0]
+    }); // sort by date
+    var len = sorted_duties.length;
+    for (var i = 0; i < len; i++) {
+        if (sorted_duties[i + 1] !== undefined && sorted_duties[i][1] == sorted_duties[i + 1][1]) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function less_than_std_dev_level(duties, std_dev_level) {
+    var sorted_duties = duties.sort(function(a, b) {
+        return a[0] > b[0]
+    }); // sort by date
+    var duties_simple_array = sorted_duties.map(function(d) {
+        return d[1]
+    });
+
+    var groups = {};
+    var total_people = 0;
+    duties_simple_array.forEach(function(person, index) {
+        if (groups[person] === undefined) {
+            groups[person] = {
+                positions: [],
+                intervals: []
+            };
+            total_people++;
+        }
+
+        groups[person].positions.push(index);
+        var pos_len = groups[person].positions.length;
+        if (pos_len > 1) {
+            var interval = index - groups[person].positions[pos_len - 2];
+            groups[person].intervals.push(interval);
+        }
+    });
+
+    for (var person in groups) {
+        //console.log(groups[person].intervals);
+        var std_dev = standardDeviation(groups[person].intervals);
+        groups[person].std_dev = std_dev;
+        //console.log(person + ": " + std_dev);
+    }
+
+    for (var person in groups) {
+        if (groups[person].std_dev > std_dev_level) {
+            return false;
         }
     }
 
-    var intervals = {};
-    var max = duties.length - 1;
-    for (i = 1; i <= 4; i++) {
-        intervals[i] = [];
-        for (j = 0, pos = -1; j < positions[i].length; j++) {
-            if (pos > -1)
-                intervals[i].push(positions[i][j] - pos);
-            pos = positions[i][j];
+    return true;
+}
+
+function shuffle(array) {
+    var counter = array.length, temp, index;
+
+    // While there are elements in the array
+    while (counter > 0) {
+        // Pick a random index
+        index = Math.floor(Math.random() * counter);
+
+        // Decrease counter by 1
+        counter--;
+
+        // And swap the last element with it
+        temp = array[counter];
+        array[counter] = array[index];
+        array[index] = temp;
+    }
+
+    return array;
+}
+
+function shuffle_duties(date_duties) {
+    var duties = date_duties.map(function(d){return d[1]});
+    shuffle(duties);
+    date_duties.forEach(function(d, i){
+        d[1] = duties[i];
+    });
+    return date_duties;
+}
+
+function random_duty(total_days, since_date_str, preset_duties, preset_holidays, patterns) {
+    var std_dev_level = 1.8;
+    var since_date = moment(since_date_str, "YYYY-MM-DD");
+
+    var status = "success",
+        msg = "",
+        duties = [];
+    var non_preset_duties = generate_non_preset_duty_match_patterns(total_days, since_date_str, preset_duties, preset_holidays, patterns);
+    var c = 0;
+    //console.log(non_preset_duties.toString());
+    while (1) {
+        shuffle_duties(non_preset_duties);
+        console.log(non_preset_duties.toString());
+        var merged_duties = non_preset_duties.concat(preset_duties);
+        if (!has_continuous_duties(merged_duties) && less_than_std_dev_level(merged_duties, std_dev_level)) {
+            duties = merged_duties;
+            break;
         }
-        if (ENABLE_CONDITIONING) {
-            if (intervals[i].indexOf(1) >= 0)
-                return false; // 不可連值
+
+        if (TEST_CONDITIONING_FUNCTION) {
+            msg = "test conditioning function. run only once. ";
+            status = "test";
+            break;
+        }
+
+        c++;
+        if (!(c % 10000)) {
+            console.log("run time: " + c + ". Still running.");
+        }
+
+        if (c > 999999) {
+            status = "fail";
+            msg = "has_continuous_duties, less_than_std_dev_level run time: " + c + ". More than 1000000.";
+            break;
         }
     }
-    //$('#intervals').html(interval1.join(', '));
-    //console.log(intervals);
 
-    std_devs = {};
-    for (i = 1; i <= 4; i++) {
-        std_devs[i] = standardDeviation(intervals[i]);
-    }
-    for (i = 1; i <= 4; i++) {
-        if (ENABLE_CONDITIONING) {
-            // set level of standard deviation.
-            if (std_devs[i] > 1.8)
-                return false;
-        }
-    }
-    //$('#std_dev').html(std_dev);
-    //console.log(std_devs);
-
-    //    var ent1 = shannon.entropy(interval1.join());
-    //var ent1 = entropy(interval1);
-    //$('#entropy').html();
-
-    console.log(positions);
-    console.log(intervals);
-    console.log(std_devs);
-
-    return duties;
+    return {
+        status: status,
+        msg: msg,
+        duties: duties
+    };
 };
