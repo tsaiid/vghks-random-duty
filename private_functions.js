@@ -2,6 +2,15 @@ function randomIntFromInterval(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
+function average(data) {
+    var sum = data.reduce(function(sum, value) {
+        return sum + value;
+    }, 0);
+
+    var avg = sum / data.length;
+    return avg;
+}
+
 function standardDeviation(values) {
     var avg = average(values);
 
@@ -45,15 +54,6 @@ function entropy(arr) {
     }
     return sum;
 };
-
-function average(data) {
-    var sum = data.reduce(function(sum, value) {
-        return sum + value;
-    }, 0);
-
-    var avg = sum / data.length;
-    return avg;
-}
 
 // entropy.js MIT License © 2014 James Abney http://github.com/jabney
 // Calculate the Shannon entropy of a string in bits per symbol.
