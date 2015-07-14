@@ -12,3 +12,8 @@ function is_friday(preset_holidays, the_day_str) {
     var next_day_str = the_day.clone().add(1, 'days').format("YYYY-MM-DD");
     return (the_day.isoWeekday() === 5 && !is_holiday(preset_holidays, the_day_str)) || is_holiday(preset_holidays, next_day_str);
 }
+
+function is_weekend(the_day_str) {
+    var the_day = moment(the_day_str);
+    return (the_day.isoWeekday() === 6 || the_day.isoWeekday() === 7);
+}
