@@ -6,6 +6,7 @@ importScripts(
 );
 
 var ENABLE_CONDITIONING = true;
+var TEST_CONDITIONING_FUNCTION = true;
 
 onmessage = function(oEvent) {
     //console.log("patterns: " + oEvent.data["patterns"]);
@@ -21,8 +22,14 @@ onmessage = function(oEvent) {
 
     var status = "success";
     var msg;
-    while (!(duties = random_duty(total_days, since_date_str, preset_duties, patterns))) {
+    while (!(duties = random_duty(total_days, since_date_str, preset_duties, preset_holidays, patterns))) {
         c++;
+        if (TEST_CONDITIONING_FUNCTION) {
+            msg = "test conditioning function. run only once. ";
+            status = "test";
+            break;
+        }
+
         if (!(c % 10000)) {
             console.log("run time: " + c + ". Still running.");
         }
@@ -34,10 +41,36 @@ onmessage = function(oEvent) {
         }
     }
 
-    postMessage({ "status": status, "msg": msg, "duties": duties});
+    postMessage({
+        "status": status,
+        "msg": msg,
+        "duties": duties
+    });
 };
 
-function random_duty(total_days, since_date_str, preset_duties, patterns) {
+function count_duty_pattern(duty_days, since_date_str, preset_holidays) {
+    var since_date = moment(since_date_str);
+    var year = since_date.year();
+    var month = since_date.month();
+    var ordinary_count = 0,
+        friday_count = 0,
+        holiday_count = 0;
+
+    duty_days.forEach(function(day) {
+        var the_day_str = moment([year, month, day]).format("YYYY-MM-DD");
+        if (is_weekend(the_day_str) || is_holiday(preset_holidays, the_day_str)) {
+            holiday_count++;
+        } else if (is_friday(preset_holidays, the_day_str)) {
+            friday_count++;
+        } else {
+            ordinary_count++;
+        }
+    });
+
+    return [ordinary_count, friday_count, holiday_count];
+}
+
+function random_duty(total_days, since_date_str, preset_duties, preset_holidays, patterns) {
     var duties = [];
     var since_date = moment(since_date_str);
     var year = since_date.year();
