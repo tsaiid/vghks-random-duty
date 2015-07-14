@@ -363,7 +363,7 @@ $(function() {
     }
 
     function get_preset_holidays_in_string() {
-        var preset_holidays = get_preset_holidays().map(function(event){
+        var preset_holidays = get_preset_holidays().map(function(event) {
             return event.start.format("YYYY-MM-DD");
         });
         return preset_holidays;
@@ -577,6 +577,7 @@ $(function() {
         calculate_suggested_patterns();
     });
 
+    var random_duty_worker;
     $('#func_test_worker').click(function() {
         calculate_suggested_patterns();
         var patterns = $('#suggested_pattern').data("patterns");
@@ -587,17 +588,26 @@ $(function() {
         var end_date = start_date.clone().add(month_span, 'months');
         var total_days = end_date.diff(start_date, 'days');
 
-        var myWorker = new Worker("worker.js");
-        myWorker.postMessage({
+        random_duty_worker = new Worker("worker.js");
+        random_duty_worker.postMessage({
             "patterns": patterns,
             "preset_holidays": preset_holidays,
             "preset_duties": preset_duties,
             "since_date_str": start_date.format("YYYY-MM-DD"),
             "total_days": total_days,
         });
-        myWorker.onmessage = function(e) {
-            console.log(e.data);
+        random_duty_worker.onmessage = function(e) {
+            if (e.data.status == "success") {
+                console.log(e.data["duties"]);
+            } else {
+                console.log(e.data["msg"]);
+            }
         }
+    });
+
+    $('#func_test_stop_worker').click(function() {
+        random_duty_worker.terminate();
+        random_duty_worker = undefined;
     });
 
     $('#func_deploy_test_data').click(function() {
