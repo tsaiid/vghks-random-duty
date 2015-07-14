@@ -312,6 +312,12 @@ $(function() {
         return patterns;
     }
 
+    function is_friday(preset_holidays, the_day_str) {
+        var the_day = moment(the_day_str);
+        var next_day_str = the_day.clone().add(1, 'days').format("YYYY-MM-DD");
+        return (the_day.isoWeekday() === 5 && !is_holiday(preset_holidays, the_day_str)) || is_holiday(preset_holidays, next_day_str);
+    }
+
     function get_suggested_patterns(start_date, month_span, people) {
         var end_date = start_date.clone().add(month_span, 'months');
         var preset_holidays = get_preset_holidays();
@@ -322,14 +328,13 @@ $(function() {
         var the_day = start_date;
         while (the_day.format() != end_date.format()) {
             var the_day_str = the_day.format("YYYY-MM-DD");
-            var next_day_str = the_day.clone().add(1, 'days').format("YYYY-MM-DD");
             if (the_day.isoWeekday() === 6 || the_day.isoWeekday() === 7) {
                 holiday_count++;
                 //console.log("Weekend: " + the_day.format());
             } else if (is_holiday(preset_holidays, the_day_str)) {
                 holiday_count++;
                 //console.log("Holiday: " + the_day.format());
-            } else if ((the_day.isoWeekday() === 5 && !is_holiday(preset_holidays, the_day_str)) || is_holiday(preset_holidays, next_day_str)) {
+            } else if (is_friday(preset_holidays, the_day_str)) {
                 friday_count++;
             } else {
                 ordinary_count++;
