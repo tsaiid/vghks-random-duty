@@ -233,80 +233,6 @@ $(function() {
         return undefined;
     }
 
-    function random_duty(total_days, since_date, patterns) {
-        var duties = [];
-        var year = since_date.year();
-        var month = since_date.month();
-        var preset_duties = get_preset_duties();
-        for (i = 0; i < total_days; i++) {
-            var duty = get_preset_duty(preset_duties, year, month, i + 1);
-            if (duty === undefined) {
-                duty = randomIntFromInterval(1, 4);
-            }
-            duties.push(duty);
-        }
-        //console.log(duties);
-
-        var positions = {};
-        for (i = 1; i <= 4; i++) {
-            positions[i] = duties.multiIndexOf(i);
-
-            // check if fit duty counts.
-            if (ENABLE_CONDITIONING) {
-                var pattern_t_count = patterns[i - 1][0] + patterns[i - 1][1] + patterns[i - 1][2];
-                if (positions[i].length != pattern_t_count) {
-                    return false;
-                }
-            }
-        }
-        //console.log(positions);
-        //$('#positions').html(pos1.join(', '));
-
-        var intervals = {};
-        var max = duties.length - 1;
-        for (i = 1; i <= 4; i++) {
-            intervals[i] = [];
-            for (j = 0, pos = -1; j < positions[i].length; j++) {
-                if (pos > -1)
-                    intervals[i].push(positions[i][j] - pos);
-                pos = positions[i][j];
-            }
-            if (ENABLE_CONDITIONING) {
-                if (intervals[i].indexOf(1) >= 0)
-                    return false; // 不可連值
-            }
-        }
-        //$('#intervals').html(interval1.join(', '));
-        //console.log(intervals);
-
-        std_devs = {};
-        for (i = 1; i <= 4; i++) {
-            std_devs[i] = standardDeviation(intervals[i]);
-        }
-        for (i = 1; i <= 4; i++) {
-            if (ENABLE_CONDITIONING) {
-                // set level of standard deviation.
-                if (std_devs[i] > 1.8)
-                    return false;
-            }
-        }
-        //$('#std_dev').html(std_dev);
-        //console.log(std_devs);
-
-        //    var ent1 = shannon.entropy(interval1.join());
-        //var ent1 = entropy(interval1);
-        //$('#entropy').html();
-
-        console.log(positions);
-        console.log(intervals);
-        console.log(std_devs);
-
-        return duties;
-        //alert(duties);
-        //var test = "3454";
-        //alert(shannon.entropy(test));
-    };
-
     function get_preset_duties() {
         var preset_duty_events = $('#cal1').fullCalendar('clientEvents', function(event) {
             if ($.inArray('preset-duty-event', event.className) > -1) {
@@ -331,9 +257,9 @@ $(function() {
         return preset_duties;
     }
 
-    function is_holiday(preset_holidays, date) {
+    function is_holiday(preset_holidays, date_str) {
         var _is_holiday = preset_holidays.some(function(holiday) {
-            if (holiday.start.format() === date.format('YYYY-MM-DD')) {
+            if (holiday === date_str) {
                 return true;
             }
         });
@@ -341,7 +267,7 @@ $(function() {
     }
 
     function get_preset_holidays() {
-        var preset_holidays = $('#cal1').fullCalendar('clientEvents', function(event) {
+        var preset_holidays1 = $('#cal1').fullCalendar('clientEvents', function(event) {
             if ($.inArray('gcal-holiday', event.className) > -1) {
                 return true;
             } else {
@@ -359,13 +285,10 @@ $(function() {
             }
         });
 
-        return preset_holidays.concat(preset_holidays2);
-    }
-
-    function get_preset_holidays_in_string() {
-        var preset_holidays = get_preset_holidays().map(function(event) {
+        var preset_holidays = preset_holidays1.concat(preset_holidays2).map(function(event) {
             return event.start.format("YYYY-MM-DD");
         });
+
         return preset_holidays;
     }
 
@@ -421,14 +344,15 @@ $(function() {
         var ordinary_count = 0;
         var the_day = start_date;
         while (the_day.format() != end_date.format()) {
-            var next_day = the_day.clone().add(1, 'days');
+            var the_day_str = the_day.format("YYYY-MM-DD");
+            var next_day_str = the_day.clone().add(1, 'days').format("YYYY-MM-DD");
             if (the_day.isoWeekday() === 6 || the_day.isoWeekday() === 7) {
                 holiday_count++;
                 //console.log("Weekend: " + the_day.format());
-            } else if (is_holiday(preset_holidays, the_day)) {
+            } else if (is_holiday(preset_holidays, the_day_str)) {
                 holiday_count++;
                 //console.log("Holiday: " + the_day.format());
-            } else if ((the_day.isoWeekday() === 5 && !is_holiday(preset_holidays, the_day)) || is_holiday(preset_holidays, next_day)) {
+            } else if ((the_day.isoWeekday() === 5 && !is_holiday(preset_holidays, the_day_str)) || is_holiday(preset_holidays, next_day_str)) {
                 friday_count++;
             } else {
                 ordinary_count++;
@@ -459,66 +383,6 @@ $(function() {
     //
     // Debug UI Buttons
     //
-    $('#func_generate_array').click(function() {
-        var c = 0;
-        var duties;
-        while (!(duties = random_duty(31, moment([2015, 6, 1])))) {
-            c++;
-        }
-        console.log(duties);
-        console.log(duties.length);
-        console.log("run times:" + c);
-        //var a = [11, 1, 1, 3, 1, 1, 1, 11];
-        //alert(entropy(a));
-        //console.log(standardDeviation([9,2,2,4,2,8,3]));
-        //console.log(standardDeviation([2,4,8,6,3,2,4]));
-        //console.log(standardDeviation([3,5,4,2,6,3,2,4]));
-        //console.log(standardDeviation([2,2,4,6,2,3,6]));
-        //entropy([2,2,3,3,5,5,8,8]);
-        //entropy([3,3,3,3,3,3,3,4]);
-    });
-
-    $('#func_toggle_calendar').click(function() {
-        var start_date = $('#cal1').fullCalendar('getDate').startOf('month');
-        var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
-        var end_date = start_date.clone().add(month_span, 'months');
-        var total_days = end_date.diff(start_date, 'days');
-        var preset_duties = get_preset_duties();
-        var patterns = $('#suggested_pattern').data('patterns');
-        console.log(patterns);
-        var duties;
-        var c = 0;
-
-        while (!(duties = random_duty(total_days, start_date, patterns))) {
-            c++;
-            if (!(c % 10000)) {
-                console.log("run time: " + c + ". Still running.");
-            }
-
-            if (c > 999999) {
-                console.log("run time: " + c + ". More than 1000000.");
-                return;
-            }
-        }
-        console.log(c);
-        console.log(duties);
-
-        var moment = start_date.clone();
-        duties.forEach(function(duty) {
-            if (!get_preset_duty(preset_duties, moment.year(), moment.month(), moment.date())) {
-                $('#cal1').fullCalendar('renderEvent', {
-                    title: duty.toString(),
-                    start: moment,
-                    allDay: true,
-                    color: duty_colors[duty],
-                    className: "duty-event"
-                }, true);
-            }
-            moment.add(1, 'd');
-        });
-        //alert("The current date of the calendar is " + moment.daysInMonth());
-    });
-
     $('#func_clear_calendar').click(function() {
         $('#cal1').fullCalendar('removeEvents', function(event) {
             if ($.inArray('duty-event', event.className) > -1) {
@@ -539,7 +403,7 @@ $(function() {
         var preset_holidays = get_preset_holidays();
 
         console.log(preset_holidays);
-        console.log(is_holiday(preset_holidays, moment([2015, 6, 28])));
+        console.log(is_holiday(preset_holidays, moment([2015, 6, 28]).format("YYYY-MM-DD")));
     });
 
     function calculate_suggested_patterns() {
@@ -581,7 +445,7 @@ $(function() {
     $('#func_test_worker').click(function() {
         calculate_suggested_patterns();
         var patterns = $('#suggested_pattern').data("patterns");
-        var preset_holidays = get_preset_holidays_in_string();
+        var preset_holidays = get_preset_holidays();
         var preset_duties = get_preset_duties();
         var start_date = $('#cal1').fullCalendar('getDate').startOf('month');
         var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
@@ -598,7 +462,25 @@ $(function() {
         });
         random_duty_worker.onmessage = function(e) {
             if (e.data.status == "success") {
-                console.log(e.data["duties"]);
+                //console.log(e.data["duties"]);
+                var duties = e.data["duties"];
+
+                var moment = start_date.clone();
+                duties.forEach(function(duty) {
+                    if (!get_preset_duty(preset_duties, moment.year(), moment.month(), moment.date())) {
+                        var event = {
+                            title: duty.toString(),
+                            start: moment,
+                            allDay: true,
+                            color: duty_colors[duty],
+                            className: "duty-event"
+                        };
+                        $('#cal1').fullCalendar('renderEvent', event, true);
+                        $('#cal2').fullCalendar('renderEvent', event, true);
+                    }
+                    moment.add(1, 'd');
+                });
+
             } else {
                 console.log(e.data["msg"]);
             }

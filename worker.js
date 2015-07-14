@@ -63,6 +63,7 @@ function random_duty(total_days, since_date_str, preset_duties, patterns) {
 
         // check if fit duty counts.
         if (ENABLE_CONDITIONING) {
+            // 總班數要對
             var pattern_t_count = patterns[i - 1][0] + patterns[i - 1][1] + patterns[i - 1][2];
             if (positions[i].length != pattern_t_count) {
                 return false;
