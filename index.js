@@ -221,18 +221,6 @@ $(function() {
     //
     // Basic Algorithm Related
     //
-    function get_preset_duty(preset_duties, y, m, d) {
-        var date = moment([y, m, d]);
-        var year = date.year();
-        var month = date.month();
-        var day = date.date();
-        if (preset_duties[year] !== undefined && preset_duties[year][month] !== undefined && preset_duties[year][month][day] !== undefined) {
-            //console.log([year, month, day, preset_duties[year][month][day]].join(', '));
-            return parseInt(preset_duties[year][month][day]);
-        }
-        return undefined;
-    }
-
     function get_preset_duties() {
         var preset_duty_events = $('#cal1').fullCalendar('clientEvents', function(event) {
             if ($.inArray('preset-duty-event', event.className) > -1) {
@@ -257,15 +245,6 @@ $(function() {
         return preset_duties;
     }
 
-    function is_holiday(preset_holidays, date_str) {
-        var _is_holiday = preset_holidays.some(function(holiday) {
-            if (holiday === date_str) {
-                return true;
-            }
-        });
-        return _is_holiday;
-    }
-
     function get_preset_holidays() {
         var preset_holidays1 = $('#cal1').fullCalendar('clientEvents', function(event) {
             if ($.inArray('gcal-holiday', event.className) > -1) {
@@ -274,8 +253,6 @@ $(function() {
                 return false;
             }
         });
-
-        //            console.log(preset_holidays);
 
         var preset_holidays2 = $('#cal2').fullCalendar('clientEvents', function(event) {
             if ($.inArray('gcal-holiday', event.className) > -1) {

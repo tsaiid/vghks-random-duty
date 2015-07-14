@@ -1,4 +1,9 @@
-importScripts('https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js', 'private_functions.js');
+importScripts(
+    'https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js',
+    'private_functions.js',
+    'lib_duties.js',
+    'lib_holidays.js'
+);
 
 var ENABLE_CONDITIONING = true;
 
@@ -31,18 +36,6 @@ onmessage = function(oEvent) {
 
     postMessage({ "status": status, "msg": msg, "duties": duties});
 };
-
-function get_preset_duty(preset_duties, y, m, d) {
-    var date = moment([y, m, d]);
-    var year = date.year();
-    var month = date.month();
-    var day = date.date();
-    if (preset_duties[year] !== undefined && preset_duties[year][month] !== undefined && preset_duties[year][month][day] !== undefined) {
-        //console.log([year, month, day, preset_duties[year][month][day]].join(', '));
-        return parseInt(preset_duties[year][month][day]);
-    }
-    return undefined;
-}
 
 function random_duty(total_days, since_date_str, preset_duties, patterns) {
     var duties = [];
