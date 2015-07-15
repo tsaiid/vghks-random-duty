@@ -122,6 +122,18 @@ function less_than_std_dev_level(group_duties, std_dev_level) {
     return true;
 }
 
+function less_than_qod_times(group_duties, qod_limit) {
+    for (var person in group_duties) {
+        var qod_times = group_duties[person].intervals.multiIndexOf(2).length;
+        if (qod_times > parseInt(qod_limit)) {
+            console.log("qod_times: " + qod_times + ", intervals: " + group_duties[person].intervals.toString());
+            return false;
+        }
+    }
+
+    return true;
+}
+
 function shuffle(array) {
     var counter = array.length,
         temp, index;
@@ -155,7 +167,7 @@ function shuffle_duties(date_duties) {
 }
 
 function random_duty(total_days, since_date_str, preset_duties, preset_holidays, patterns) {
-    var std_dev_level = 2;
+    var std_dev_level = 1.8;
     var since_date = moment(since_date_str, "YYYY-MM-DD");
 
     var status = "success",
@@ -170,7 +182,9 @@ function random_duty(total_days, since_date_str, preset_duties, preset_holidays,
         var merged_duties = non_preset_duties.concat(preset_duties);
 //        console.log(has_continuous_duties(merged_duties));
         var group_duties = calculate_group_duties(merged_duties);
-        if (!has_continuous_duties(merged_duties) && less_than_std_dev_level(group_duties, std_dev_level)) {
+        if (!has_continuous_duties(merged_duties)
+            && less_than_qod_times(group_duties, 1)
+            && less_than_std_dev_level(group_duties, std_dev_level) ) {
             duties = merged_duties;
             groups = group_duties;
             break;
