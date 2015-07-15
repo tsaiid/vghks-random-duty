@@ -121,16 +121,19 @@ function calculate_group_duties(duties) {
 
     var groups = {};
     var total_people = 0;
-    duties_simple_array.forEach(function(person, index) {
+    sorted_duties.forEach(function(duty, index) {
+        var person = duty[1];
         if (groups[person] === undefined) {
             groups[person] = {
                 positions: [],
-                intervals: []
+                intervals: [],
+                dates: []
             };
             total_people++;
         }
 
         groups[person].positions.push(index);
+        groups[person].dates.push(duty[0]);
         var pos_len = groups[person].positions.length;
         if (pos_len > 1) {
             var interval = index - groups[person].positions[pos_len - 2];

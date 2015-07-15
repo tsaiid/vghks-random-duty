@@ -411,6 +411,18 @@ $(function() {
         calculate_suggested_patterns();
     });
 
+    function update_summary_duties(groups_duties) {
+        var summary_duties_html = '<table class="table table-striped"><tr><th>No.</th><th>Dates</th><th>Intervals</th><th>Std Dev</th></tr>';
+        for (var p in groups_duties) {
+            var dates = groups_duties[p].dates.map(function(d){return moment(d, "YYYY-MM-DD").format("MM-DD")}).join(', ');
+            var intervals = groups_duties[p].intervals.join(', ');
+            var std_dev = groups_duties[p].std_dev;
+            summary_duties_html += '<tr><th>' + p + '</th><th>' + dates + '</th><th>' + intervals + '</th><th>' + std_dev + '</th></tr>';
+        }
+        summary_duties_html += '</table>';
+        $('#summary_duties').html(summary_duties_html);
+    }
+
     var random_duty_worker;
     $('#func_test_worker').click(function() {
         calculate_suggested_patterns();
@@ -452,6 +464,8 @@ $(function() {
                     moment.add(1, 'd');
                 });
 
+                // outline the result and std_dev
+                update_summary_duties(groups);
             } else {
                 console.log(e.data["msg"]);
             }
