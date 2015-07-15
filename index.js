@@ -414,7 +414,9 @@ $(function() {
     function update_summary_duties(groups_duties) {
         var summary_duties_html = '<table class="table table-striped"><tr><th>No.</th><th>Dates</th><th>Intervals</th><th>Std Dev</th></tr>';
         for (var p in groups_duties) {
-            var dates = groups_duties[p].dates.map(function(d){return moment(d, "YYYY-MM-DD").format("MM-DD")}).join(', ');
+            var dates = groups_duties[p].dates.sort().map(function(d) {
+                return moment(d, "YYYY-MM-DD").format("M/D")
+            }).join(', ');
             var intervals = groups_duties[p].intervals.join(', ');
             var std_dev = groups_duties[p].std_dev;
             summary_duties_html += '<tr><th>' + p + '</th><th>' + dates + '</th><th>' + intervals + '</th><th>' + std_dev + '</th></tr>';
@@ -448,20 +450,20 @@ $(function() {
                 var groups = e.data["groups"];
                 //console.log(groups);
 
-                var moment = start_date.clone();
                 duties.forEach(function(duty) {
-                    if (get_preset_duty(preset_duties, moment.format("YYYY-MM-DD")) === undefined) {
+                    var date = moment(duty[0], "YYYY-MM-DD");
+                    if (get_preset_duty(preset_duties, duty[0]) === undefined) {
                         var event = {
                             title: duty[1].toString(),
-                            start: moment,
+                            start: date,
                             allDay: true,
                             color: duty_colors[duty[1]],
                             className: "duty-event"
                         };
                         $('#cal1').fullCalendar('renderEvent', event, true);
                         $('#cal2').fullCalendar('renderEvent', event, true);
+                        //console.log(duty[0] + ": " + duty[1]);
                     }
-                    moment.add(1, 'd');
                 });
 
                 // outline the result and std_dev

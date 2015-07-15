@@ -100,7 +100,7 @@ function generate_non_preset_duty_match_patterns(total_days, since_date_str, pre
 
 function has_continuous_duties(duties) {
     var sorted_duties = duties.sort(function(a, b) {
-        return a[0] > b[0]
+        return moment(a[0], "YYYY-MM-DD") - moment(b[0], "YYYY-MM-DD")
     }); // sort by date
     var len = sorted_duties.length;
     for (var i = 0; i < len; i++) {
@@ -113,7 +113,7 @@ function has_continuous_duties(duties) {
 
 function calculate_group_duties(duties) {
     var sorted_duties = duties.sort(function(a, b) {
-        return a[0] > b[0]
+        return moment(a[0], "YYYY-MM-DD") - moment(b[0], "YYYY-MM-DD")
     }); // sort by date
     var duties_simple_array = sorted_duties.map(function(d) {
         return d[1]
@@ -203,10 +203,8 @@ function random_duty(total_days, since_date_str, preset_duties, preset_holidays,
         groups = {};
     var non_preset_duties = generate_non_preset_duty_match_patterns(total_days, since_date_str, preset_duties, preset_holidays, patterns);
     var c = 0;
-    //console.log(non_preset_duties.toString());
     while (1) {
         shuffle_duties(non_preset_duties);
-        //console.log(non_preset_duties.toString());
         var merged_duties = non_preset_duties.concat(preset_duties);
         var group_duties = calculate_group_duties(merged_duties);
         if (!has_continuous_duties(merged_duties) && less_than_std_dev_level(group_duties, std_dev_level)) {
