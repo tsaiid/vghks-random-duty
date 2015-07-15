@@ -361,6 +361,13 @@ $(function() {
                 return false;
             }
         });
+        $('#cal2').fullCalendar('removeEvents', function(event) {
+            if ($.inArray('duty-event', event.className) > -1) {
+                return true;
+            } else {
+                return false;
+            }
+        });
     });
 
     $('#func_get_preset_duty_events').click(function() {
