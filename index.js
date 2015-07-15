@@ -146,6 +146,11 @@ $(function() {
         $('#calEventEditDialog #eventEditTitle').val(calEvent.title);
         $("#calEventEditDialog").dialog('open');
     };
+    var onlyTheMonthEventRender = function(event, element, view) {
+        if (event.start.month() != view.intervalStart.month()) {
+            return false;
+        }
+    };
     var duty_colors = [
         "#000000",
         "#2D6100",
@@ -172,6 +177,7 @@ $(function() {
         dayClick: calDayClick,
         editable: true,
         eventClick: calEventClick,
+        eventRender: onlyTheMonthEventRender,
         eventAfterAllRender: function() {
             //console.log("cal1 rendered.")
             is_cal1_finished = true;
@@ -194,6 +200,7 @@ $(function() {
         dayClick: calDayClick,
         editable: true,
         eventClick: calEventClick,
+        eventRender: onlyTheMonthEventRender,
         eventAfterAllRender: function() {
             //console.log("cal2 rendered.")
             is_cal2_finished = true;
