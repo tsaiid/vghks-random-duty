@@ -17,14 +17,14 @@ onmessage = function(oEvent) {
     var preset_duties = oEvent.data["preset_duties"];
     var since_date_str = oEvent.data["since_date_str"];
     var total_days = oEvent.data["total_days"];
-    var c = 0;
 
     var result = random_duty(total_days, since_date_str, preset_duties, preset_holidays, patterns);
 
     postMessage({
         "status": result.status,
         "msg": result.msg,
-        "duties": result.duties
+        "duties": result.duties,
+        "groups": result.groups
     });
 };
 
@@ -111,7 +111,7 @@ function has_continuous_duties(duties) {
     return false;
 }
 
-function less_than_std_dev_level(duties, std_dev_level) {
+function calculate_group_duties(duties) {
     var sorted_duties = duties.sort(function(a, b) {
         return a[0] > b[0]
     }); // sort by date
@@ -138,15 +138,19 @@ function less_than_std_dev_level(duties, std_dev_level) {
         }
     });
 
+    // calculate standard deviations
     for (var person in groups) {
         //console.log(groups[person].intervals);
         var std_dev = standardDeviation(groups[person].intervals);
         groups[person].std_dev = std_dev;
         //console.log(person + ": " + std_dev);
     }
+    return groups;
+}
 
-    for (var person in groups) {
-        if (groups[person].std_dev > std_dev_level) {
+function less_than_std_dev_level(group_duties, std_dev_level) {
+    for (var person in group_duties) {
+        if (group_duties[person].std_dev > std_dev_level) {
             return false;
         }
     }
@@ -155,7 +159,8 @@ function less_than_std_dev_level(duties, std_dev_level) {
 }
 
 function shuffle(array) {
-    var counter = array.length, temp, index;
+    var counter = array.length,
+        temp, index;
 
     // While there are elements in the array
     while (counter > 0) {
@@ -175,9 +180,11 @@ function shuffle(array) {
 }
 
 function shuffle_duties(date_duties) {
-    var duties = date_duties.map(function(d){return d[1]});
+    var duties = date_duties.map(function(d) {
+        return d[1]
+    });
     shuffle(duties);
-    date_duties.forEach(function(d, i){
+    date_duties.forEach(function(d, i) {
         d[1] = duties[i];
     });
     return date_duties;
@@ -189,16 +196,19 @@ function random_duty(total_days, since_date_str, preset_duties, preset_holidays,
 
     var status = "success",
         msg = "",
-        duties = [];
+        duties = [],
+        groups = {};
     var non_preset_duties = generate_non_preset_duty_match_patterns(total_days, since_date_str, preset_duties, preset_holidays, patterns);
     var c = 0;
     //console.log(non_preset_duties.toString());
     while (1) {
         shuffle_duties(non_preset_duties);
-        console.log(non_preset_duties.toString());
+        //console.log(non_preset_duties.toString());
         var merged_duties = non_preset_duties.concat(preset_duties);
-        if (!has_continuous_duties(merged_duties) && less_than_std_dev_level(merged_duties, std_dev_level)) {
+        var group_duties = calculate_group_duties(merged_duties);
+        if (!has_continuous_duties(merged_duties) && less_than_std_dev_level(group_duties, std_dev_level)) {
             duties = merged_duties;
+            groups = group_duties;
             break;
         }
 
@@ -223,6 +233,7 @@ function random_duty(total_days, since_date_str, preset_duties, preset_holidays,
     return {
         status: status,
         msg: msg,
-        duties: duties
+        duties: duties,
+        groups: groups
     };
 };

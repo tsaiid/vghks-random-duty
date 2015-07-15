@@ -432,8 +432,9 @@ $(function() {
         });
         random_duty_worker.onmessage = function(e) {
             if (e.data.status == "success") {
-                //console.log(e.data["duties"]);
                 var duties = e.data["duties"];
+                var groups = e.data["groups"];
+                //console.log(groups);
 
                 var moment = start_date.clone();
                 duties.forEach(function(duty) {
