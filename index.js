@@ -24,7 +24,6 @@ $(function() {
                 $('.first_cal').toggleClass('col-sm-6', state, 600);
                 $('.second_cal').hide();
             }
-            calculate_suggested_patterns();
         }
     });
 
@@ -179,9 +178,7 @@ $(function() {
         eventClick: calEventClick,
         eventRender: onlyTheMonthEventRender,
         eventAfterAllRender: function() {
-            //console.log("cal1 rendered.")
             is_cal1_finished = true;
-            //calculate_suggested_patterns();
         }
     });
 
@@ -202,9 +199,7 @@ $(function() {
         eventClick: calEventClick,
         eventRender: onlyTheMonthEventRender,
         eventAfterAllRender: function() {
-            //console.log("cal2 rendered.")
             is_cal2_finished = true;
-            //calculate_suggested_patterns();
         }
     });
 
@@ -323,12 +318,8 @@ $(function() {
         var the_day = start_date;
         while (the_day.format() != end_date.format()) {
             var the_day_str = the_day.format("YYYY-MM-DD");
-            if (is_weekend(the_day_str)) {
+            if (is_weekend(the_day_str) || is_holiday(preset_holidays, the_day_str)) {
                 holiday_count++;
-                //console.log("Weekend: " + the_day.format());
-            } else if (is_holiday(preset_holidays, the_day_str)) {
-                holiday_count++;
-                //console.log("Holiday: " + the_day.format());
             } else if (is_friday(preset_holidays, the_day_str)) {
                 friday_count++;
             } else {
@@ -391,11 +382,9 @@ $(function() {
     });
 
     function calculate_suggested_patterns() {
-        // check if cal1 and cal2 is all rendered.
-        if (!is_cal1_finished || !is_cal2_finished) {
-            console.log('not all calendars finish.');
-            return;
-        }
+        // clear previous data first
+        $('#suggested_pattern').removeData("patterns");
+        $('#suggested_pattern').html("");
 
         var start_date = $('#cal1').fullCalendar('getDate').startOf('month');
         var people = parseInt($('#inputPeople').val());
@@ -439,12 +428,64 @@ $(function() {
         $('#summary_duties').html(summary_duties_html);
     }
 
+    function count_duty_pattern(dates, preset_holidays) {
+        var o_count = 0, f_count = 0, h_count = 0;
+        dates.forEach(function(date){
+            if (is_weekend(date) || is_holiday(preset_holidays, date)) {
+                h_count++;
+            } else if (is_friday(preset_holidays, date)) {
+                f_count++;
+            } else {
+                o_count++;
+            }
+        });
+        //console.log("dates: " + dates);
+        //console.log("pattern: " + [o_count, f_count, h_count].toString());
+        return [o_count, f_count, h_count];
+    }
+
+    function is_preset_duties_fit_pattern(preset_duties, preset_holidays, patterns) {
+        var groups = calculate_group_duties(preset_duties);
+        console.log(groups);
+        if (Object.keys(groups).length != patterns.length) {
+            console.log("length not equal. groups: " + Object.keys(groups).length + ", patterns: " + patterns.length);
+            return false;
+        }
+
+        for (var i = 0; i < patterns.length; i++) {
+            var person = i + 1;
+            if (groups[person] === undefined) {
+                return false;
+            }
+            var dates = groups[person].dates;
+            var counted_pattern = count_duty_pattern(dates, preset_holidays);
+            // compare only friday and holiday now
+            if (patterns[i][1] != counted_pattern[1] || patterns[i][2] != counted_pattern[2]) {
+                console.log("person: " + person + ", pattern not fit: " + counted_pattern.join(", "));
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     var random_duty_worker;
     $('#func_test_worker').click(function() {
-        calculate_suggested_patterns();
+        // check if calculated patterns.
         var patterns = $('#suggested_pattern').data("patterns");
+        if (patterns === undefined) {
+            alert("Please calculate duty patterns first.");
+            return;
+        }
+
+        // check if friday, weekend, holiday duties are set and fit pattern.
         var preset_holidays = get_preset_holidays();
         var preset_duties = get_preset_duties();
+        if (!is_preset_duties_fit_pattern(preset_duties, preset_holidays, patterns)) {
+            alert("The preset duties do not fit the patterns. Please adjust them.");
+            return;
+        }
+
         var start_date = $('#cal1').fullCalendar('getDate').startOf('month');
         var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
         var end_date = start_date.clone().add(month_span, 'months');
