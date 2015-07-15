@@ -100,7 +100,8 @@ function generate_non_preset_duty_match_patterns(total_days, since_date_str, pre
 
 function has_continuous_duties(duties) {
     var sorted_duties = duties.sort(function(a, b) {
-        return moment(a[0], "YYYY-MM-DD") - moment(b[0], "YYYY-MM-DD")
+        //return moment(a[0], "YYYY-MM-DD") - moment(b[0], "YYYY-MM-DD")
+        return a[0].localeCompare(b[0])
     }); // sort by date
     var len = sorted_duties.length;
     for (var i = 0; i < len; i++) {
@@ -113,7 +114,8 @@ function has_continuous_duties(duties) {
 
 function calculate_group_duties(duties) {
     var sorted_duties = duties.sort(function(a, b) {
-        return moment(a[0], "YYYY-MM-DD") - moment(b[0], "YYYY-MM-DD")
+        //return moment(a[0], "YYYY-MM-DD") - moment(b[0], "YYYY-MM-DD")
+        return a[0].localeCompare(b[0])
     }); // sort by date
     var duties_simple_array = sorted_duties.map(function(d) {
         return d[1]
@@ -194,7 +196,7 @@ function shuffle_duties(date_duties) {
 }
 
 function random_duty(total_days, since_date_str, preset_duties, preset_holidays, patterns) {
-    var std_dev_level = 1.8;
+    var std_dev_level = 2;
     var since_date = moment(since_date_str, "YYYY-MM-DD");
 
     var status = "success",
@@ -205,7 +207,9 @@ function random_duty(total_days, since_date_str, preset_duties, preset_holidays,
     var c = 0;
     while (1) {
         shuffle_duties(non_preset_duties);
+//        console.log(non_preset_duties.toString());
         var merged_duties = non_preset_duties.concat(preset_duties);
+//        console.log(has_continuous_duties(merged_duties));
         var group_duties = calculate_group_duties(merged_duties);
         if (!has_continuous_duties(merged_duties) && less_than_std_dev_level(group_duties, std_dev_level)) {
             duties = merged_duties;
@@ -216,11 +220,14 @@ function random_duty(total_days, since_date_str, preset_duties, preset_holidays,
         if (TEST_CONDITIONING_FUNCTION) {
             msg = "test conditioning function. run only once. ";
             status = "test";
+//            console.log(merged_duties.toString());
+//            console.log(group_duties);
+//            console.log(patterns.toString());
             break;
         }
 
         c++;
-        if (!(c % 10000)) {
+        if (!(c % 100)) {
             console.log("run time: " + c + ". Still running.");
         }
 
