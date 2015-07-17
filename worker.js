@@ -50,24 +50,7 @@ function count_duty_pattern(duty_dates, preset_holidays) {
     return [ordinary_count, friday_count, holiday_count];
 }
 
-function is_duties_match_counts(duties, counts, people) {
-    for (i = 1; i <= people; i++) {
-        var random_ordinary_count = duties.filter(function(d) {
-            return d[1] == i
-        }).length;
-        if (random_ordinary_count != counts[i - 1]) {
-            //console.log(duties.toString());
-            //console.log(i + ": " + random_ordinary_count);
-            //console.log(counts[i - 1]);
-            //console.log(duties.toString());
-            return false;
-        }
-    }
-    return true;
-}
-
 function generate_non_preset_duty_match_patterns(total_days, since_date_str, preset_duties, preset_holidays, patterns) {
-    var people = 4;
     var non_preset_duties = [];
 
     //console.log(preset_duties.toString());
