@@ -18,7 +18,7 @@ $(function() {
         onSwitchChange: function(event, state) {
             //console.log(state); // true | false
             if (state) { // 2-month mode
-                $('.first_cal').toggleClass('col-sm-6', state, 600).promise().done(function(){
+                $('.first_cal').toggleClass('col-sm-6', state, 600).promise().done(function() {
                     $('.second_cal').show();
                 });
             } else { // 1-month mode
@@ -438,8 +438,10 @@ $(function() {
     }
 
     function count_duty_pattern(dates, preset_holidays) {
-        var o_count = 0, f_count = 0, h_count = 0;
-        dates.forEach(function(date){
+        var o_count = 0,
+            f_count = 0,
+            h_count = 0;
+        dates.forEach(function(date) {
             if (is_weekend(date) || is_holiday(preset_holidays, date)) {
                 h_count++;
             } else if (is_friday(preset_holidays, date)) {
@@ -544,43 +546,71 @@ $(function() {
     });
 
     $('#func_deploy_test_data').click(function() {
-        var test_data = [
-            [1, "2015-08-08"],
-            [1, "2015-08-16"],
-            [1, "2015-08-21"],
-            [1, "2015-08-28"],
-            [2, "2015-08-02"],
-            [2, "2015-08-15"],
-            [2, "2015-08-30"],
-            [3, "2015-08-09"],
-            [3, "2015-08-14"],
-            [3, "2015-08-23"],
-            [3, "2015-08-29"],
-            [4, "2015-08-01"],
-            [4, "2015-08-07"],
-            [4, "2015-08-22"],
-            [4, "2015-08-27"],
-        ];
-
+        var people = parseInt($('#inputPeopleSlider').slider('option', 'value'));
         var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
-        if (month_span > 1) {
-            test_data = test_data.concat([
-                [1, "2015-09-04"],
-                [1, "2015-09-06"],
-                [1, "2015-09-19"],
-                [2, "2015-09-02"],
-                [2, "2015-09-11"],
-                [2, "2015-09-13"],
-                [2, "2015-09-25"],
-                [2, "2015-09-28"],
-                [3, "2015-09-05"],
-                [3, "2015-09-20"],
-                [3, "2015-09-27"],
-                [4, "2015-09-03"],
-                [4, "2015-09-12"],
-                [4, "2015-09-18"],
-                [4, "2015-09-26"],
-            ]);
+        var test_data;
+        switch (people) {
+            case 4:
+                test_data = [
+                    [1, "2015-08-08"],
+                    [1, "2015-08-16"],
+                    [1, "2015-08-21"],
+                    [1, "2015-08-28"],
+                    [2, "2015-08-02"],
+                    [2, "2015-08-15"],
+                    [2, "2015-08-30"],
+                    [3, "2015-08-09"],
+                    [3, "2015-08-14"],
+                    [3, "2015-08-23"],
+                    [3, "2015-08-29"],
+                    [4, "2015-08-01"],
+                    [4, "2015-08-07"],
+                    [4, "2015-08-22"],
+                    [4, "2015-08-27"],
+                ];
+
+                if (month_span > 1) {
+                    test_data = test_data.concat([
+                        [1, "2015-09-04"],
+                        [1, "2015-09-06"],
+                        [1, "2015-09-19"],
+                        [2, "2015-09-02"],
+                        [2, "2015-09-11"],
+                        [2, "2015-09-13"],
+                        [2, "2015-09-25"],
+                        [2, "2015-09-28"],
+                        [3, "2015-09-05"],
+                        [3, "2015-09-20"],
+                        [3, "2015-09-27"],
+                        [4, "2015-09-03"],
+                        [4, "2015-09-12"],
+                        [4, "2015-09-18"],
+                        [4, "2015-09-26"],
+                    ]);
+                }
+                break;
+            case 5:
+                test_data = [
+                    [1, "2015-08-16"],
+                    [1, "2015-08-21"],
+                    [1, "2015-08-28"],
+                    [2, "2015-08-02"],
+                    [2, "2015-08-15"],
+                    [2, "2015-08-27"],
+                    [3, "2015-08-09"],
+                    [3, "2015-08-14"],
+                    [3, "2015-08-29"],
+                    [4, "2015-08-01"],
+                    [4, "2015-08-07"],
+                    [4, "2015-08-22"],
+                    [5, "2015-08-08"],
+                    [5, "2015-08-23"],
+                    [5, "2015-08-30"],
+                ];
+                break;
+            default:
+                alert("Please set deploy data for " + people + ".");
+                return;
         }
 
         test_data.forEach(function(data) {
