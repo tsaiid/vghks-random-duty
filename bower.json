@@ -1,0 +1,24 @@
+{
+  "name": "vghks-random-duty",
+  "main": "index.html",
+  "version": "0.0.1",
+  "homepage": "https://github.com/tsaiid/vghks-random-duty",
+  "authors": [
+    "I-Ta Tsai@MBPR <ittsai@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.5",
+    "jquery-ui": "~1.11.4",
+    "bootstrap-switch": "~3.3.2",
+    "blockUI": "*",
+    "fullcalendar": "~2.3.2"
+  }
+}
