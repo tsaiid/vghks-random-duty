@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="bower_components/bootstrap-switch/dist/css/bootstrap3/bootstrap-switch.min.css">
     <link rel="stylesheet" href="bower_components/fullcalendar/dist/fullcalendar.min.css">
     <link rel="stylesheet" href="bower_components/jquery-ui/themes/redmond/jquery-ui.css">
+    <link rel="stylesheet" href="bower_components/jquery-ui-slider-pips/dist/jquery-ui-slider-pips.css">
     <link rel="stylesheet" type="text/css" href="dashboard.css">
     <link rel="stylesheet" type="text/css" href="calendar.css">
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -57,7 +58,7 @@
                 <button id="func_get_holiday_condition" class="btn btn-default" type="submit">Get Holiday Condition</button>
                 <form class="form-horizontal">
                     <div class="form-group">
-                        <label for="inputPeople" class="col-sm-4 control-label">模式</label>
+                        <label for="modeSwitch" class="col-sm-4 control-label">模式</label>
                         <div class="col-sm-8">
                             <input type="checkbox" id="mode_switch" checked>
                         </div>
@@ -65,7 +66,7 @@
                     <div class="form-group">
                         <label for="inputPeople" class="col-sm-4 control-label">People</label>
                         <div class="col-sm-8">
-                            <input type="text" class="form-control" id="inputPeople" value="4">
+                            <div id="inputPeopleSlider" class="slider"></div>
                         </div>
                     </div>
                 </form>
@@ -116,6 +117,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/md5.js"></script>
     <script src="bower_components/jquery/dist/jquery.min.js"></script>
     <script src="bower_components/jquery-ui/jquery-ui.min.js"></script>
+    <script src="bower_components/jquery-ui-slider-pips/dist/jquery-ui-slider-pips.min.js"></script>
     <script src="bower_components/moment/min/moment.min.js"></script>
     <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="bower_components/bootstrap-switch/dist/js/bootstrap-switch.min.js"></script>

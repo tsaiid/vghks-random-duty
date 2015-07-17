@@ -28,6 +28,14 @@ $(function() {
         }
     });
 
+    $('#inputPeopleSlider').slider({
+        max: 9,
+        min: 3,
+        value: 4
+    }).slider("pips", {
+        rest: "label"
+    });
+
     function get_calendar_height() {
         return $(window).height() - 300;
     }
@@ -388,7 +396,7 @@ $(function() {
         $('#suggested_pattern').html("");
 
         var start_date = $('#cal1').fullCalendar('getDate').startOf('month');
-        var people = parseInt($('#inputPeople').val());
+        var people = parseInt($('#inputPeopleSlider').slider("option", "value"));
         var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
 
         var suggested_patterns = get_suggested_patterns(start_date, month_span, people);

@@ -19,6 +19,7 @@
     "jquery-ui": "~1.11.4",
     "bootstrap-switch": "~3.3.2",
     "blockUI": "*",
-    "fullcalendar": "~2.3.2"
+    "fullcalendar": "~2.3.2",
+    "jquery-ui-slider-pips": "~1.10.5"
   }
 }
