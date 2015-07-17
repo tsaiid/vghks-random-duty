@@ -18,11 +18,12 @@ $(function() {
         onSwitchChange: function(event, state) {
             //console.log(state); // true | false
             if (state) { // 2-month mode
-                $('.first_cal').toggleClass('col-sm-6', state, 600);
-                $('.second_cal').show();
+                $('.first_cal').toggleClass('col-sm-6', state, 600).promise().done(function(){
+                    $('.second_cal').show();
+                });
             } else { // 1-month mode
-                $('.first_cal').toggleClass('col-sm-6', state, 600);
                 $('.second_cal').hide();
+                $('.first_cal').toggleClass('col-sm-6', state, 600);
             }
         }
     });
