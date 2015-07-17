@@ -9,6 +9,34 @@ function get_preset_duty(preset_duties, date_str) {
     return duty;
 }
 
+function count_duty_pattern(dates, preset_holidays) {
+    var o_count = 0,
+        f_count = 0,
+        h_count = 0;
+    dates.forEach(function(date) {
+        if (is_weekend(date) || is_holiday(preset_holidays, date)) {
+            h_count++;
+        } else if (is_friday(preset_holidays, date)) {
+            f_count++;
+        } else {
+            o_count++;
+        }
+    });
+    //console.log("dates: " + dates);
+    //console.log("pattern: " + [o_count, f_count, h_count].toString());
+    return [o_count, f_count, h_count];
+}
+
+function calculate_group_duties_status(groups, preset_holidays) {
+    for (var person in groups) {
+        var duty_pattern = count_duty_pattern(groups[person].dates, preset_holidays);
+        groups[person].ordinary_count = duty_pattern[0];
+        groups[person].friday_count = duty_pattern[1];
+        groups[person].holiday_count = duty_pattern[2];
+    }
+    return groups;
+}
+
 function calculate_group_duties(duties) {
     var sorted_duties = duties.sort(function(a, b) {
         //return moment(a[0], "YYYY-MM-DD") - moment(b[0], "YYYY-MM-DD")

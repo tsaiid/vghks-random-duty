@@ -250,6 +250,24 @@ $(function() {
         return preset_duties;
     }
 
+    function get_all_duties() {
+        var all_duty_events = $('#cal1').fullCalendar('clientEvents', function(event) {
+            if ($.inArray('preset-duty-event', event.className) > -1 || $.inArray('duty-event', event.className) > -1) {
+                return true;
+            } else {
+                return false;
+            }
+        });
+
+        var all_duties = [];
+        all_duty_events.forEach(function(event) {
+            var date = event.start.format("YYYY-MM-DD");
+            all_duties.push([date, parseInt(event.title)]);
+        });
+
+        return all_duties;
+    }
+
     function get_preset_holidays() {
         var preset_holidays1 = $('#cal1').fullCalendar('clientEvents', function(event) {
             if ($.inArray('gcal-holiday', event.className) > -1) {
@@ -383,11 +401,31 @@ $(function() {
         console.log(preset_duties);
     });
 
-    $('#func_test_is_holiday').click(function() {
-        var preset_holidays = get_preset_holidays();
+    function update_current_duty_status() {
+        // check if suggested pattern exists
+        if ($('#suggested_pattern').data("patterns") === undefined) {
+            calculate_suggested_patterns();
+        }
 
-        console.log(preset_holidays);
-        console.log(is_holiday(preset_holidays, moment([2015, 6, 28]).format("YYYY-MM-DD")));
+        var preset_holidays = get_preset_holidays();
+        var all_duties = get_all_duties();
+        var groups = calculate_group_duties(all_duties);
+        calculate_group_duties_status(groups, preset_holidays);
+        //        console.log(groups);
+        for (var person in groups) {
+            var person_id = '#person_' + person;
+            if ($(person_id).length == 1) {
+                $(person_id + " .ordinary_count .current_status").html("(" + groups[person].ordinary_count + ")");
+                $(person_id + " .friday_count .current_status").html("(" + groups[person].friday_count + ")");
+                $(person_id + " .holiday_count .current_status").html("(" + groups[person].holiday_count + ")");
+            } else {
+                console.log("no such person: " + person);
+            }
+        }
+    }
+
+    $('#func_update_current_duty_status').click(function() {
+        update_current_duty_status();
     });
 
     function calculate_suggested_patterns() {
@@ -407,7 +445,7 @@ $(function() {
                 h_count = 0;
             suggested_patterns.forEach(function(pattern, index) {
                 var point = parseInt(pattern[1]) + parseInt(pattern[2]) * 2;
-                suggested_pattern_html += '<tr><td>' + (index + 1) + '</td><td>' + pattern[0] + '</td><td>' + pattern[1] + '</td><td>' + pattern[2] + '</td><td>' + point + '</td></tr>';
+                suggested_pattern_html += '<tr id="person_' + (index + 1) + '"><td>' + (index + 1) + '</td><td class="ordinary_count">' + pattern[0] + ' <span class="current_status"></span></td><td class="friday_count">' + pattern[1] + ' <span class="current_status"></span></td><td class="holiday_count">' + pattern[2] + ' <span class="current_status"></span></td><td>' + point + '</td></tr>';
                 o_count += pattern[0];
                 f_count += pattern[1];
                 h_count += pattern[2];
@@ -421,6 +459,7 @@ $(function() {
 
     $('#func_get_holiday_condition').click(function() {
         calculate_suggested_patterns();
+        update_current_duty_status();
     });
 
     function update_summary_duties(groups_duties) {
@@ -435,24 +474,6 @@ $(function() {
         }
         summary_duties_html += '</table>';
         $('#summary_duties').html(summary_duties_html);
-    }
-
-    function count_duty_pattern(dates, preset_holidays) {
-        var o_count = 0,
-            f_count = 0,
-            h_count = 0;
-        dates.forEach(function(date) {
-            if (is_weekend(date) || is_holiday(preset_holidays, date)) {
-                h_count++;
-            } else if (is_friday(preset_holidays, date)) {
-                f_count++;
-            } else {
-                o_count++;
-            }
-        });
-        //console.log("dates: " + dates);
-        //console.log("pattern: " + [o_count, f_count, h_count].toString());
-        return [o_count, f_count, h_count];
     }
 
     function is_preset_duties_fit_pattern(preset_duties, preset_holidays, patterns) {
