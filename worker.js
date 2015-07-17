@@ -28,28 +28,6 @@ onmessage = function(oEvent) {
     });
 };
 
-function count_duty_pattern(duty_dates, preset_holidays) {
-    var since_date = moment(since_date_str, "YYYY-MM-DD");
-    var year = since_date.year();
-    var month = since_date.month();
-    var ordinary_count = 0,
-        friday_count = 0,
-        holiday_count = 0;
-
-    duty_days.forEach(function(day) {
-        var the_day_str = moment([year, month, day]).format("YYYY-MM-DD");
-        if (is_weekend(the_day_str) || is_holiday(preset_holidays, the_day_str)) {
-            holiday_count++;
-        } else if (is_friday(preset_holidays, the_day_str)) {
-            friday_count++;
-        } else {
-            ordinary_count++;
-        }
-    });
-
-    return [ordinary_count, friday_count, holiday_count];
-}
-
 function generate_non_preset_duty_match_patterns(total_days, since_date_str, preset_duties, preset_holidays, patterns) {
     var non_preset_duties = [];
 
