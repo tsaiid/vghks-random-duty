@@ -18,8 +18,9 @@ onmessage = function(oEvent) {
     var since_date_str = oEvent.data["since_date_str"];
     var total_days = oEvent.data["total_days"];
     var std_dev_level = oEvent.data["std_dev_level"];
+    var qod_limit = oEvent.data["qod_limit"];
 
-    var result = random_duty(total_days, since_date_str, preset_duties, preset_holidays, patterns, std_dev_level);
+    var result = random_duty(total_days, since_date_str, preset_duties, preset_holidays, patterns, std_dev_level, qod_limit);
 
     postMessage({
         "status": result.status,
@@ -128,7 +129,7 @@ function shuffle_duties(date_duties) {
     return date_duties;
 }
 
-function random_duty(total_days, since_date_str, preset_duties, preset_holidays, patterns, std_dev_level) {
+function random_duty(total_days, since_date_str, preset_duties, preset_holidays, patterns, std_dev_level, qod_limit) {
     var since_date = moment(since_date_str, "YYYY-MM-DD");
 
     var status = "success",
@@ -143,7 +144,7 @@ function random_duty(total_days, since_date_str, preset_duties, preset_holidays,
         var merged_duties = non_preset_duties.concat(preset_duties);
         //        console.log(has_continuous_duties(merged_duties));
         var group_duties = calculate_group_duties(merged_duties);
-        if (!has_continuous_duties(merged_duties) && less_than_qod_times(group_duties, 1) && less_than_std_dev_level(group_duties, std_dev_level)) {
+        if (!has_continuous_duties(merged_duties) && less_than_qod_times(group_duties, qod_limit) && less_than_std_dev_level(group_duties, std_dev_level)) {
             duties = merged_duties;
             groups = group_duties;
             break;
