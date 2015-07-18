@@ -28,6 +28,16 @@ $(function() {
         }
     });
 
+    $('#inputStdDevSlider').slider({
+        max: 2,
+        min: 1,
+        step: 0.1,
+        value: 1.8
+    }).slider("pips", {
+        rest: "label",
+        step: 2
+    });
+
     $('#inputPeopleSlider').slider({
         max: 9,
         min: 3,
