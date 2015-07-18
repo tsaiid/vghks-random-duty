@@ -485,9 +485,18 @@ $(function() {
 
     function update_summary_duties(groups_duties) {
         var summary_duties_html = '<table class="table table-striped"><tr><th>No.</th><th>Dates</th><th>Intervals</th><th>Std Dev</th></tr>';
+        var preset_holidays = get_preset_holidays();
         for (var p in groups_duties) {
             var dates = groups_duties[p].dates.sort().map(function(d) {
-                return moment(d, "YYYY-MM-DD").format("M/D")
+                var date_html = '<span class="';
+                // colorize if friday or holiday
+                if (is_holiday(preset_holidays, d) || is_weekend(d)) {
+                    date_html += 'bg-danger';
+                } else if (is_friday(preset_holidays, d)) {
+                    date_html += 'bg-success';
+                }
+                date_html += '">' + moment(d, "YYYY-MM-DD").format("M/D") + '</span>';
+                return date_html;
             }).join(', ');
             var intervals = groups_duties[p].intervals.join(', ');
             var std_dev = groups_duties[p].std_dev;
