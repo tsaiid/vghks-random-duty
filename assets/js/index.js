@@ -28,6 +28,14 @@ $(function() {
         }
     });
 
+    $('#inputQodLimitSlider').slider({
+        max: 4,
+        min: 0,
+        value: 1
+    }).slider("pips", {
+        rest: "label"
+    });
+
     $('#inputStdDevSlider').slider({
         max: 2,
         min: 1,
