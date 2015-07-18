@@ -87,8 +87,15 @@
                 </form>
                 <div id="suggested_pattern"></div>
                 <div id="block_ui_box">
-                    <div id="block_ui_message"></div>
-                    <button id="btn_stop_random_duty_worker" class="btn btn-default" type="submit">STOP Worker</button>
+                    <div class="media">
+                        <div class="media-left">
+                            <i class="fa fa-spinner fa-spin fa-4x"></i>
+                        </div>
+                        <div class="media-body">
+                            <div class="media-heading" id="block_ui_message">Media heading</div>
+                            <button id="btn_stop_random_duty_worker" class="btn btn-warning pull-right" type="submit">Cancel</button>
+                        </div>
+                    </div>
                 </div>
                 <div class="growlUI" style="display:none">
                     <h1>Growl Notification</h1>
