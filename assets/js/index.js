@@ -36,7 +36,8 @@ $(function() {
         rest: "label"
     });
 
-    $.blockUI.defaults.growlCSS.top = '60px';   // show below the nav bar.
+    $.blockUI.defaults.growlCSS.top = '60px'; // show below the nav bar.
+    $.blockUI.defaults.growlCSS.opacity = 0.8;
 
     function get_calendar_height() {
         return $(window).height() - 300;
@@ -568,8 +569,11 @@ $(function() {
                     update_summary_duties(groups);
 
                     // unblock ui
-                    $.unblockUI();
-                    $.growlUI('Random Duty Completed', 'Have a nice day!');
+                    $.unblockUI({
+                        onUnblock: function() {
+                            $.growlUI('Random Duty Completed', 'Have a nice day!');
+                        }
+                    });
                     break;
                 case "running":
                     $('#block_ui_message').html(e.data.msg);
@@ -589,8 +593,11 @@ $(function() {
     });
 
     $('#func_test_stop_worker').click(function() {
-        random_duty_worker.terminate();
-        random_duty_worker = undefined;
+        if (random_duty_worker !== undefined) {
+            random_duty_worker.terminate();
+            random_duty_worker = undefined;
+        }
+        $.unblockUI();
     });
 
     $('#func_deploy_test_data').click(function() {
