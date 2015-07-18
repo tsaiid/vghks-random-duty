@@ -674,6 +674,52 @@ $(function() {
         });
     });
 
+    $('#func_deploy_test_data_ordinary').click(function() {
+        var people = parseInt($('#inputPeopleSlider').slider('option', 'value'));
+        var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
+        var test_data;
+        switch (people) {
+            case 4:
+                test_data = [
+                    [1, "2015-08-03"],
+                    [1, "2015-08-13"],
+                    [1, "2015-08-19"],
+                    [1, "2015-08-24"],
+                    [2, "2015-08-06"],
+                    [2, "2015-08-11"],
+                    [2, "2015-08-20"],
+                    [2, "2015-08-25"],
+                    [3, "2015-08-05"],
+                    [3, "2015-08-18"],
+                    [3, "2015-08-26"],
+                    [3, "2015-08-31"],
+                    [4, "2015-08-04"],
+                    [4, "2015-08-10"],
+                    [4, "2015-08-12"],
+                    [4, "2015-08-17"],
+                ];
+
+                break;
+            case 5:
+                break;
+            default:
+                alert("Please set deploy data for " + people + ".");
+                return;
+        }
+
+        test_data.forEach(function(data) {
+            var event = {
+                title: data[0].toString(),
+                start: data[1],
+                allDay: true,
+                className: "duty-event",
+                color: duty_colors[data[0]]
+            };
+            $("#cal1").fullCalendar('renderEvent', event, true);
+            $("#cal2").fullCalendar('renderEvent', event, true);
+        });
+    });
+
     //
     // Must be done at first time
     //
