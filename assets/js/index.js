@@ -28,6 +28,14 @@ $(function() {
         }
     });
 
+    $('#inputQodLimitSlider').slider({
+        max: 4,
+        min: 0,
+        value: 1
+    }).slider("pips", {
+        rest: "label"
+    });
+
     $('#inputStdDevSlider').slider({
         max: 2,
         min: 1,
@@ -544,6 +552,7 @@ $(function() {
         var end_date = start_date.clone().add(month_span, 'months');
         var total_days = end_date.diff(start_date, 'days');
         var std_dev_level = parseFloat($('#inputStdDevSlider').slider('option', 'value'));
+        var qod_limit = parseInt($('#inputQodLimitSlider').slider('option', 'value'));
 
         random_duty_worker = new Worker("assets/js/random_duty_worker.js");
         random_duty_worker.postMessage({
@@ -553,6 +562,7 @@ $(function() {
             "since_date_str": start_date.format("YYYY-MM-DD"),
             "total_days": total_days,
             "std_dev_level": std_dev_level,
+            "qod_limit": qod_limit,
         });
         random_duty_worker.onmessage = function(e) {
             switch (e.data.status) {
