@@ -17,8 +17,9 @@ onmessage = function(oEvent) {
     var preset_duties = oEvent.data["preset_duties"];
     var since_date_str = oEvent.data["since_date_str"];
     var total_days = oEvent.data["total_days"];
+    var std_dev_level = oEvent.data["std_dev_level"];
 
-    var result = random_duty(total_days, since_date_str, preset_duties, preset_holidays, patterns);
+    var result = random_duty(total_days, since_date_str, preset_duties, preset_holidays, patterns, std_dev_level);
 
     postMessage({
         "status": result.status,
@@ -127,8 +128,7 @@ function shuffle_duties(date_duties) {
     return date_duties;
 }
 
-function random_duty(total_days, since_date_str, preset_duties, preset_holidays, patterns) {
-    var std_dev_level = 1.8;
+function random_duty(total_days, since_date_str, preset_duties, preset_holidays, patterns, std_dev_level) {
     var since_date = moment(since_date_str, "YYYY-MM-DD");
 
     var status = "success",
