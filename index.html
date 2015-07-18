@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="bower_components/jquery-ui-slider-pips/dist/jquery-ui-slider-pips.css">
     <link rel="stylesheet" type="text/css" href="assets/css/dashboard.css">
     <link rel="stylesheet" type="text/css" href="assets/css/calendar.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/index.css">
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -52,6 +53,7 @@
                 <button id="func_test_worker" class="btn btn-default" type="submit">Test Worker</button>
                 <button id="func_test_stop_worker" class="btn btn-default" type="submit">Test STOP Worker</button>
                 <button id="func_deploy_test_data" class="btn btn-default" type="submit">Deploy Test Data</button>
+                <button id="func_deploy_test_data_ordinary" class="btn btn-default" type="submit">Deploy Test Ord Data</button>
                 <button id="func_clear_calendar" class="btn btn-default" type="submit">Clear Calendar</button>
                 <button id="func_get_preset_duty_events" class="btn btn-default" type="submit">Get Preset Duties</button>
                 <button id="func_update_current_duty_status" class="btn btn-default" type="submit">Update Curr Duty Status</button>
@@ -71,6 +73,14 @@
                     </div>
                 </form>
                 <div id="suggested_pattern"></div>
+                <div id="block_ui_box">
+                    <div id="block_ui_message"></div>
+                    <button id="btn_stop_random_duty_worker" class="btn btn-default" type="submit">STOP Worker</button>
+                </div>
+                <div class="growlUI" style="display:none">
+                    <h1>Growl Notification</h1>
+                    <h2>Have a nice day!</h2>
+                </div>
             </div>
             <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
                 <div id="calEventDialog">

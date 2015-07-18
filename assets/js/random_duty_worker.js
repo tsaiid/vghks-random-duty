@@ -87,7 +87,7 @@ function less_than_qod_times(group_duties, qod_limit) {
     for (var person in group_duties) {
         var qod_times = group_duties[person].intervals.multiIndexOf(2).length;
         if (qod_times > parseInt(qod_limit)) {
-            console.log("qod_times: " + qod_times + ", intervals: " + group_duties[person].intervals.toString());
+            // console.log("qod_times: " + qod_times + ", intervals: " + group_duties[person].intervals.toString());
             return false;
         }
     }
@@ -139,13 +139,11 @@ function random_duty(total_days, since_date_str, preset_duties, preset_holidays,
     var c = 0;
     while (1) {
         shuffle_duties(non_preset_duties);
-//        console.log(non_preset_duties.toString());
+        //        console.log(non_preset_duties.toString());
         var merged_duties = non_preset_duties.concat(preset_duties);
-//        console.log(has_continuous_duties(merged_duties));
+        //        console.log(has_continuous_duties(merged_duties));
         var group_duties = calculate_group_duties(merged_duties);
-        if (!has_continuous_duties(merged_duties)
-            && less_than_qod_times(group_duties, 1)
-            && less_than_std_dev_level(group_duties, std_dev_level) ) {
+        if (!has_continuous_duties(merged_duties) && less_than_qod_times(group_duties, 1) && less_than_std_dev_level(group_duties, std_dev_level)) {
             duties = merged_duties;
             groups = group_duties;
             break;
@@ -154,15 +152,20 @@ function random_duty(total_days, since_date_str, preset_duties, preset_holidays,
         if (TEST_CONDITIONING_FUNCTION) {
             msg = "test conditioning function. run only once. ";
             status = "test";
-//            console.log(merged_duties.toString());
-//            console.log(group_duties);
-//            console.log(patterns.toString());
+            //            console.log(merged_duties.toString());
+            //            console.log(group_duties);
+            //            console.log(patterns.toString());
             break;
         }
 
         c++;
-        if (!(c % 100)) {
-            console.log("run time: " + c + ". Still running.");
+        if (!(c % 1000)) {
+            var block_ui_message = "Randomizing time: " + c + ". Still running.";
+            //console.log(block_ui_message);
+            postMessage({
+                "status": "running",
+                "msg": block_ui_message,
+            });
         }
 
         if (c > 999999) {

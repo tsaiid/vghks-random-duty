@@ -1,0 +1,27 @@
+/*
+ * blockUI
+ */
+
+#block_ui_box {
+    display: none;
+}
+
+div.growlUI {
+    background: url(../img/check48.png) no-repeat 10px 10px;
+}
+
+div.growlUI h1,
+div.growlUI h2 {
+    color: white;
+    padding: 6px 5px 5px 75px;
+    text-align: left;
+    margin: 0;
+    line-height: normal;
+}
+
+div.growlUI h1 {
+    font-size: 18px;
+}
+div.growlUI h2 {
+    font-size: 16px;
+}

@@ -36,6 +36,9 @@ $(function() {
         rest: "label"
     });
 
+    $.blockUI.defaults.growlCSS.top = '60px'; // show below the nav bar.
+    $.blockUI.defaults.growlCSS.opacity = 0.8;
+
     function get_calendar_height() {
         return $(window).height() - 300;
     }
@@ -518,12 +521,20 @@ $(function() {
             return;
         }
 
+        // block ui
+        $('#block_ui_message').html("Please wait...");
+        $.blockUI({
+            theme: true,
+            title: 'Generating Duties',
+            message: $('#block_ui_box')
+        });
+
         var start_date = $('#cal1').fullCalendar('getDate').startOf('month');
         var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
         var end_date = start_date.clone().add(month_span, 'months');
         var total_days = end_date.diff(start_date, 'days');
 
-        random_duty_worker = new Worker("worker.js");
+        random_duty_worker = new Worker("assets/js/random_duty_worker.js");
         random_duty_worker.postMessage({
             "patterns": patterns,
             "preset_holidays": preset_holidays,
@@ -532,38 +543,61 @@ $(function() {
             "total_days": total_days,
         });
         random_duty_worker.onmessage = function(e) {
-            if (e.data.status == "success") {
-                var duties = e.data["duties"];
-                var groups = e.data["groups"];
-                //console.log(groups);
+            switch (e.data.status) {
+                case "success":
+                    var duties = e.data["duties"];
+                    var groups = e.data["groups"];
+                    //console.log(groups);
 
-                duties.forEach(function(duty) {
-                    var date = moment(duty[0], "YYYY-MM-DD");
-                    if (get_preset_duty(preset_duties, duty[0]) === undefined) {
-                        var event = {
-                            title: duty[1].toString(),
-                            start: date,
-                            allDay: true,
-                            color: duty_colors[duty[1]],
-                            className: "duty-event"
-                        };
-                        $('#cal1').fullCalendar('renderEvent', event, true);
-                        $('#cal2').fullCalendar('renderEvent', event, true);
-                        //console.log(duty[0] + ": " + duty[1]);
-                    }
-                });
+                    duties.forEach(function(duty) {
+                        var date = moment(duty[0], "YYYY-MM-DD");
+                        if (get_preset_duty(preset_duties, duty[0]) === undefined) {
+                            var event = {
+                                title: duty[1].toString(),
+                                start: date,
+                                allDay: true,
+                                color: duty_colors[duty[1]],
+                                className: "duty-event"
+                            };
+                            $('#cal1').fullCalendar('renderEvent', event, true);
+                            $('#cal2').fullCalendar('renderEvent', event, true);
+                            //console.log(duty[0] + ": " + duty[1]);
+                        }
+                    });
 
-                // outline the result and std_dev
-                update_summary_duties(groups);
-            } else {
-                console.log(e.data["msg"]);
+                    // outline the result and std_dev
+                    update_summary_duties(groups);
+
+                    // unblock ui
+                    $.unblockUI({
+                        onUnblock: function() {
+                            $.growlUI('Random Duty Completed', 'Have a nice day!');
+                        }
+                    });
+                    break;
+                case "running":
+                    $('#block_ui_message').html(e.data.msg);
+                    break;
+                default:
+                    console.log(e.data["msg"]);
             }
         }
     });
 
+    $('#btn_stop_random_duty_worker').click(function() {
+        if (random_duty_worker !== undefined) {
+            random_duty_worker.terminate();
+            random_duty_worker = undefined;
+        }
+        $.unblockUI();
+    });
+
     $('#func_test_stop_worker').click(function() {
-        random_duty_worker.terminate();
-        random_duty_worker = undefined;
+        if (random_duty_worker !== undefined) {
+            random_duty_worker.terminate();
+            random_duty_worker = undefined;
+        }
+        $.unblockUI();
     });
 
     $('#func_deploy_test_data').click(function() {
@@ -640,6 +674,52 @@ $(function() {
                 start: data[1],
                 allDay: true,
                 className: "preset-duty-event",
+                color: duty_colors[data[0]]
+            };
+            $("#cal1").fullCalendar('renderEvent', event, true);
+            $("#cal2").fullCalendar('renderEvent', event, true);
+        });
+    });
+
+    $('#func_deploy_test_data_ordinary').click(function() {
+        var people = parseInt($('#inputPeopleSlider').slider('option', 'value'));
+        var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
+        var test_data;
+        switch (people) {
+            case 4:
+                test_data = [
+                    [1, "2015-08-03"],
+                    [1, "2015-08-13"],
+                    [1, "2015-08-19"],
+                    [1, "2015-08-24"],
+                    [2, "2015-08-06"],
+                    [2, "2015-08-11"],
+                    [2, "2015-08-20"],
+                    [2, "2015-08-25"],
+                    [3, "2015-08-05"],
+                    [3, "2015-08-18"],
+                    [3, "2015-08-26"],
+                    [3, "2015-08-31"],
+                    [4, "2015-08-04"],
+                    [4, "2015-08-10"],
+                    [4, "2015-08-12"],
+                    [4, "2015-08-17"],
+                ];
+
+                break;
+            case 5:
+                break;
+            default:
+                alert("Please set deploy data for " + people + ".");
+                return;
+        }
+
+        test_data.forEach(function(data) {
+            var event = {
+                title: data[0].toString(),
+                start: data[1],
+                allDay: true,
+                className: "duty-event",
                 color: duty_colors[data[0]]
             };
             $("#cal1").fullCalendar('renderEvent', event, true);
