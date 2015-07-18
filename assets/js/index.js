@@ -36,6 +36,8 @@ $(function() {
         rest: "label"
     });
 
+    $.blockUI.defaults.growlCSS.top = '60px';   // show below the nav bar.
+
     function get_calendar_height() {
         return $(window).height() - 300;
     }
@@ -519,9 +521,10 @@ $(function() {
         }
 
         // block ui
+        $('#block_ui_message').html("Please wait...");
         $.blockUI({
-            theme:     true,
-            title:    'Generating Duties',
+            theme: true,
+            title: 'Generating Duties',
             message: $('#block_ui_box')
         });
 
@@ -539,35 +542,41 @@ $(function() {
             "total_days": total_days,
         });
         random_duty_worker.onmessage = function(e) {
-            if (e.data.status == "success") {
-                var duties = e.data["duties"];
-                var groups = e.data["groups"];
-                //console.log(groups);
+            switch (e.data.status) {
+                case "success":
+                    var duties = e.data["duties"];
+                    var groups = e.data["groups"];
+                    //console.log(groups);
 
-                duties.forEach(function(duty) {
-                    var date = moment(duty[0], "YYYY-MM-DD");
-                    if (get_preset_duty(preset_duties, duty[0]) === undefined) {
-                        var event = {
-                            title: duty[1].toString(),
-                            start: date,
-                            allDay: true,
-                            color: duty_colors[duty[1]],
-                            className: "duty-event"
-                        };
-                        $('#cal1').fullCalendar('renderEvent', event, true);
-                        $('#cal2').fullCalendar('renderEvent', event, true);
-                        //console.log(duty[0] + ": " + duty[1]);
-                    }
-                });
+                    duties.forEach(function(duty) {
+                        var date = moment(duty[0], "YYYY-MM-DD");
+                        if (get_preset_duty(preset_duties, duty[0]) === undefined) {
+                            var event = {
+                                title: duty[1].toString(),
+                                start: date,
+                                allDay: true,
+                                color: duty_colors[duty[1]],
+                                className: "duty-event"
+                            };
+                            $('#cal1').fullCalendar('renderEvent', event, true);
+                            $('#cal2').fullCalendar('renderEvent', event, true);
+                            //console.log(duty[0] + ": " + duty[1]);
+                        }
+                    });
 
-                // outline the result and std_dev
-                update_summary_duties(groups);
-            } else {
-                console.log(e.data["msg"]);
+                    // outline the result and std_dev
+                    update_summary_duties(groups);
+
+                    // unblock ui
+                    $.unblockUI();
+                    $.growlUI('Random Duty Completed', 'Have a nice day!');
+                    break;
+                case "running":
+                    $('#block_ui_message').html(e.data.msg);
+                    break;
+                default:
+                    console.log(e.data["msg"]);
             }
-
-            // unblock ui
-            $.unblockUI();
         }
     });
 
