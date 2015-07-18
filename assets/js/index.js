@@ -518,12 +518,19 @@ $(function() {
             return;
         }
 
+        // block ui
+        $.blockUI({
+            theme:     true,
+            title:    'Generating Duties',
+            message: $('#block_ui_box')
+        });
+
         var start_date = $('#cal1').fullCalendar('getDate').startOf('month');
         var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
         var end_date = start_date.clone().add(month_span, 'months');
         var total_days = end_date.diff(start_date, 'days');
 
-        random_duty_worker = new Worker("worker.js");
+        random_duty_worker = new Worker("assets/js/random_duty_worker.js");
         random_duty_worker.postMessage({
             "patterns": patterns,
             "preset_holidays": preset_holidays,
@@ -558,7 +565,18 @@ $(function() {
             } else {
                 console.log(e.data["msg"]);
             }
+
+            // unblock ui
+            $.unblockUI();
         }
+    });
+
+    $('#btn_stop_random_duty_worker').click(function() {
+        if (random_duty_worker !== undefined) {
+            random_duty_worker.terminate();
+            random_duty_worker = undefined;
+        }
+        $.unblockUI();
     });
 
     $('#func_test_stop_worker').click(function() {
