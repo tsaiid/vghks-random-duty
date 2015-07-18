@@ -9,18 +9,13 @@ var ENABLE_CONDITIONING = true;
 var TEST_CONDITIONING_FUNCTION = false;
 
 onmessage = function(oEvent) {
-    //console.log("patterns: " + oEvent.data["patterns"]);
-    //console.log("holidays: " + oEvent.data["holidays"]);
-    //console.log("preset_duties: " + oEvent.data["preset_duties"][2015][7][15]);
-    var patterns = oEvent.data["patterns"];
     var preset_holidays = oEvent.data["preset_holidays"];
     var preset_duties = oEvent.data["preset_duties"];
     var since_date_str = oEvent.data["since_date_str"];
     var total_days = oEvent.data["total_days"];
-    var std_dev_level = oEvent.data["std_dev_level"];
-    var qod_limit = oEvent.data["qod_limit"];
+    var filters = oEvent.data["filters"];
 
-    var result = random_duty(total_days, since_date_str, preset_duties, preset_holidays, patterns, std_dev_level, qod_limit);
+    var result = random_duty(total_days, since_date_str, preset_duties, preset_holidays, filters);
 
     postMessage({
         "status": result.status,
@@ -129,8 +124,10 @@ function shuffle_duties(date_duties) {
     return date_duties;
 }
 
-function random_duty(total_days, since_date_str, preset_duties, preset_holidays, patterns, std_dev_level, qod_limit) {
-    var since_date = moment(since_date_str, "YYYY-MM-DD");
+function random_duty(total_days, since_date_str, preset_duties, preset_holidays, filters) {
+    var patterns = filters.patterns;
+    var qod_limit = filters.qod_limit;
+    var std_dev_level = filters.std_dev_level;
 
     var status = "success",
         msg = "",

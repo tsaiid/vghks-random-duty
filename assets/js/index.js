@@ -551,18 +551,19 @@ $(function() {
         var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
         var end_date = start_date.clone().add(month_span, 'months');
         var total_days = end_date.diff(start_date, 'days');
-        var std_dev_level = parseFloat($('#inputStdDevSlider').slider('option', 'value'));
-        var qod_limit = parseInt($('#inputQodLimitSlider').slider('option', 'value'));
+        var filters = {
+            "patterns": patterns,
+            "std_dev_level": parseFloat($('#inputStdDevSlider').slider('option', 'value')),
+            "qod_limit": parseInt($('#inputQodLimitSlider').slider('option', 'value')),
+        };
 
         random_duty_worker = new Worker("assets/js/random_duty_worker.js");
         random_duty_worker.postMessage({
-            "patterns": patterns,
             "preset_holidays": preset_holidays,
             "preset_duties": preset_duties,
             "since_date_str": start_date.format("YYYY-MM-DD"),
             "total_days": total_days,
-            "std_dev_level": std_dev_level,
-            "qod_limit": qod_limit,
+            "filters": filters,
         });
         random_duty_worker.onmessage = function(e) {
             switch (e.data.status) {
