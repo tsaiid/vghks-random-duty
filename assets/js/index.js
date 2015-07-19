@@ -256,12 +256,12 @@ $(function() {
     // Basic Algorithm Related
     //
     function get_preset_duties() {
+        // consider month mode
+        var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
+        var start_date = $('#cal1').fullCalendar('getDate').startOf('month');
+        var end_date = start_date.clone().add(month_span, 'months');
         var preset_duty_events = $('#cal1').fullCalendar('clientEvents', function(event) {
-            if ($.inArray('preset-duty-event', event.className) > -1) {
-                return true;
-            } else {
-                return false;
-            }
+            return (event.start >= start_date && event.start < end_date && $.inArray('preset-duty-event', event.className) > -1);
         });
 
         var preset_duties = [];
