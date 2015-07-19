@@ -67,6 +67,18 @@ $(function() {
         return $(window).height() - 300;
     }
 
+    function check_if_has_same_non_duty(preset_non_duties, date, person) {
+        var len = preset_non_duties.length;
+        for (var i = 0; i < len; i++) {
+            var non_duty_date_str = preset_non_duties[i][0];
+            var non_duty_person = preset_non_duties[i][1];
+            if (non_duty_date_str == date && non_duty_person == person) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     //
     // Dialog related
     //
@@ -82,23 +94,36 @@ $(function() {
                 var start = $('#eventStart');
 
                 if (title.val() !== '') {
-                    var className = ($('#eventPropNonduty').is(":checked") ? 'preset-non-duty-event' : 'preset-duty-event');
-                    var color = ($('#eventPropNonduty').is(":checked") ? non_duty_color : duty_colors[title.val()]);
-                    var eventTitle = ($('#eventPropNonduty').is(":checked") ? ' ' + title.val() + ' 不值' : title.val()); // add a space for sort first
-                    var event = {
-                        id: CryptoJS.MD5(start.val() + eventTitle).toString(),
-                        title: eventTitle,
-                        start: start.val(),
-                        allDay: true,
-                        className: className,
-                        color: color,
-                    };
-                    $("#cal1").fullCalendar('renderEvent', event, true);
-                    $("#cal2").fullCalendar('renderEvent', event, true);
+                    var preset_duties = get_preset_duties();
+                    var preset_non_duties = get_preset_non_duties();
+                    var is_non_duty = $('#eventPropNonduty').is(":checked");
+                    var already_had_duty = (get_preset_duty(preset_duties, start.val()) !== undefined);
+                    var has_same_non_duty = check_if_has_same_non_duty(preset_non_duties, start.val(), title.val());
+                    var className = (is_non_duty ? 'preset-non-duty-event' : 'preset-duty-event');
+                    var color = (is_non_duty ? non_duty_color : duty_colors[title.val()]);
+                    var eventTitle = (is_non_duty ? ' ' + title.val() + ' 不值' : title.val()); // add a space for sort first
+
+                    if ((is_non_duty && !has_same_non_duty) || (!is_non_duty && !already_had_duty)) {
+                        var event = {
+                            id: CryptoJS.MD5(start.val() + eventTitle).toString(),
+                            title: eventTitle,
+                            start: start.val(),
+                            allDay: true,
+                            className: className,
+                            color: color,
+                        };
+                        $("#cal1").fullCalendar('renderEvent', event, true);
+                        $("#cal2").fullCalendar('renderEvent', event, true);
+                    }
                 }
                 $("#cal1").fullCalendar('unselect');
                 $("#cal2").fullCalendar('unselect');
                 $(this).dialog('close');
+                if (!is_non_duty && already_had_duty) {
+                    myGrowlUI("Warning", "A duty has already been set.");
+                } else if (is_non_duty && has_same_non_duty) {
+                    myGrowlUI("Warning", "A non-duty has already been set.");
+                }
             },
             Cancel: function() {
                 $(this).dialog('close');
@@ -187,9 +212,9 @@ $(function() {
     var calEventClick = function(calEvent, jsEvent, view) {
         $('#eventEditStart').val(calEvent.start.format("YYYY-MM-DD"));
         $('#eventEditId').val(calEvent._id);
-        var title = calEvent.title.trim().split(" 不值")[0];  // trim for a space prepend to non-duty
+        var title = calEvent.title.trim().split(" 不值")[0]; // trim for a space prepend to non-duty
         var is_non_duty = (calEvent.title.indexOf(" 不值") > -1);
-        $('#calEventEditDialog #eventEditPropNonduty').prop( "checked", is_non_duty );
+        $('#calEventEditDialog #eventEditPropNonduty').prop("checked", is_non_duty);
         $('#calEventEditDialog #eventEditTitle').val(title);
         $("#calEventEditDialog").dialog('open');
     };
@@ -318,7 +343,7 @@ $(function() {
         var preset_non_duties = [];
         preset_non_duty_events.forEach(function(event) {
             var date = event.start.format("YYYY-MM-DD");
-            preset_non_duties.push([date, parseInt(event.title)]);  // parseInt("1 不值") == 1
+            preset_non_duties.push([date, parseInt(event.title)]); // parseInt("1 不值") == 1
         });
 
         return preset_non_duties;
