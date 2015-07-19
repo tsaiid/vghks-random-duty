@@ -57,6 +57,12 @@ $(function() {
     $.blockUI.defaults.growlCSS.top = '60px'; // show below the nav bar.
     $.blockUI.defaults.growlCSS.opacity = 0.8;
 
+    function myGrowlUI(status, msg) {
+        var className = "growlUI " + status.toLowerCase();
+        $.growlUI(status, msg);
+        $('div.growlUI').attr('class', className);  // use class to control background image
+    }
+
     function get_calendar_height() {
         return $(window).height() - 300;
     }
@@ -178,7 +184,7 @@ $(function() {
     var calEventDrop = function(event, delta, revertFunc, jsEvent, ui, view) {
         // holiday can not be dragged and dropped. only can be deleted or created.
         if ($.inArray('gcal-holiday', event.className) > -1) {
-            $.growlUI('Error', 'Holiday cannot be moved!');
+            myGrowlUI('Error', 'Holiday cannot be moved!');
             revertFunc();
         }
 
@@ -629,7 +635,7 @@ $(function() {
                     // unblock ui
                     $.unblockUI({
                         onUnblock: function() {
-                            $.growlUI('Random Duty Completed', 'Have a nice day!');
+                            myGrowlUI('Random Duty Completed', 'Have a nice day!');
                         }
                     });
                     break;

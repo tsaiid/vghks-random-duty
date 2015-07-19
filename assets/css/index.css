@@ -7,7 +7,16 @@
 }
 
 div.growlUI {
-    background: url(../img/check48.png) no-repeat 10px 10px;
+    background: url(../img/success48.png) no-repeat 10px 10px;
+}
+div.growlUI.success {
+    background: url(../img/success48.png) no-repeat 10px 10px;
+}
+div.growlUI.warning {
+    background: url(../img/warning48.png) no-repeat 10px 10px;
+}
+div.growlUI.error {
+    background: url(../img/error48.png) no-repeat 10px 10px;
 }
 
 div.growlUI h1,
