@@ -175,6 +175,28 @@ $(function() {
         $('#calEventEditDialog #eventEditTitle').val(calEvent.title);
         $("#calEventEditDialog").dialog('open');
     };
+    var calEventDrop = function(event, delta, revertFunc, jsEvent, ui, view) {
+        // holiday can not be dragged and dropped. only can be deleted or created.
+        if ($.inArray('gcal-holiday', event.className) > -1) {
+            $.growlUI('Error', 'Holiday cannot be moved!');
+            revertFunc();
+        }
+
+        // both calendars should sync
+        var other_cal = (view == $('#cal1').fullCalendar('getView')) ? $('#cal2') : $('#cal1');
+        other_cal.fullCalendar('removeEvents', event.id); // id only suitable for preset-duty-event
+
+        var other_event = {
+            id: event.id,
+            title: event.title,
+            start: event.start,
+            allDay: true,
+            className: event.className,
+            color: event.color,
+        };
+
+        other_cal.fullCalendar('renderEvent', other_event, true);
+    };
     var onlyTheMonthEventRender = function(event, element, view) {
         if (event.start.month() != view.intervalStart.month()) {
             return false;
@@ -206,6 +228,7 @@ $(function() {
         selectable: true,
         dayClick: calDayClick,
         editable: true,
+        eventDrop: calEventDrop,
         eventClick: calEventClick,
         eventRender: onlyTheMonthEventRender,
         eventAfterAllRender: function() {
@@ -228,6 +251,7 @@ $(function() {
         selectable: true,
         dayClick: calDayClick,
         editable: true,
+        eventDrop: calEventDrop,
         eventClick: calEventClick,
         eventRender: onlyTheMonthEventRender,
         eventAfterAllRender: function() {
