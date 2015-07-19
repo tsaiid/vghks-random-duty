@@ -83,19 +83,68 @@ $(function() {
     // Dialog related
     //
     // Dialog for insert new event
+    function get_duty_conflict_status(title, orig_title, is_edit_dialog, is_non_duty, prev_set_duty, prev_set_non_duties, already_had_duty) {
+        var status;
+        if (is_edit_dialog) {
+            if (is_non_duty) {
+                if ($.inArray(parseInt(title), prev_set_non_duties) > -1) {
+                    status = "Already set the same non-duty!";
+                } else if (prev_set_duty == title && title != orig_title) {
+                    status = "Conflict! The staff (" + title + ") is already on duty!";
+                }
+            } else {
+                if (already_had_duty) {
+                    if (title == prev_set_duty && title != orig_title) {
+                        status = "Already had a duty!";
+                    } else if (title != prev_set_duty && title == orig_title) {
+                        status = "Already had a duty!";
+                    } else if ($.inArray(parseInt(title), prev_set_non_duties) > -1) {
+                        status = "Conflict! The staff (" + title + ") should not be on duty!";
+                    }
+                } else {
+                    if ($.inArray(parseInt(title), prev_set_non_duties) > -1) {
+                        if (title != orig_title) {
+                            status = "Conflict! The staff (" + title + ") should not be on duty!";
+                        }
+                    }
+                }
+            }
+        } else {
+            if (is_non_duty) {
+                if ($.inArray(parseInt(title), prev_set_non_duties) > -1) {
+                    status = "Already had a same non-duty!";
+                }
+                if (prev_set_duty == title) {
+                    status = "Conflict! The staff (" + title + ") should be on duty!";
+                }
+            } else {
+                if (already_had_duty) {
+                    status = "Already had a duty!";
+                } else if ($.inArray(parseInt(title), prev_set_non_duties) > -1) {
+                    status = "Conflict! The staff (" + title + ") should not be on duty!";
+                }
+            }
+        }
+
+        return status;
+    }
+
     function save_or_update_event(is_edit_dialog) {
-        var title = $('#eventTitle');
-        var start = $('#eventStart');
+        var title = $('#eventTitle').val();
+        var orig_title = $('#eventOrigTitle').val();
+        var date = $('#eventStart').val();
 
         if ($('#eventTitle').val() !== '') {
             var preset_duties = get_preset_duties();
             var preset_non_duties = get_preset_non_duties();
             var is_non_duty = $('#eventPropNonduty').is(":checked");
-            var prev_set_duty = get_preset_duty(preset_duties, start.val());
+            var prev_set_duty = get_preset_duty(preset_duties, date);
+            var prev_set_non_duties = get_preset_non_duties_by_date(preset_non_duties, date);
             var already_had_duty = (prev_set_duty !== undefined);
-            var has_same_non_duty = check_if_has_same_non_duty(preset_non_duties, start.val(), title.val());
+            var has_same_non_duty = check_if_has_same_non_duty(preset_non_duties, date, title);
 
-            if ((is_non_duty && !has_same_non_duty) || (!is_non_duty && ((!is_edit_dialog && !already_had_duty) || (is_edit_dialog && prev_set_duty != title.val())))) {
+            var duty_conflict_status = get_duty_conflict_status(title, orig_title, is_edit_dialog, is_non_duty, prev_set_duty, prev_set_non_duties, already_had_duty);
+            if (!duty_conflict_status) {
                 if (is_edit_dialog) {
                     // have to remove old and add new
                     $("#cal1").fullCalendar('removeEvents', $('#eventId').val());
@@ -103,33 +152,24 @@ $(function() {
                 }
 
                 var className = (is_non_duty ? 'preset-non-duty-event' : 'preset-duty-event');
-                var color = (is_non_duty ? non_duty_color : duty_colors[title.val()]);
-                var eventTitle = (is_non_duty ? ' ' + title.val() + ' 不值' : title.val()); // add a space for sort first
+                var color = (is_non_duty ? non_duty_color : duty_colors[title]);
+                var eventTitle = (is_non_duty ? ' ' + title + ' 不值' : title); // add a space for sort first
                 var event = {
-                    id: CryptoJS.MD5(start.val() + eventTitle).toString(),
+                    id: CryptoJS.MD5(date + eventTitle).toString(),
                     title: eventTitle,
-                    start: start.val(),
+                    start: date,
                     allDay: true,
                     className: className,
                     color: color,
                 };
                 $("#cal1").fullCalendar('renderEvent', event, true);
                 $("#cal2").fullCalendar('renderEvent', event, true);
+            } else {
+                myGrowlUI("Warning", duty_conflict_status);
             }
         }
         $("#cal1").fullCalendar('unselect');
         $("#cal2").fullCalendar('unselect');
-
-        // show messages
-        if (!is_non_duty) {
-            if (!is_edit_dialog && already_had_duty) {
-                myGrowlUI("Warning", "A duty has already been set.");
-            } else if (is_edit_dialog && prev_set_duty == title.val()) {
-                myGrowlUI("Warning", "The duty does not change.");
-            }
-        } else if (is_non_duty && has_same_non_duty) {
-            myGrowlUI("Warning", "A same non-duty has already been set.");
-        }
     }
 
     $('#calEventDialog').dialog({
@@ -183,11 +223,12 @@ $(function() {
     };
     var calEventClick = function(calEvent, jsEvent, view) {
         $('#eventStart').val(calEvent.start.format("YYYY-MM-DD"));
-        $('#eventId').val(calEvent._id);
+        $('#eventId').val(calEvent.id);
         var title = calEvent.title.trim().split(" 不值")[0]; // trim for a space prepend to non-duty
         var is_non_duty = (calEvent.title.indexOf(" 不值") > -1);
         $('#calEventDialog #eventPropNonduty').prop("checked", is_non_duty);
         $('#calEventDialog #eventTitle').val(title);
+        $('#calEventDialog #eventOrigTitle').val(title);
 
         // set ui dialog
         $("#calEventDialog").dialog("option", "title", "Edit Duty");
