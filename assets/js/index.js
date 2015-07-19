@@ -84,7 +84,7 @@ $(function() {
                 if (title.val() !== '') {
                     var className = ($('#eventPropNonduty').is(":checked") ? 'preset-non-duty-event' : 'preset-duty-event');
                     var color = ($('#eventPropNonduty').is(":checked") ? non_duty_color : duty_colors[title.val()]);
-                    var eventTitle = ($('#eventPropNonduty').is(":checked") ? title.val() + ' 不值' : title.val());
+                    var eventTitle = ($('#eventPropNonduty').is(":checked") ? ' ' + title.val() + ' 不值' : title.val()); // add a space for sort first
                     var event = {
                         id: CryptoJS.MD5(start.val() + eventTitle).toString(),
                         title: eventTitle,
@@ -124,7 +124,7 @@ $(function() {
 
                     var className = ($('#eventEditPropNonduty').is(":checked") ? 'preset-non-duty-event' : 'preset-duty-event');
                     var color = ($('#eventEditPropNonduty').is(":checked") ? non_duty_color : duty_colors[title.val()]);
-                    var eventTitle = ($('#eventEditPropNonduty').is(":checked") ? title.val() + ' 不值' : title.val());
+                    var eventTitle = ($('#eventEditPropNonduty').is(":checked") ? ' ' + title.val() + ' 不值' : title.val()); // add a space for sort first
                     var event = {
                         id: CryptoJS.MD5(start.val() + eventTitle).toString(),
                         title: eventTitle,
@@ -187,7 +187,7 @@ $(function() {
     var calEventClick = function(calEvent, jsEvent, view) {
         $('#eventEditStart').val(calEvent.start.format("YYYY-MM-DD"));
         $('#eventEditId').val(calEvent._id);
-        var title = calEvent.title.split(" 不值")[0];
+        var title = calEvent.title.trim().split(" 不值")[0];  // trim for a space prepend to non-duty
         var is_non_duty = (calEvent.title.indexOf(" 不值") > -1);
         $('#calEventEditDialog #eventEditPropNonduty').prop( "checked", is_non_duty );
         $('#calEventEditDialog #eventEditTitle').val(title);
