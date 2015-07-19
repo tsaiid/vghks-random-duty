@@ -60,7 +60,7 @@ $(function() {
     function myGrowlUI(status, msg) {
         var className = "growlUI " + status.toLowerCase();
         $.growlUI(status, msg);
-        $('div.growlUI').attr('class', className);  // use class to control background image
+        $('div.growlUI').attr('class', className); // use class to control background image
     }
 
     function get_calendar_height() {
@@ -70,10 +70,6 @@ $(function() {
     //
     // Dialog related
     //
-    var title = $('#eventTitle');
-    var start = $('#eventStart');
-    var eventClass, color;
-
     // Dialog for insert new event
     $('#calEventDialog').dialog({
         resizable: false,
@@ -82,14 +78,20 @@ $(function() {
         width: 400,
         buttons: {
             Save: function() {
+                var title = $('#eventTitle');
+                var start = $('#eventStart');
+
                 if (title.val() !== '') {
+                    var className = ($('#eventPropNonduty').is(":checked") ? 'preset-non-duty-event' : 'preset-duty-event');
+                    var color = ($('#eventPropNonduty').is(":checked") ? non_duty_color : duty_colors[title.val()]);
+                    var eventTitle = ($('#eventPropNonduty').is(":checked") ? ' ' + title.val() + ' 不值' : title.val()); // add a space for sort first
                     var event = {
-                        id: CryptoJS.MD5(start.val() + title).toString(),
-                        title: title.val(),
+                        id: CryptoJS.MD5(start.val() + eventTitle).toString(),
+                        title: eventTitle,
                         start: start.val(),
                         allDay: true,
-                        className: "preset-duty-event",
-                        color: duty_colors[title.val()]
+                        className: className,
+                        color: color,
                     };
                     $("#cal1").fullCalendar('renderEvent', event, true);
                     $("#cal2").fullCalendar('renderEvent', event, true);
@@ -112,17 +114,24 @@ $(function() {
         width: 400,
         buttons: {
             Update: function() {
+                var title = $('#eventEditTitle');
+                var start = $('#eventEditStart');
+
                 if ($('#eventEditTitle').val() !== '') {
                     // have to remove old and add new
                     $("#cal1").fullCalendar('removeEvents', $('#eventEditId').val());
                     $("#cal2").fullCalendar('removeEvents', $('#eventEditId').val());
 
+                    var className = ($('#eventEditPropNonduty').is(":checked") ? 'preset-non-duty-event' : 'preset-duty-event');
+                    var color = ($('#eventEditPropNonduty').is(":checked") ? non_duty_color : duty_colors[title.val()]);
+                    var eventTitle = ($('#eventEditPropNonduty').is(":checked") ? ' ' + title.val() + ' 不值' : title.val()); // add a space for sort first
                     var event = {
-                        title: $('#eventEditTitle').val(),
-                        start: $('#eventEditStart').val(),
+                        id: CryptoJS.MD5(start.val() + eventTitle).toString(),
+                        title: eventTitle,
+                        start: start.val(),
                         allDay: true,
-                        className: "preset-duty-event",
-                        color: duty_colors[$('#eventEditTitle').val()]
+                        className: className,
+                        color: color,
                     };
                     $("#cal1").fullCalendar('renderEvent', event, true);
                     $("#cal2").fullCalendar('renderEvent', event, true);
@@ -178,7 +187,10 @@ $(function() {
     var calEventClick = function(calEvent, jsEvent, view) {
         $('#eventEditStart').val(calEvent.start.format("YYYY-MM-DD"));
         $('#eventEditId').val(calEvent._id);
-        $('#calEventEditDialog #eventEditTitle').val(calEvent.title);
+        var title = calEvent.title.trim().split(" 不值")[0];  // trim for a space prepend to non-duty
+        var is_non_duty = (calEvent.title.indexOf(" 不值") > -1);
+        $('#calEventEditDialog #eventEditPropNonduty').prop( "checked", is_non_duty );
+        $('#calEventEditDialog #eventEditTitle').val(title);
         $("#calEventEditDialog").dialog('open');
     };
     var calEventDrop = function(event, delta, revertFunc, jsEvent, ui, view) {
@@ -217,6 +229,7 @@ $(function() {
         "#20006E",
         "#20006E",
     ];
+    var non_duty_color = "#000000";
 
     // init cal1 and cal2
     $("#cal1").fullCalendar({
@@ -285,6 +298,32 @@ $(function() {
     //
     // Basic Algorithm Related
     //
+    function get_presets() {
+        var presets = {};
+        presets.holidays = get_preset_holidays();
+        presets.duties = get_preset_duties();
+        presets.non_duties = get_preset_non_duties();
+        return presets;
+    }
+
+    function get_preset_non_duties() {
+        // consider month mode
+        var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
+        var start_date = $('#cal1').fullCalendar('getDate').startOf('month');
+        var end_date = start_date.clone().add(month_span, 'months');
+        var preset_non_duty_events = $('#cal1').fullCalendar('clientEvents', function(event) {
+            return (event.start >= start_date && event.start < end_date && $.inArray('preset-non-duty-event', event.className) > -1);
+        });
+
+        var preset_non_duties = [];
+        preset_non_duty_events.forEach(function(event) {
+            var date = event.start.format("YYYY-MM-DD");
+            preset_non_duties.push([date, parseInt(event.title)]);  // parseInt("1 不值") == 1
+        });
+
+        return preset_non_duties;
+    }
+
     function get_preset_duties() {
         // consider month mode
         var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
@@ -448,10 +487,10 @@ $(function() {
         });
     });
 
-    $('#func_get_preset_duty_events').click(function() {
-        var preset_duties = get_preset_duties();
+    $('#func_get_preset_events').click(function() {
+        var presets = get_presets();
 
-        console.log(preset_duties);
+        console.log(presets);
     });
 
     function update_current_duty_status() {
@@ -538,9 +577,9 @@ $(function() {
         $('#summary_duties').html(summary_duties_html);
     }
 
-    function is_preset_duties_fit_pattern(preset_duties, preset_holidays, patterns) {
-        var groups = calculate_group_duties(preset_duties);
-        console.log(groups);
+    function is_preset_duties_fit_pattern(presets, patterns) {
+        var groups = calculate_group_duties(presets.duties);
+        //console.log(groups);
         if (Object.keys(groups).length != patterns.length) {
             console.log("length not equal. groups: " + Object.keys(groups).length + ", patterns: " + patterns.length);
             return false;
@@ -552,7 +591,7 @@ $(function() {
                 return false;
             }
             var dates = groups[person].dates;
-            var counted_pattern = count_duty_pattern(dates, preset_holidays);
+            var counted_pattern = count_duty_pattern(dates, presets.holidays);
             // compare only friday and holiday now
             if (patterns[i][1] != counted_pattern[1] || patterns[i][2] != counted_pattern[2]) {
                 console.log("person: " + person + ", pattern not fit: " + counted_pattern.join(", "));
@@ -573,9 +612,8 @@ $(function() {
         }
 
         // check if friday, weekend, holiday duties are set and fit pattern.
-        var preset_holidays = get_preset_holidays();
-        var preset_duties = get_preset_duties();
-        if (!is_preset_duties_fit_pattern(preset_duties, preset_holidays, patterns)) {
+        var presets = get_presets();
+        if (!is_preset_duties_fit_pattern(presets, patterns)) {
             alert("The preset duties do not fit the patterns. Please adjust them.");
             return;
         }
@@ -602,8 +640,7 @@ $(function() {
 
         random_duty_worker = new Worker("assets/js/random_duty_worker.js");
         random_duty_worker.postMessage({
-            "preset_holidays": preset_holidays,
-            "preset_duties": preset_duties,
+            "presets": presets,
             "since_date_str": start_date.format("YYYY-MM-DD"),
             "total_days": total_days,
             "filters": filters,
@@ -617,7 +654,7 @@ $(function() {
 
                     duties.forEach(function(duty) {
                         var date = moment(duty[0], "YYYY-MM-DD");
-                        if (get_preset_duty(preset_duties, duty[0]) === undefined) {
+                        if (get_preset_duty(presets.duties, duty[0]) === undefined) {
                             var event = {
                                 title: duty[1].toString(),
                                 start: date,

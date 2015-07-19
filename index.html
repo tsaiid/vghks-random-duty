@@ -56,7 +56,7 @@
                 <button id="func_deploy_test_data" class="btn btn-default" type="submit">Deploy Test Data</button>
                 <button id="func_deploy_test_data_ordinary" class="btn btn-default" type="submit">Deploy Test Ord Data</button>
                 <button id="func_clear_calendar" class="btn btn-default" type="submit">Clear Calendar</button>
-                <button id="func_get_preset_duty_events" class="btn btn-default" type="submit">Get Preset Duties</button>
+                <button id="func_get_preset_events" class="btn btn-default" type="submit">Get Presets</button>
                 <button id="func_update_current_duty_status" class="btn btn-default" type="submit">Update Curr Duty Status</button>
                 <button id="func_get_holiday_condition" class="btn btn-default" type="submit">Get Holiday Condition</button>
                 <form class="form-horizontal">
@@ -118,22 +118,44 @@
             </div>
             <div class="col-sm-9 col-sm-offset-3 main">
                 <div id="calEventDialog">
-                    <form>
-                        <fieldset>
-                            <label for="eventTitle">Title</label>
-                            <input type="text" name="eventTitle" id="eventTitle" />
-                            <input type="hidden" name="eventTitle" id="eventStart" />
-                        </fieldset>
+                    <form class="form-horizontal">
+                        <div class="form-group">
+                            <label for="eventTitle" class="col-sm-2 control-label">Title</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="eventTitle" id="eventTitle" />
+                                <input type="hidden" name="eventStart" id="eventStart" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" name="eventPropNonduty" id="eventPropNonduty" /> Non-duty
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
                     </form>
                 </div>
                 <div id="calEventEditDialog">
-                    <form>
-                        <fieldset>
-                            <label for="eventEditStart">Title</label>
-                            <input type="text" name="eventEditTitle" id="eventEditTitle" />
-                            <input type="hidden" name="eventEditStart" id="eventEditStart" />
-                            <input type="hidden" name="eventEditId" id="eventEditId" />
-                        </fieldset>
+                    <form class="form-horizontal">
+                        <div class="form-group">
+                            <label for="eventEditTitle" class="col-sm-2 control-label">Title</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" name="eventEditTitle" id="eventEditTitle" />
+                                <input type="hidden" name="eventEditStart" id="eventEditStart" />
+                                <input type="hidden" name="eventEditId" id="eventEditId" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" name="eventEditPropNonduty" id="eventEditPropNonduty" /> Non-duty
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
                     </form>
                 </div>
                 <div id="cal_nav" style="position: absolute;">
@@ -160,10 +182,11 @@
     </div>
     <script src="bower_components/cryptojslib/rollups/md5.js"></script>
     <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <!-- bootstrap should be load earlier than jquery-ui, or the dialog will be wrong. -->
+    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="bower_components/jquery-ui/jquery-ui.min.js"></script>
     <script src="bower_components/jquery-ui-slider-pips/dist/jquery-ui-slider-pips.min.js"></script>
     <script src="bower_components/moment/min/moment.min.js"></script>
-    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="bower_components/bootstrap-switch/dist/js/bootstrap-switch.min.js"></script>
     <script src="bower_components/blockUI/jquery.blockUI.js"></script>
     <script src="bower_components/fullcalendar/dist/fullcalendar.min.js"></script>
