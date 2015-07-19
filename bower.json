@@ -21,6 +21,7 @@
     "blockUI": "*",
     "fullcalendar": "~2.3.2",
     "jquery-ui-slider-pips": "~1.10.5",
-    "font-awesome": "~4.3.0"
+    "font-awesome": "~4.3.0",
+    "cryptojslib": "~3.1.2"
   }
 }
