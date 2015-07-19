@@ -298,6 +298,32 @@ $(function() {
     //
     // Basic Algorithm Related
     //
+    function get_presets() {
+        var presets = {};
+        presets.holidays = get_preset_holidays();
+        presets.duties = get_preset_duties();
+        presets.non_duties = get_preset_non_duties();
+        return presets;
+    }
+
+    function get_preset_non_duties() {
+        // consider month mode
+        var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
+        var start_date = $('#cal1').fullCalendar('getDate').startOf('month');
+        var end_date = start_date.clone().add(month_span, 'months');
+        var preset_non_duty_events = $('#cal1').fullCalendar('clientEvents', function(event) {
+            return (event.start >= start_date && event.start < end_date && $.inArray('preset-non-duty-event', event.className) > -1);
+        });
+
+        var preset_non_duties = [];
+        preset_non_duty_events.forEach(function(event) {
+            var date = event.start.format("YYYY-MM-DD");
+            preset_non_duties.push([date, parseInt(event.title)]);  // parseInt("1 不值") == 1
+        });
+
+        return preset_non_duties;
+    }
+
     function get_preset_duties() {
         // consider month mode
         var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
@@ -461,10 +487,10 @@ $(function() {
         });
     });
 
-    $('#func_get_preset_duty_events').click(function() {
-        var preset_duties = get_preset_duties();
+    $('#func_get_preset_events').click(function() {
+        var presets = get_presets();
 
-        console.log(preset_duties);
+        console.log(presets);
     });
 
     function update_current_duty_status() {
