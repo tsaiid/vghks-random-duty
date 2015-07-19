@@ -9,6 +9,16 @@ function get_preset_duty(preset_duties, date_str) {
     return duty;
 }
 
+function get_preset_non_duties_by_date(preset_non_duties, date_str) {
+    var duties = [];
+    preset_non_duties.forEach(function(d) {
+        if (d[0] == date_str) {
+            duties.push(parseInt(d[1]));
+        }
+    });
+    return duties;
+}
+
 function count_duty_pattern(dates, preset_holidays) {
     var o_count = 0,
         f_count = 0,
