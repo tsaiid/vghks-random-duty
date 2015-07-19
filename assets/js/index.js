@@ -99,11 +99,11 @@ $(function() {
                     var is_non_duty = $('#eventPropNonduty').is(":checked");
                     var already_had_duty = (get_preset_duty(preset_duties, start.val()) !== undefined);
                     var has_same_non_duty = check_if_has_same_non_duty(preset_non_duties, start.val(), title.val());
-                    var className = (is_non_duty ? 'preset-non-duty-event' : 'preset-duty-event');
-                    var color = (is_non_duty ? non_duty_color : duty_colors[title.val()]);
-                    var eventTitle = (is_non_duty ? ' ' + title.val() + ' 不值' : title.val()); // add a space for sort first
 
                     if ((is_non_duty && !has_same_non_duty) || (!is_non_duty && !already_had_duty)) {
+                        var className = (is_non_duty ? 'preset-non-duty-event' : 'preset-duty-event');
+                        var color = (is_non_duty ? non_duty_color : duty_colors[title.val()]);
+                        var eventTitle = (is_non_duty ? ' ' + title.val() + ' 不值' : title.val()); // add a space for sort first
                         var event = {
                             id: CryptoJS.MD5(start.val() + eventTitle).toString(),
                             title: eventTitle,
@@ -119,10 +119,12 @@ $(function() {
                 $("#cal1").fullCalendar('unselect');
                 $("#cal2").fullCalendar('unselect');
                 $(this).dialog('close');
+
+                // show messages
                 if (!is_non_duty && already_had_duty) {
                     myGrowlUI("Warning", "A duty has already been set.");
                 } else if (is_non_duty && has_same_non_duty) {
-                    myGrowlUI("Warning", "A non-duty has already been set.");
+                    myGrowlUI("Warning", "A same non-duty has already been set.");
                 }
             },
             Cancel: function() {
@@ -143,27 +145,42 @@ $(function() {
                 var start = $('#eventEditStart');
 
                 if ($('#eventEditTitle').val() !== '') {
-                    // have to remove old and add new
-                    $("#cal1").fullCalendar('removeEvents', $('#eventEditId').val());
-                    $("#cal2").fullCalendar('removeEvents', $('#eventEditId').val());
+                    var preset_duties = get_preset_duties();
+                    var preset_non_duties = get_preset_non_duties();
+                    var is_non_duty = $('#eventEditPropNonduty').is(":checked");
+                    var already_had_duty = (get_preset_duty(preset_duties, start.val()) !== undefined);
+                    var has_same_non_duty = check_if_has_same_non_duty(preset_non_duties, start.val(), title.val());
 
-                    var className = ($('#eventEditPropNonduty').is(":checked") ? 'preset-non-duty-event' : 'preset-duty-event');
-                    var color = ($('#eventEditPropNonduty').is(":checked") ? non_duty_color : duty_colors[title.val()]);
-                    var eventTitle = ($('#eventEditPropNonduty').is(":checked") ? ' ' + title.val() + ' 不值' : title.val()); // add a space for sort first
-                    var event = {
-                        id: CryptoJS.MD5(start.val() + eventTitle).toString(),
-                        title: eventTitle,
-                        start: start.val(),
-                        allDay: true,
-                        className: className,
-                        color: color,
-                    };
-                    $("#cal1").fullCalendar('renderEvent', event, true);
-                    $("#cal2").fullCalendar('renderEvent', event, true);
+                    if ((is_non_duty && !has_same_non_duty) || (!is_non_duty && !already_had_duty)) {
+                        // have to remove old and add new
+                        $("#cal1").fullCalendar('removeEvents', $('#eventEditId').val());
+                        $("#cal2").fullCalendar('removeEvents', $('#eventEditId').val());
+
+                        var className = (is_non_duty ? 'preset-non-duty-event' : 'preset-duty-event');
+                        var color = (is_non_duty ? non_duty_color : duty_colors[title.val()]);
+                        var eventTitle = (is_non_duty ? ' ' + title.val() + ' 不值' : title.val()); // add a space for sort first
+                        var event = {
+                            id: CryptoJS.MD5(start.val() + eventTitle).toString(),
+                            title: eventTitle,
+                            start: start.val(),
+                            allDay: true,
+                            className: className,
+                            color: color,
+                        };
+                        $("#cal1").fullCalendar('renderEvent', event, true);
+                        $("#cal2").fullCalendar('renderEvent', event, true);
+                    }
                 }
                 $("#cal1").fullCalendar('unselect');
                 $("#cal2").fullCalendar('unselect');
                 $(this).dialog('close');
+
+                // show messages
+                if (!is_non_duty && already_had_duty) {
+                    myGrowlUI("Warning", "A duty has already been set.");
+                } else if (is_non_duty && has_same_non_duty) {
+                    myGrowlUI("Warning", "A same non-duty has already been set.");
+                }
             },
             Delete: function() {
                 $("#cal1").fullCalendar('removeEvents', $('#eventEditId').val());
