@@ -198,6 +198,7 @@ $(function() {
             center: '',
             right: ''
         },
+        height: 580,
         firstDay: 1,
         theme: true,
         googleCalendarApiKey: calGoogleCalendarApiKey,
@@ -219,6 +220,7 @@ $(function() {
             center: '',
             right: 'title'
         },
+        height: 580,
         firstDay: 1,
         theme: true,
         googleCalendarApiKey: calGoogleCalendarApiKey,
