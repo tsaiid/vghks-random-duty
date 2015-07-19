@@ -60,7 +60,7 @@ $(function() {
     function myGrowlUI(status, msg) {
         var className = "growlUI " + status.toLowerCase();
         $.growlUI(status, msg);
-        $('div.growlUI').attr('class', className);  // use class to control background image
+        $('div.growlUI').attr('class', className); // use class to control background image
     }
 
     function get_calendar_height() {
@@ -70,10 +70,6 @@ $(function() {
     //
     // Dialog related
     //
-    var title = $('#eventTitle');
-    var start = $('#eventStart');
-    var eventClass, color;
-
     // Dialog for insert new event
     $('#calEventDialog').dialog({
         resizable: false,
@@ -82,14 +78,20 @@ $(function() {
         width: 400,
         buttons: {
             Save: function() {
+                var title = $('#eventTitle');
+                var start = $('#eventStart');
+
                 if (title.val() !== '') {
+                    var className = ($('#eventPropNonduty').is(":checked") ? 'preset-non-duty-event' : 'preset-duty-event');
+                    var color = ($('#eventPropNonduty').is(":checked") ? non_duty_color : duty_colors[title.val()]);
+                    var eventTitle = ($('#eventPropNonduty').is(":checked") ? title.val() + ' 不值' : title.val());
                     var event = {
-                        id: CryptoJS.MD5(start.val() + title).toString(),
-                        title: title.val(),
+                        id: CryptoJS.MD5(start.val() + eventTitle).toString(),
+                        title: eventTitle,
                         start: start.val(),
                         allDay: true,
-                        className: "preset-duty-event",
-                        color: duty_colors[title.val()]
+                        className: className,
+                        color: color,
                     };
                     $("#cal1").fullCalendar('renderEvent', event, true);
                     $("#cal2").fullCalendar('renderEvent', event, true);
@@ -112,17 +114,24 @@ $(function() {
         width: 400,
         buttons: {
             Update: function() {
+                var title = $('#eventEditTitle');
+                var start = $('#eventEditStart');
+
                 if ($('#eventEditTitle').val() !== '') {
                     // have to remove old and add new
                     $("#cal1").fullCalendar('removeEvents', $('#eventEditId').val());
                     $("#cal2").fullCalendar('removeEvents', $('#eventEditId').val());
 
+                    var className = ($('#eventEditPropNonduty').is(":checked") ? 'preset-non-duty-event' : 'preset-duty-event');
+                    var color = ($('#eventEditPropNonduty').is(":checked") ? non_duty_color : duty_colors[title.val()]);
+                    var eventTitle = ($('#eventEditPropNonduty').is(":checked") ? title.val() + ' 不值' : title.val());
                     var event = {
-                        title: $('#eventEditTitle').val(),
-                        start: $('#eventEditStart').val(),
+                        id: CryptoJS.MD5(start.val() + eventTitle).toString(),
+                        title: eventTitle,
+                        start: start.val(),
                         allDay: true,
-                        className: "preset-duty-event",
-                        color: duty_colors[$('#eventEditTitle').val()]
+                        className: className,
+                        color: color,
                     };
                     $("#cal1").fullCalendar('renderEvent', event, true);
                     $("#cal2").fullCalendar('renderEvent', event, true);
@@ -178,7 +187,10 @@ $(function() {
     var calEventClick = function(calEvent, jsEvent, view) {
         $('#eventEditStart').val(calEvent.start.format("YYYY-MM-DD"));
         $('#eventEditId').val(calEvent._id);
-        $('#calEventEditDialog #eventEditTitle').val(calEvent.title);
+        var title = calEvent.title.split(" 不值")[0];
+        var is_non_duty = (calEvent.title.indexOf(" 不值") > -1);
+        $('#calEventEditDialog #eventEditPropNonduty').prop( "checked", is_non_duty );
+        $('#calEventEditDialog #eventEditTitle').val(title);
         $("#calEventEditDialog").dialog('open');
     };
     var calEventDrop = function(event, delta, revertFunc, jsEvent, ui, view) {
@@ -217,6 +229,7 @@ $(function() {
         "#20006E",
         "#20006E",
     ];
+    var non_duty_color = "#000000";
 
     // init cal1 and cal2
     $("#cal1").fullCalendar({
