@@ -124,10 +124,29 @@ function shuffle_duties(date_duties) {
     return date_duties;
 }
 
+function is_match_filters(merged_duties, group_duties, filters) {
+    var use_qod_limit = filters.use_qod_limit;
+    var qod_limit = filters.qod_limit;
+    var use_std_dev_level = filters.use_std_dev_level;
+    var std_dev_level = filters.std_dev_level;
+
+    if (has_continuous_duties(merged_duties)) {
+        return false;
+    }
+
+    if (use_qod_limit && !less_than_qod_times(group_duties, qod_limit)) {
+        return false;
+    }
+
+    if (use_std_dev_level && !less_than_std_dev_level(group_duties, std_dev_level)) {
+        return false;
+    }
+
+    return true;
+}
+
 function random_duty(total_days, since_date_str, preset_duties, preset_holidays, filters) {
     var patterns = filters.patterns;
-    var qod_limit = filters.qod_limit;
-    var std_dev_level = filters.std_dev_level;
 
     var status = "success",
         msg = "",
@@ -141,7 +160,7 @@ function random_duty(total_days, since_date_str, preset_duties, preset_holidays,
         var merged_duties = non_preset_duties.concat(preset_duties);
         //        console.log(has_continuous_duties(merged_duties));
         var group_duties = calculate_group_duties(merged_duties);
-        if (!has_continuous_duties(merged_duties) && less_than_qod_times(group_duties, qod_limit) && less_than_std_dev_level(group_duties, std_dev_level)) {
+        if (is_match_filters(merged_duties, group_duties, filters)) {
             duties = merged_duties;
             groups = group_duties;
             break;

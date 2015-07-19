@@ -50,7 +50,7 @@
     </nav>
     <div class="container-fluid">
         <div class="row">
-            <div class="col-sm-3 col-md-2 sidebar">
+            <div class="col-sm-3 sidebar">
                 <button id="func_test_worker" class="btn btn-default" type="submit">Test Worker</button>
                 <button id="func_test_stop_worker" class="btn btn-default" type="submit">Test STOP Worker</button>
                 <button id="func_deploy_test_data" class="btn btn-default" type="submit">Deploy Test Data</button>
@@ -61,26 +61,40 @@
                 <button id="func_get_holiday_condition" class="btn btn-default" type="submit">Get Holiday Condition</button>
                 <form class="form-horizontal">
                     <div class="form-group">
-                        <label for="modeSwitch" class="col-sm-4 control-label">模式</label>
-                        <div class="col-sm-8">
+                        <label for="modeSwitch" class="col-sm-5 control-label">模式</label>
+                        <div class="col-sm-7">
                             <input type="checkbox" id="mode_switch" checked>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="inputQodLimit" class="col-sm-4 control-label">QOD上限</label>
-                        <div class="col-sm-8">
+                        <label for="inputQodLimit" class="col-sm-5 control-label">
+                            <div class="row">
+                                <div class="col-sm-1">
+                                    <input type="checkbox" id="use_qod_limit" checked>
+                                </div>
+                                <div class="col-sm-9 pull-right">QOD 上限</div>
+                            </div>
+                        </label>
+                        <div class="col-sm-7">
                             <div id="inputQodLimitSlider" class="slider"></div>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="inputStdDev" class="col-sm-4 control-label">StdDev</label>
-                        <div class="col-sm-8">
+                        <label for="inputStdDev" class="col-sm-5 control-label">
+                            <div class="row">
+                                <div class="col-sm-1">
+                                    <input type="checkbox" id="use_std_dev_level" checked>
+                                </div>
+                                <div class="col-sm-9 pull-right">Std Dev</div>
+                            </div>
+                        </label>
+                        <div class="col-sm-7">
                             <div id="inputStdDevSlider" class="slider"></div>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="inputPeople" class="col-sm-4 control-label">People</label>
-                        <div class="col-sm-8">
+                        <label for="inputPeople" class="col-sm-5 control-label">People</label>
+                        <div class="col-sm-7">
                             <div id="inputPeopleSlider" class="slider"></div>
                         </div>
                     </div>
@@ -102,7 +116,7 @@
                     <h2>Have a nice day!</h2>
                 </div>
             </div>
-            <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            <div class="col-sm-9 col-sm-offset-3 main">
                 <div id="calEventDialog">
                     <form>
                         <fieldset>

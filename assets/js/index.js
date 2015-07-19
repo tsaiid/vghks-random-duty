@@ -594,7 +594,9 @@ $(function() {
         var total_days = end_date.diff(start_date, 'days');
         var filters = {
             "patterns": patterns,
+            "use_std_dev_level": $('#use_std_dev_level').is(':checked'),
             "std_dev_level": parseFloat($('#inputStdDevSlider').slider('option', 'value')),
+            "use_qod_limit": $('#use_qod_limit').is(':checked'),
             "qod_limit": parseInt($('#inputQodLimitSlider').slider('option', 'value')),
         };
 
