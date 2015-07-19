@@ -577,9 +577,9 @@ $(function() {
         $('#summary_duties').html(summary_duties_html);
     }
 
-    function is_preset_duties_fit_pattern(preset_duties, preset_holidays, patterns) {
-        var groups = calculate_group_duties(preset_duties);
-        console.log(groups);
+    function is_preset_duties_fit_pattern(presets, patterns) {
+        var groups = calculate_group_duties(presets.duties);
+        //console.log(groups);
         if (Object.keys(groups).length != patterns.length) {
             console.log("length not equal. groups: " + Object.keys(groups).length + ", patterns: " + patterns.length);
             return false;
@@ -591,7 +591,7 @@ $(function() {
                 return false;
             }
             var dates = groups[person].dates;
-            var counted_pattern = count_duty_pattern(dates, preset_holidays);
+            var counted_pattern = count_duty_pattern(dates, presets.holidays);
             // compare only friday and holiday now
             if (patterns[i][1] != counted_pattern[1] || patterns[i][2] != counted_pattern[2]) {
                 console.log("person: " + person + ", pattern not fit: " + counted_pattern.join(", "));
@@ -612,9 +612,8 @@ $(function() {
         }
 
         // check if friday, weekend, holiday duties are set and fit pattern.
-        var preset_holidays = get_preset_holidays();
-        var preset_duties = get_preset_duties();
-        if (!is_preset_duties_fit_pattern(preset_duties, preset_holidays, patterns)) {
+        var presets = get_presets();
+        if (!is_preset_duties_fit_pattern(presets, patterns)) {
             alert("The preset duties do not fit the patterns. Please adjust them.");
             return;
         }
@@ -641,8 +640,7 @@ $(function() {
 
         random_duty_worker = new Worker("assets/js/random_duty_worker.js");
         random_duty_worker.postMessage({
-            "preset_holidays": preset_holidays,
-            "preset_duties": preset_duties,
+            "presets": presets,
             "since_date_str": start_date.format("YYYY-MM-DD"),
             "total_days": total_days,
             "filters": filters,
@@ -656,7 +654,7 @@ $(function() {
 
                     duties.forEach(function(duty) {
                         var date = moment(duty[0], "YYYY-MM-DD");
-                        if (get_preset_duty(preset_duties, duty[0]) === undefined) {
+                        if (get_preset_duty(presets.duties, duty[0]) === undefined) {
                             var event = {
                                 title: duty[1].toString(),
                                 start: date,
