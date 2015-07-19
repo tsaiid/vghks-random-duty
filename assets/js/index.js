@@ -67,89 +67,115 @@ $(function() {
         return $(window).height() - 300;
     }
 
+    function check_if_has_same_non_duty(preset_non_duties, date, person) {
+        var len = preset_non_duties.length;
+        for (var i = 0; i < len; i++) {
+            var non_duty_date_str = preset_non_duties[i][0];
+            var non_duty_person = preset_non_duties[i][1];
+            if (non_duty_date_str == date && non_duty_person == person) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     //
     // Dialog related
     //
     // Dialog for insert new event
+    function get_duty_conflict_status(title, orig_title, is_edit_dialog, is_non_duty, prev_set_duty, prev_set_non_duties, already_had_duty) {
+        var status;
+        if (is_edit_dialog) {
+            if (is_non_duty) {
+                if ($.inArray(parseInt(title), prev_set_non_duties) > -1) {
+                    status = "Already set the same non-duty!";
+                } else if (prev_set_duty == title && title != orig_title) {
+                    status = "Conflict! The staff (" + title + ") is already on duty!";
+                }
+            } else {
+                if (already_had_duty) {
+                    if (title == prev_set_duty && title != orig_title) {
+                        status = "Already had a duty!";
+                    } else if (title != prev_set_duty && title == orig_title) {
+                        status = "Already had a duty!";
+                    } else if ($.inArray(parseInt(title), prev_set_non_duties) > -1) {
+                        status = "Conflict! The staff (" + title + ") should not be on duty!";
+                    }
+                } else {
+                    if ($.inArray(parseInt(title), prev_set_non_duties) > -1) {
+                        if (title != orig_title) {
+                            status = "Conflict! The staff (" + title + ") should not be on duty!";
+                        }
+                    }
+                }
+            }
+        } else {
+            if (is_non_duty) {
+                if ($.inArray(parseInt(title), prev_set_non_duties) > -1) {
+                    status = "Already had a same non-duty!";
+                }
+                if (prev_set_duty == title) {
+                    status = "Conflict! The staff (" + title + ") should be on duty!";
+                }
+            } else {
+                if (already_had_duty) {
+                    status = "Already had a duty!";
+                } else if ($.inArray(parseInt(title), prev_set_non_duties) > -1) {
+                    status = "Conflict! The staff (" + title + ") should not be on duty!";
+                }
+            }
+        }
+
+        return status;
+    }
+
+    function save_or_update_event(is_edit_dialog) {
+        var title = $('#eventTitle').val();
+        var orig_title = $('#eventOrigTitle').val();
+        var date = $('#eventStart').val();
+
+        if ($('#eventTitle').val() !== '') {
+            var preset_duties = get_preset_duties();
+            var preset_non_duties = get_preset_non_duties();
+            var is_non_duty = $('#eventPropNonduty').is(":checked");
+            var prev_set_duty = get_preset_duty(preset_duties, date);
+            var prev_set_non_duties = get_preset_non_duties_by_date(preset_non_duties, date);
+            var already_had_duty = (prev_set_duty !== undefined);
+            var has_same_non_duty = check_if_has_same_non_duty(preset_non_duties, date, title);
+
+            var duty_conflict_status = get_duty_conflict_status(title, orig_title, is_edit_dialog, is_non_duty, prev_set_duty, prev_set_non_duties, already_had_duty);
+            if (!duty_conflict_status) {
+                if (is_edit_dialog) {
+                    // have to remove old and add new
+                    $("#cal1").fullCalendar('removeEvents', $('#eventId').val());
+                    $("#cal2").fullCalendar('removeEvents', $('#eventId').val());
+                }
+
+                var className = (is_non_duty ? 'preset-non-duty-event' : 'preset-duty-event');
+                var color = (is_non_duty ? non_duty_color : duty_colors[title]);
+                var eventTitle = (is_non_duty ? ' ' + title + ' 不值' : title); // add a space for sort first
+                var event = {
+                    id: CryptoJS.MD5(date + eventTitle).toString(),
+                    title: eventTitle,
+                    start: date,
+                    allDay: true,
+                    className: className,
+                    color: color,
+                };
+                $("#cal1").fullCalendar('renderEvent', event, true);
+                $("#cal2").fullCalendar('renderEvent', event, true);
+            } else {
+                myGrowlUI("Warning", duty_conflict_status);
+            }
+        }
+        $("#cal1").fullCalendar('unselect');
+        $("#cal2").fullCalendar('unselect');
+    }
+
     $('#calEventDialog').dialog({
         resizable: false,
         autoOpen: false,
-        title: 'Set Duty',
         width: 400,
-        buttons: {
-            Save: function() {
-                var title = $('#eventTitle');
-                var start = $('#eventStart');
-
-                if (title.val() !== '') {
-                    var className = ($('#eventPropNonduty').is(":checked") ? 'preset-non-duty-event' : 'preset-duty-event');
-                    var color = ($('#eventPropNonduty').is(":checked") ? non_duty_color : duty_colors[title.val()]);
-                    var eventTitle = ($('#eventPropNonduty').is(":checked") ? ' ' + title.val() + ' 不值' : title.val()); // add a space for sort first
-                    var event = {
-                        id: CryptoJS.MD5(start.val() + eventTitle).toString(),
-                        title: eventTitle,
-                        start: start.val(),
-                        allDay: true,
-                        className: className,
-                        color: color,
-                    };
-                    $("#cal1").fullCalendar('renderEvent', event, true);
-                    $("#cal2").fullCalendar('renderEvent', event, true);
-                }
-                $("#cal1").fullCalendar('unselect');
-                $("#cal2").fullCalendar('unselect');
-                $(this).dialog('close');
-            },
-            Cancel: function() {
-                $(this).dialog('close');
-            }
-        }
-    });
-
-    // Dialog for update or delete event
-    $('#calEventEditDialog').dialog({
-        resizable: false,
-        autoOpen: false,
-        title: 'Edit Duty',
-        width: 400,
-        buttons: {
-            Update: function() {
-                var title = $('#eventEditTitle');
-                var start = $('#eventEditStart');
-
-                if ($('#eventEditTitle').val() !== '') {
-                    // have to remove old and add new
-                    $("#cal1").fullCalendar('removeEvents', $('#eventEditId').val());
-                    $("#cal2").fullCalendar('removeEvents', $('#eventEditId').val());
-
-                    var className = ($('#eventEditPropNonduty').is(":checked") ? 'preset-non-duty-event' : 'preset-duty-event');
-                    var color = ($('#eventEditPropNonduty').is(":checked") ? non_duty_color : duty_colors[title.val()]);
-                    var eventTitle = ($('#eventEditPropNonduty').is(":checked") ? ' ' + title.val() + ' 不值' : title.val()); // add a space for sort first
-                    var event = {
-                        id: CryptoJS.MD5(start.val() + eventTitle).toString(),
-                        title: eventTitle,
-                        start: start.val(),
-                        allDay: true,
-                        className: className,
-                        color: color,
-                    };
-                    $("#cal1").fullCalendar('renderEvent', event, true);
-                    $("#cal2").fullCalendar('renderEvent', event, true);
-                }
-                $("#cal1").fullCalendar('unselect');
-                $("#cal2").fullCalendar('unselect');
-                $(this).dialog('close');
-            },
-            Delete: function() {
-                $("#cal1").fullCalendar('removeEvents', $('#eventEditId').val());
-                $("#cal2").fullCalendar('removeEvents', $('#eventEditId').val());
-                //console.log(calEvent._id);
-                $(this).dialog("close");
-            },
-            Cancel: function() {
-                $(this).dialog('close');
-            }
-        }
     });
 
     //
@@ -181,17 +207,46 @@ $(function() {
     }];
     var calDayClick = function(date, jsEvent, view) {
         $('#eventStart').val(date.format("YYYY-MM-DD"));
-        //console.log(date.format("YYYY-MM-DD"));
+
+        // set ui dialog
+        $("#calEventDialog").dialog("option", "title", "Add Duty");
+        $("#calEventDialog").dialog("option", "buttons", {
+            Save: function() {
+                save_or_update_event(false);
+                $(this).dialog('close');
+            },
+            Cancel: function() {
+                $(this).dialog('close');
+            }
+        });
         $('#calEventDialog').dialog('open');
     };
     var calEventClick = function(calEvent, jsEvent, view) {
-        $('#eventEditStart').val(calEvent.start.format("YYYY-MM-DD"));
-        $('#eventEditId').val(calEvent._id);
-        var title = calEvent.title.trim().split(" 不值")[0];  // trim for a space prepend to non-duty
+        $('#eventStart').val(calEvent.start.format("YYYY-MM-DD"));
+        $('#eventId').val(calEvent.id);
+        var title = calEvent.title.trim().split(" 不值")[0]; // trim for a space prepend to non-duty
         var is_non_duty = (calEvent.title.indexOf(" 不值") > -1);
-        $('#calEventEditDialog #eventEditPropNonduty').prop( "checked", is_non_duty );
-        $('#calEventEditDialog #eventEditTitle').val(title);
-        $("#calEventEditDialog").dialog('open');
+        $('#calEventDialog #eventPropNonduty').prop("checked", is_non_duty);
+        $('#calEventDialog #eventTitle').val(title);
+        $('#calEventDialog #eventOrigTitle').val(title);
+
+        // set ui dialog
+        $("#calEventDialog").dialog("option", "title", "Edit Duty");
+        $("#calEventDialog").dialog("option", "buttons", {
+            Update: function() {
+                save_or_update_event(true);
+                $(this).dialog("close");
+            },
+            Delete: function() {
+                $("#cal1").fullCalendar('removeEvents', $('#eventId').val());
+                $("#cal2").fullCalendar('removeEvents', $('#eventId').val());
+                $(this).dialog("close");
+            },
+            Cancel: function() {
+                $(this).dialog('close');
+            }
+        });
+        $("#calEventDialog").dialog('open');
     };
     var calEventDrop = function(event, delta, revertFunc, jsEvent, ui, view) {
         // holiday can not be dragged and dropped. only can be deleted or created.
@@ -318,7 +373,7 @@ $(function() {
         var preset_non_duties = [];
         preset_non_duty_events.forEach(function(event) {
             var date = event.start.format("YYYY-MM-DD");
-            preset_non_duties.push([date, parseInt(event.title)]);  // parseInt("1 不值") == 1
+            preset_non_duties.push([date, parseInt(event.title)]); // parseInt("1 不值") == 1
         });
 
         return preset_non_duties;
