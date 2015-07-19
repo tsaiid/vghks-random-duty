@@ -123,6 +123,19 @@ function shuffle_duties(date_duties) {
     return date_duties;
 }
 
+function is_match_non_duties(merged_duties, preset_non_duties) {
+    var len = preset_non_duties.length;
+    for (var i = 0; i < len; i++) {
+        var non_duty_date_str = preset_non_duties[i][0];
+        var non_duty_person = preset_non_duties[i][1];
+        if (get_preset_duty(merged_duties, non_duty_date_str) == non_duty_person) {
+            //console.log(non_duty_person + "can not be duty on: " + non_duty_date_str);
+            return false;
+        }
+    }
+    return true;
+}
+
 function is_match_filters(merged_duties, group_duties, filters) {
     var use_qod_limit = filters.use_qod_limit;
     var qod_limit = filters.qod_limit;
@@ -159,7 +172,7 @@ function random_duty(total_days, since_date_str, presets, filters) {
         var merged_duties = non_preset_duties.concat(presets.duties);
         //        console.log(has_continuous_duties(merged_duties));
         var group_duties = calculate_group_duties(merged_duties);
-        if (is_match_filters(merged_duties, group_duties, filters)) {
+        if (is_match_non_duties(merged_duties, presets.non_duties) && is_match_filters(merged_duties, group_duties, filters)) {
             duties = merged_duties;
             groups = group_duties;
             break;
