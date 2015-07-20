@@ -6,8 +6,8 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks "grunt-bower-task"
   grunt.loadNpmTasks "grunt-contrib-connect"
   grunt.loadNpmTasks "grunt-contrib-copy"
+  grunt.loadNpmTasks "grunt-contrib-clean"
   grunt.loadNpmTasks "grunt-contrib-watch"
-  grunt.loadNpmTasks "grunt-exec"
 
   grunt.initConfig
     copy:
@@ -124,6 +124,12 @@ module.exports = (grunt) ->
           dest: '_site/'
         }]
 
+    clean:
+      vendor: [
+        "vendor",
+        "_site/vendor"
+      ]
+
     watch:
       options:
         livereload: true
@@ -141,11 +147,12 @@ module.exports = (grunt) ->
           livereload: true
 
   grunt.registerTask "build", [
+    "clean"
     "copy"
   ]
 
   grunt.registerTask "serve", [
-    "copy"
+    "build"
     "connect:server"
     "watch"
   ]
