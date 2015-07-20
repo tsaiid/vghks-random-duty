@@ -11,124 +11,123 @@ module.exports = (grunt) ->
 
   grunt.initConfig
     copy:
-      jquery:
+      vendor:
+        # jquery
         files: [{
           expand: true
           cwd: "bower_components/jquery/dist/"
           src: "jquery.min.js"
-          dest: "vendor/js/"
-        }]
-      moment:
-        files: [{
+          dest: "_site/vendor/js/"
+        },
+        # moment
+        {
           expand: true
           cwd: "bower_components/moment/min/"
           src: "moment.min.js"
-          dest: "vendor/js/"
-        }]
-      jquery_ui:
-        files: [{
+          dest: "_site/vendor/js/"
+        },
+        #jquery_ui
+        {
           expand: true
           cwd: "bower_components/jquery-ui/"
           src: ['themes/redmond/**']
-          dest: "vendor/css/"
+          dest: "_site/vendor/css/"
         },
         {
           expand: true
           cwd: "bower_components/jquery-ui/"
           src: "jquery-ui.min.js"
-          dest: "vendor/js/"
-        }]
-      jquery_ui_slider_pips:
-        files: [{
+          dest: "_site/vendor/js/"
+        },
+        # jquery_ui_slider_pips
+        {
           expand: true
           cwd: "bower_components/jquery-ui-slider-pips/dist/"
           src: "jquery-ui-slider-pips.css"
-          dest: "vendor/css/"
+          dest: "_site/vendor/css/"
         },
         {
           expand: true
           cwd: "bower_components/jquery-ui-slider-pips/dist/"
           src: "jquery-ui-slider-pips.min.js"
-          dest: "vendor/js/"
-        }]
-      jquery_blockUI:
-        files: [{
+          dest: "_site/vendor/js/"
+        },
+        # jquery_blockUI
+        {
           expand: true
           cwd: "bower_components/blockUI/"
           src: "jquery.blockUI.js"
-          dest: "vendor/js/"
-        }]
-      font_awesome:
-        files: [{
+          dest: "_site/vendor/js/"
+        },
+        # font_awesome
+        {
           expand: true
           cwd: "bower_components/font-awesome/css/"
           src: "font-awesome.min.css"
-          dest: "vendor/css/"
-        }]
-      bootstrap:
-        files: [{
+          dest: "_site/vendor/css/"
+        },
+        # bootstrap
+        {
           expand: true
           cwd: "bower_components/bootstrap/dist/css/"
           src: "bootstrap.min.css"
-          dest: "vendor/css/"
+          dest: "_site/vendor/css/"
         },
         {
           expand: true
           cwd: "bower_components/bootstrap/dist/js/"
           src: "bootstrap.min.js"
-          dest: "vendor/js/"
-        }]
-      bootstrap_switch:
-        files: [{
+          dest: "_site/vendor/js/"
+        },
+        # bootstrap_switch
+        {
           expand: true
           cwd: "bower_components/bootstrap-switch/dist/css/bootstrap3/"
           src: "bootstrap-switch.min.css"
-          dest: "vendor/css/"
+          dest: "_site/vendor/css/"
         },
         {
           expand: true
           cwd: "bower_components/bootstrap-switch/dist/js/"
           src: "bootstrap-switch.min.js"
-          dest: "vendor/js/"
-        }]
-      fullcalendar:
-        files: [{
+          dest: "_site/vendor/js/"
+        },
+        # fullcalendar
+        {
           expand: true
           cwd: "bower_components/fullcalendar/dist/"
           src: "fullcalendar.min.css"
-          dest: "vendor/css/"
+          dest: "_site/vendor/css/"
         },
         {
           expand: true
           cwd: "bower_components/fullcalendar/dist/"
           src: "fullcalendar.min.js"
-          dest: "vendor/js/"
+          dest: "_site/vendor/js/"
         },
         {
           expand: true
           cwd: "bower_components/fullcalendar/dist/"
           src: "gcal.js"
-          dest: "vendor/js/"
-        }]
-      cryptojs:
-        files: [{
+          dest: "_site/vendor/js/"
+        },
+        # cryptojs
+        {
           expand: true
           cwd: "bower_components/cryptojslib/rollups/"
           src: "md5.js"
-          dest: "vendor/js/"
+          dest: "_site/vendor/js/"
         }]
-      vendor:
+      sources:
         files: [{
-          expand: true,
-          src: ['vendor/**'],
-          dest: '_site/'
-        }]
+            expand: true,
+            src: ['assets/**', 'index.html'],
+            dest: '_site/'
+          }]
 
     clean:
-      vendor: [
-        "vendor",
-        "_site/vendor"
-      ]
+      vendor: ["_site/vendor"]
+      sources: ['_site/assets/**', '_site/index.html']
 
     watch:
       options:
@@ -138,12 +137,15 @@ module.exports = (grunt) ->
           "assets/**/*"
           "*.html"
         ]
+        tasks: [
+          "copy:sources"
+        ]
 
     connect:
       server:
         options:
           port: 4000
-          base: '.'
+          base: '_site'
           livereload: true
 
   grunt.registerTask "build", [
@@ -152,7 +154,7 @@ module.exports = (grunt) ->
   ]
 
   grunt.registerTask "serve", [
-    "build"
+    "copy"
     "connect:server"
     "watch"
   ]
