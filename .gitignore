@@ -1,1 +1,4 @@
-bower_components
+/bower_components/
+/node_modules/
+/vendor/
+/_site/
