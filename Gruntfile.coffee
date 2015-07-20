@@ -66,6 +66,12 @@ module.exports = (grunt) ->
           src: "font-awesome.min.css"
           dest: "_site/vendor/css/"
         },
+        {
+          expand: true
+          cwd: "bower_components/font-awesome/fonts/"
+          src: ['*.woff*', '*.ttf']
+          dest: "_site/vendor/fonts/"
+        },
         # bootstrap
         {
           expand: true
