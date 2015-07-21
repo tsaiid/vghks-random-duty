@@ -736,13 +736,21 @@ $(function() {
                 case "running":
                     $('#block_ui_message').html(e.data.msg);
                     break;
+                case "fail":
+                    $('#block_ui_dialog_message').html(e.data.msg);
+                    $.blockUI({
+                        theme: true,
+                        title: 'Generating Failed',
+                        message: $('#block_ui_dialog'),
+                    });
+                    break;
                 default:
                     console.log(e.data["msg"]);
             }
         }
     });
 
-    $('#btn_stop_random_duty_worker').click(function() {
+    $('.btn_stop_random_duty_worker').click(function() {
         if (random_duty_worker !== undefined) {
             random_duty_worker.terminate();
             random_duty_worker = undefined;

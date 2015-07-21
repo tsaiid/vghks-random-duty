@@ -199,7 +199,7 @@ function random_duty(total_days, since_date_str, presets, filters) {
 
         if (c > 999999) {
             status = "fail";
-            msg = "has_continuous_duties, less_than_std_dev_level run time: " + c + ". More than 1000000.";
+            msg = "Run time more than 1000000. May be no suitable resolutions.";
             break;
         }
     }
