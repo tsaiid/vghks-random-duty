@@ -555,12 +555,6 @@ $(function() {
         });
     });
 
-    $('#func_get_preset_events').click(function() {
-        var presets = get_presets();
-
-        console.log(presets);
-    });
-
     function update_current_duty_status() {
         // check if suggested pattern exists
         var patterns = $('#suggested_pattern').data("patterns");
@@ -597,14 +591,10 @@ $(function() {
         }
     }
 
-    $('#func_update_current_duty_status').click(function() {
-        update_current_duty_status();
-    });
-
     function calculate_suggested_patterns() {
         // clear previous data first
         $('#suggested_pattern').removeData("patterns");
-        $('#suggested_pattern').html("");
+        $('#suggested_pattern table').remove();
 
         var start_date = $('#cal1').fullCalendar('getDate').startOf('month');
         var people = parseInt($('#inputPeopleSlider').slider("option", "value"));
@@ -625,7 +615,7 @@ $(function() {
             });
             var t_count = o_count + f_count + h_count;
             suggested_pattern_html += '<tr><th>共</th><th>' + o_count + '</th><th>' + f_count + '</th><th>' + h_count + '</th><th>' + t_count + '</th></tr></table>';
-            $('#suggested_pattern').html(suggested_pattern_html);
+            $('#suggested_pattern').append(suggested_pattern_html);
             $('#suggested_pattern').data("patterns", suggested_patterns); // save object for random duty to match
         }
     }
@@ -684,7 +674,7 @@ $(function() {
     }
 
     var random_duty_worker;
-    $('#func_test_worker').click(function() {
+    $('#func_random_duty').click(function() {
         // check if calculated patterns.
         var patterns = $('#suggested_pattern').data("patterns");
         if (patterns === undefined) {
@@ -777,14 +767,6 @@ $(function() {
     });
 
     $('.btn_stop_random_duty_worker').click(function() {
-        if (random_duty_worker !== undefined) {
-            random_duty_worker.terminate();
-            random_duty_worker = undefined;
-        }
-        $.unblockUI();
-    });
-
-    $('#func_test_stop_worker').click(function() {
         if (random_duty_worker !== undefined) {
             random_duty_worker.terminate();
             random_duty_worker = undefined;
