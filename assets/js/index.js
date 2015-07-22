@@ -303,31 +303,6 @@ $(function() {
     var non_duty_color = "#000000";
 
     // init cal1 and cal2
-    $("#cal1").fullCalendar({
-        defaultDate: nextMonth,
-        header: {
-            left: 'title',
-            center: '',
-            right: ''
-        },
-        height: 580,
-        firstDay: 1,
-        theme: true,
-        googleCalendarApiKey: calGoogleCalendarApiKey,
-        eventSources: calEventSources,
-        selectable: true,
-        dayClick: calDayClick,
-        editable: true,
-        eventDrop: calEventDrop,
-        eventClick: calEventClick,
-        eventRender: onlyTheMonthEventRender,
-        eventAfterAllRender: function() {
-            update_current_duty_status();
-            var groups = calculate_group_duties(get_all_duties());
-            update_summary_duties(groups);
-        }
-    });
-
     $("#cal2").fullCalendar({
         defaultDate: nextTwoMonth,
         header: {
@@ -349,6 +324,31 @@ $(function() {
         eventAfterAllRender: function() {
             is_cal2_finished = true;
         }
+    }).promise().done(function() {
+        $("#cal1").fullCalendar({
+            defaultDate: nextMonth,
+            header: {
+                left: 'title',
+                center: '',
+                right: ''
+            },
+            height: 580,
+            firstDay: 1,
+            theme: true,
+            googleCalendarApiKey: calGoogleCalendarApiKey,
+            eventSources: calEventSources,
+            selectable: true,
+            dayClick: calDayClick,
+            editable: true,
+            eventDrop: calEventDrop,
+            eventClick: calEventClick,
+            eventRender: onlyTheMonthEventRender,
+            eventAfterAllRender: function() {
+                update_current_duty_status();
+                var groups = calculate_group_duties(get_all_duties());
+                update_summary_duties(groups);
+            }
+        });
     });
 
     // navigator for next and prev months
