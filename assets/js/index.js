@@ -49,7 +49,9 @@ $(function() {
     $('#inputPeopleSlider').slider({
         max: 9,
         min: 3,
-        value: 4
+        value: 4,
+        create: update_dialog_select_options,
+        change: update_dialog_select_options,
     }).slider("pips", {
         rest: "label"
     });
@@ -170,6 +172,16 @@ $(function() {
         }
         $("#cal1").fullCalendar('unselect');
         $("#cal2").fullCalendar('unselect');
+    }
+
+    // set dialog select options by people number
+    function update_dialog_select_options() {
+        var people = parseInt($('#inputPeopleSlider').slider("option", "value"));
+        $('#eventTitle').empty();
+        for (var i = 1; i <= people; i++) {
+            var option_html = '<option>' + i + '</option>';
+            $('#eventTitle').append(option_html);
+        }
     }
 
     $('#calEventDialog').dialog({
