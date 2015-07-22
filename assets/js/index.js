@@ -323,7 +323,8 @@ $(function() {
         eventRender: onlyTheMonthEventRender,
         eventAfterAllRender: function() {
             update_current_duty_status();
-            is_cal1_finished = true;
+            var groups = calculate_group_duties(get_all_duties());
+            update_summary_duties(groups);
         }
     });
 

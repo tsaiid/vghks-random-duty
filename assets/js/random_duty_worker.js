@@ -171,7 +171,7 @@ function random_duty(total_days, since_date_str, presets, filters) {
         //        console.log(non_preset_duties.toString());
         var merged_duties = non_preset_duties.concat(presets.duties);
         //        console.log(has_continuous_duties(merged_duties));
-        var group_duties = calculate_group_duties(merged_duties);
+        var group_duties = calculate_group_duties(merged_duties, true);
         if (is_match_non_duties(merged_duties, presets.non_duties) && is_match_filters(merged_duties, group_duties, filters)) {
             duties = merged_duties;
             groups = group_duties;

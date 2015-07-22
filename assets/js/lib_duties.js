@@ -47,7 +47,10 @@ function calculate_group_duties_status(groups, preset_holidays) {
     return groups;
 }
 
-function calculate_group_duties(duties) {
+function calculate_group_duties(duties, is_continuous_duties) {
+    // is_continuous_duties is used in worker, reduce moment.js obj to enhance efficiency.
+    is_continuous_duties = typeof is_continuous_duties !== 'undefined' ? is_continuous_duties : false;
+
     var sorted_duties = duties.sort(function(a, b) {
         //return moment(a[0], "YYYY-MM-DD") - moment(b[0], "YYYY-MM-DD")
         return a[0].localeCompare(b[0])
@@ -69,11 +72,17 @@ function calculate_group_duties(duties) {
             total_people++;
         }
 
-        groups[person].positions.push(index);
+        if (is_continuous_duties) {
+            groups[person].positions.push(index);
+        }
         groups[person].dates.push(duty[0]);
-        var pos_len = groups[person].positions.length;
-        if (pos_len > 1) {
-            var interval = index - groups[person].positions[pos_len - 2];
+        var len = groups[person].dates.length;
+        if (len > 1) {
+            if (is_continuous_duties) {
+                var interval = index - groups[person].positions[len - 2];
+            } else {
+                var interval = moment(duty[0], "YYYY-MM-DD").diff(moment(groups[person].dates[len - 2]), 'days');
+            }
             groups[person].intervals.push(interval);
         }
     });
