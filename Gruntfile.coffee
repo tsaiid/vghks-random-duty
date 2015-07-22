@@ -98,6 +98,19 @@ module.exports = (grunt) ->
           src: "bootstrap-switch.min.js"
           dest: "_site/vendor/js/"
         },
+        # bootstrap_dialog
+        {
+          expand: true
+          cwd: "bower_components/bootstrap-dialog/dist/css/"
+          src: "bootstrap-dialog.min.css"
+          dest: "_site/vendor/css/"
+        },
+        {
+          expand: true
+          cwd: "bower_components/bootstrap-dialog/dist/js/"
+          src: "bootstrap-dialog.min.js"
+          dest: "_site/vendor/js/"
+        },
         # fullcalendar
         {
           expand: true
