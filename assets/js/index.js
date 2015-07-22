@@ -794,9 +794,6 @@ $(function() {
                     // outline the result and std_dev
                     update_summary_duties(groups);
 
-                    // write table for downloading
-                    generate_duties_datatable(duties);
-
                     // unblock ui
                     $.unblockUI({
                         onUnblock: function() {
@@ -967,6 +964,10 @@ $(function() {
             duration_str += '-' + end_month;
         }
         var excel_path = duration_str + '_duties.xls';
+
+        // write table for downloading
+        var duties = get_all_duties();
+        generate_duties_datatable(duties);
 
         $(this).attr('download', excel_path);
         ExcellentExport.excel(this, 'duties_datatable', 'duration_str');
