@@ -586,9 +586,9 @@ $(function() {
                 h_span.html("(" + h_count + ")");
 
                 // show background if not fit pattern
-                o_span.toggleClass('bg-danger', (o_count != patterns[person-1][0]), 800);
-                f_span.toggleClass('bg-danger', (f_count != patterns[person-1][1]), 800);
-                h_span.toggleClass('bg-danger', (h_count != patterns[person-1][2]), 800);
+                o_span.toggleClass('bg-danger', (o_count != patterns[person - 1][0]), 800);
+                f_span.toggleClass('bg-danger', (f_count != patterns[person - 1][1]), 800);
+                h_span.toggleClass('bg-danger', (h_count != patterns[person - 1][2]), 800);
             } else {
                 console.log("no such person: " + person);
             }
@@ -677,6 +677,50 @@ $(function() {
         return true;
     }
 
+    function generate_duties_datatable(duties) {
+        var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
+        var table_html = '<table id="duties_datatable" class="table">';
+        var duties_map = {};
+        duties.map(function(x) {
+            return duties_map[x[0]] = x[1]
+        });
+
+        for (var i = 1; i <= month_span; i++) {
+            var cal = $('#cal' + i);
+            var start_date = cal.fullCalendar('getView').start;
+            var end_date = cal.fullCalendar('getView').end;
+            var month_first_date = cal.fullCalendar('getView').intervalStart;
+            var the_date = start_date.clone();
+            var the_cal_date = start_date.clone();
+
+            if (i > 1) {
+                table_html += '<tr></tr>';
+            }
+            table_html += '<tr><td colspan="7">' + month_first_date.format("YYYY/MM") + '</td></tr>';
+
+            while (the_date < end_date) {
+                table_html += '<tr>';
+                for (var j = 0; j < 7; j++, the_cal_date.add(1, 'day')) {
+                    var date_str = the_cal_date.format("MM/DD");
+                    table_html += '<th>' + date_str + '</th>';
+                }
+                table_html += '</tr><tr>';
+                for (var j = 0; j < 7; j++, the_date.add(1, 'day')) {
+                    var date_str = the_date.format("YYYY-MM-DD");
+                    var duty = duties_map[date_str];
+                    if (duty === undefined) {
+                        duty = "";
+                    }
+                    table_html += '<td>' + duty + '</td>';
+                }
+                table_html += '</tr>';
+            }
+        }
+
+        table_html += '</table>';
+        $('#duties_datatable_div').html(table_html);
+    }
+
     var random_duty_worker;
     $('#func_random_duty').click(function() {
         // check if calculated patterns.
@@ -745,6 +789,9 @@ $(function() {
 
                     // outline the result and std_dev
                     update_summary_duties(groups);
+
+                    // write table for downloading
+                    generate_duties_datatable(duties);
 
                     // unblock ui
                     $.unblockUI({
@@ -903,6 +950,22 @@ $(function() {
             $("#cal1").fullCalendar('renderEvent', event, true);
             $("#cal2").fullCalendar('renderEvent', event, true);
         });
+    });
+
+    $('#func_download_excel').click(function(event) {
+        // set duration as file name.
+        var start_date = $('#cal1').fullCalendar('getDate').startOf('month');
+        var start_month = start_date.format("YYYY-MM");
+        var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
+        var end_month = start_date.clone().add(month_span, 'months').subtract(1, 'day').format("YYYY-MM");
+        var duration_str = start_month;
+        if (start_month != end_month) {
+            duration_str += '-' + end_month;
+        }
+        var excel_path = duration_str + '_duties.xls';
+
+        $(this).attr('download', excel_path);
+        ExcellentExport.excel(this, 'duties_datatable', 'duration_str');
     });
 
     //

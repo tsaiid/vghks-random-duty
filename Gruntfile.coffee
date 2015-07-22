@@ -123,6 +123,13 @@ module.exports = (grunt) ->
           cwd: "bower_components/cryptojslib/rollups/"
           src: "md5.js"
           dest: "_site/vendor/js/"
+        },
+        # Excellent Export
+        {
+          expand: true
+          cwd: "bower_components/excellentexport/"
+          src: "excellentexport.min.js"
+          dest: "_site/vendor/js/"
         }]
       sources:
         files: [{
