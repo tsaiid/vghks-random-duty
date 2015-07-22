@@ -56,6 +56,7 @@
                 <button id="func_get_holiday_condition" class="btn btn-info" type="submit">更新建議班表</button>
                 <button id="func_deploy_test_data" class="btn btn-default" type="submit">Deploy Test Data</button>
                 <button id="func_deploy_test_data_ordinary" class="btn btn-default" type="submit">Deploy Test Ord Data</button>
+                <a class="btn btn-default" id="func_download_excel" download="duties.xls" href="#" role="button">下載值班表 Excel</a>
                 <form class="form-horizontal">
                     <div class="form-group">
                         <label for="modeSwitch" class="col-sm-5 control-label">模式</label>
@@ -169,6 +170,7 @@
                 </div>
                 <div class="row">
                     <div class="col-sm-12" id="summary_duties"></div>
+                    <div id="duties_datatable_div"></div>
                 </div>
             </div>
         </div>
@@ -184,6 +186,7 @@
     <script src="vendor/js/jquery.blockUI.js"></script>
     <script src="vendor/js/fullcalendar.min.js"></script>
     <script src="vendor/js/gcal.js"></script>
+    <script src="vendor/js/excellentexport.min.js"></script>
     <script src="assets/js/private_functions.js"></script>
     <script src="assets/js/lib_duties.js"></script>
     <script src="assets/js/lib_holidays.js"></script>
