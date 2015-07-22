@@ -51,7 +51,11 @@ $(function() {
         min: 3,
         value: 4,
         create: update_dialog_select_options,
-        change: update_dialog_select_options,
+        change: function() {
+            calculate_suggested_patterns();
+            update_current_duty_status();
+            update_dialog_select_options();
+        },
     }).slider("pips", {
         rest: "label"
     });
