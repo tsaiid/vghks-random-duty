@@ -543,6 +543,7 @@ $(function() {
     // Debug UI Buttons
     //
     $('#func_clear_calendar').click(function() {
+        // clear fullCalendar
         $('#cal1').fullCalendar('removeEvents', function(event) {
             if ($.inArray('duty-event', event.className) > -1) {
                 return true;
@@ -557,6 +558,9 @@ $(function() {
                 return false;
             }
         });
+
+        // clear summary
+        $('#summary_duties').html('');
     });
 
     function update_current_duty_status() {
