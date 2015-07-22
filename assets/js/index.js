@@ -731,14 +731,34 @@ $(function() {
         // check if calculated patterns.
         var patterns = $('#suggested_pattern').data("patterns");
         if (patterns === undefined) {
-            alert("Please calculate duty patterns first.");
+            BootstrapDialog.show({
+                type: BootstrapDialog.TYPE_WARNING,
+                title: 'Warning',
+                message: 'Please calculate duty patterns first!',
+                buttons: [{
+                    label: 'Close',
+                    action: function(dialogItself) {
+                        dialogItself.close();
+                    }
+                }],
+            });
             return;
         }
 
         // check if friday, weekend, holiday duties are set and fit pattern.
         var presets = get_presets();
         if (!is_preset_duties_fit_pattern(presets, patterns)) {
-            alert("The preset duties do not fit the patterns. Please adjust them.");
+            BootstrapDialog.show({
+                type: BootstrapDialog.TYPE_WARNING,
+                title: 'Warning',
+                message: 'The preset duties do not fit the patterns. Please adjust them!',
+                buttons: [{
+                    label: 'Close',
+                    action: function(dialogItself) {
+                        dialogItself.close();
+                    }
+                }],
+            });
             return;
         }
 
