@@ -306,6 +306,7 @@ $(function() {
         eventClick: calEventClick,
         eventRender: onlyTheMonthEventRender,
         eventAfterAllRender: function() {
+            update_current_duty_status();
             is_cal1_finished = true;
         }
     });
