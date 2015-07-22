@@ -551,7 +551,8 @@ $(function() {
 
     function update_current_duty_status() {
         // check if suggested pattern exists
-        if ($('#suggested_pattern').data("patterns") === undefined) {
+        var patterns = $('#suggested_pattern').data("patterns");
+        if (patterns === undefined) {
             calculate_suggested_patterns();
         }
 
@@ -563,9 +564,21 @@ $(function() {
         for (var person in groups) {
             var person_id = '#person_' + person;
             if ($(person_id).length == 1) {
-                $(person_id + " .ordinary_count .current_status").html("(" + groups[person].ordinary_count + ")");
-                $(person_id + " .friday_count .current_status").html("(" + groups[person].friday_count + ")");
-                $(person_id + " .holiday_count .current_status").html("(" + groups[person].holiday_count + ")");
+                var o_span = $(person_id + " .ordinary_count .current_status");
+                var f_span = $(person_id + " .friday_count .current_status");
+                var h_span = $(person_id + " .holiday_count .current_status");
+                var o_count = groups[person].ordinary_count;
+                var f_count = groups[person].friday_count;
+                var h_count = groups[person].holiday_count;
+
+                o_span.html("(" + o_count + ")");
+                f_span.html("(" + f_count + ")");
+                h_span.html("(" + h_count + ")");
+
+                // show background if not fit pattern
+                o_span.toggleClass('bg-danger', (o_count != patterns[person-1][0]), 800);
+                f_span.toggleClass('bg-danger', (f_count != patterns[person-1][1]), 800);
+                h_span.toggleClass('bg-danger', (h_count != patterns[person-1][2]), 800);
             } else {
                 console.log("no such person: " + person);
             }
