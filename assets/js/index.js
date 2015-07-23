@@ -253,7 +253,7 @@ $(function() {
         eventDataTransform: function(rawEventData) { // drop url from google cal
             return {
                 id: rawEventData.id,
-                title: '  ' + rawEventData.title, // prepend two spaces to be sort first.
+                title: '  假日 ' + rawEventData.title, // prepend two spaces to be sort first.
                 start: rawEventData.start,
                 end: rawEventData.end,
                 className: 'gcal-holiday'
