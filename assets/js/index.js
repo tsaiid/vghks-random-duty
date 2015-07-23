@@ -17,7 +17,7 @@ $(function() {
             if (state) { // 2-month mode
                 $('.first_cal').toggleClass('col-sm-6', state, 600).promise().done(function() {
                     $('.second_cal').show();
-                    $('#cal2').fullCalendar('render');  // force render the cal, needed for from hidden div
+                    $('#cal2').fullCalendar('render'); // force render the cal, needed for from hidden div
                 });
             } else { // 1-month mode
                 $('.second_cal').hide();
@@ -319,8 +319,7 @@ $(function() {
         eventDrop: calEventDrop,
         eventClick: calEventClick,
         eventRender: onlyTheMonthEventRender,
-        eventAfterAllRender: function() {
-        }
+        eventAfterAllRender: function() {}
     });
 
     $("#cal1").fullCalendar({
@@ -597,38 +596,136 @@ $(function() {
         }
     }
 
+    function update_duty_patterns(patterns) {
+        if (patterns !== undefined) {
+            $('#suggested_pattern table').remove();
+            var pattern_html = '<table class="table table-striped"><tr><th>No.</th><th>平</th><th>五</th><th>假</th><th>P</th></tr>';
+            var o_count = 0,
+                f_count = 0,
+                h_count = 0;
+            patterns.forEach(function(pattern, index) {
+                var point = parseInt(pattern[1]) + parseInt(pattern[2]) * 2;
+                pattern_html += '<tr id="person_' + (index + 1) + '"><td>' + (index + 1) + '</td><td class="ordinary_count">' + pattern[0] + ' <span class="current_status"></span></td><td class="friday_count">' + pattern[1] + ' <span class="current_status"></span></td><td class="holiday_count">' + pattern[2] + ' <span class="current_status"></span></td><td>' + point + '</td></tr>';
+                o_count += pattern[0];
+                f_count += pattern[1];
+                h_count += pattern[2];
+            });
+            var t_count = o_count + f_count + h_count;
+            pattern_html += '<tr><th>共</th><th>' + o_count + '</th><th>' + f_count + '</th><th>' + h_count + '</th><th>' + t_count + '</th></tr></table>';
+            $('#suggested_pattern').append(pattern_html);
+        }
+    }
+
     function calculate_suggested_patterns() {
         // clear previous data first
         $('#suggested_pattern').removeData("patterns");
-        $('#suggested_pattern table').remove();
 
         var start_date = $('#cal1').fullCalendar('getDate').startOf('month');
         var people = parseInt($('#inputPeopleSlider').slider("option", "value"));
         var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
 
         var suggested_patterns = get_suggested_patterns(start_date, month_span, people);
-        if (suggested_patterns !== undefined) {
-            var suggested_pattern_html = '<table class="table table-striped"><tr><th>No.</th><th>平</th><th>五</th><th>假</th><th>P</th></tr>';
-            var o_count = 0,
-                f_count = 0,
-                h_count = 0;
-            suggested_patterns.forEach(function(pattern, index) {
-                var point = parseInt(pattern[1]) + parseInt(pattern[2]) * 2;
-                suggested_pattern_html += '<tr id="person_' + (index + 1) + '"><td>' + (index + 1) + '</td><td class="ordinary_count">' + pattern[0] + ' <span class="current_status"></span></td><td class="friday_count">' + pattern[1] + ' <span class="current_status"></span></td><td class="holiday_count">' + pattern[2] + ' <span class="current_status"></span></td><td>' + point + '</td></tr>';
-                o_count += pattern[0];
-                f_count += pattern[1];
-                h_count += pattern[2];
-            });
-            var t_count = o_count + f_count + h_count;
-            suggested_pattern_html += '<tr><th>共</th><th>' + o_count + '</th><th>' + f_count + '</th><th>' + h_count + '</th><th>' + t_count + '</th></tr></table>';
-            $('#suggested_pattern').append(suggested_pattern_html);
-            $('#suggested_pattern').data("patterns", suggested_patterns); // save object for random duty to match
-        }
+        $('#suggested_pattern').data("patterns", suggested_patterns); // save object for random duty to match
+        update_duty_patterns(suggested_patterns);
     }
 
     $('#func_get_holiday_condition').click(function() {
         calculate_suggested_patterns();
         update_current_duty_status();
+    });
+
+    $('#func_edit_suggested_patterns').click(function() {
+        var patterns = $('#suggested_pattern').data("patterns");
+        if (patterns === undefined) {
+            BootstrapDialog.alert('Patterns are undefinde!');
+            return;
+        }
+
+        var o_count = 0,
+            f_count = 0,
+            h_count = 0;
+        var table_html = '<table id="edit_patterns_table" class="table"><tr><th>No.</th><th>平</th><th>五</th><th>假</th><th>P</th></tr>';
+        patterns.forEach(function(p, i) {
+            o_count += p[0];
+            f_count += p[1];
+            h_count += p[2];
+            var pt = p[1] + p[2] * 2;
+            table_html += '<tr><td>' + (i + 1) + '</td><td class="duty_data" contentEditable>' + p[0] + '</td><td class="duty_data" contentEditable>' + p[1] + '</td><td class="duty_data" contentEditable>' + p[2] + '</td><td class="total_points">' + pt + '</td></tr>';
+        });
+        var t_count = o_count + f_count + h_count;
+        table_html += '<tr><th>共</th><th>' + o_count + ' <span class="o_count bg-danger"></span></th><th>' + f_count + ' <span class="f_count bg-danger"></span></th><th>' + h_count + ' <span class="h_count bg-danger"></span></th><th>' + t_count + '</th></tr></table>';
+
+        function getPatternTableData(table) {
+            var data = [];
+            table.find('tr:has(td)').each(function(rowIndex, r) {
+                var cols = [];
+                $(this).find('td.duty_data').each(function(colIndex, c) {
+                    cols.push(parseInt(c.textContent));
+                });
+                data.push(cols);
+            });
+            return data;
+        }
+
+        BootstrapDialog.show({
+            title: '修改排班樣式',
+            message: table_html,
+            cssClass: 'login-dialog',
+            buttons: [{
+                label: 'Update',
+                cssClass: 'btn-primary',
+                action: function(dialog) {
+                    // check if pattern matches
+                    var table_data = getPatternTableData($('#edit_patterns_table'));
+                    var tb_o_count = 0,
+                        tb_f_count = 0,
+                        tb_h_count = 0;
+                    table_data.forEach(function(p) {
+                        tb_o_count += parseInt(p[0]);
+                        tb_f_count += parseInt(p[1]);
+                        tb_h_count += parseInt(p[2]);
+                    });
+                    if (tb_o_count != o_count || tb_f_count != f_count || tb_h_count != h_count) {
+                        BootstrapDialog.alert("總班數錯誤，請再檢查");
+                        console.log(table_data);
+                        return;
+                    }
+
+                    // update jquery data
+                    $('#suggested_pattern').data("patterns", table_data);
+                    dialog.close();
+                    update_duty_patterns(table_data);
+                }
+            }],
+            onshown: function(dialogRef) {
+                $('#edit_patterns_table').contentEditable().change(function(e) {
+                    //console.log(e.action);
+                    //console.log(e.changed);
+                    //console.log(e.changedField);
+
+                    if (e.action == "save") {
+                        var table_data = getPatternTableData($('#edit_patterns_table'));
+                        // update point
+                        var tb_o_count = 0,
+                            tb_f_count = 0,
+                            tb_h_count = 0;
+                        table_data.forEach(function(p, i) {
+                            tb_o_count += parseInt(p[0]);
+                            tb_f_count += parseInt(p[1]);
+                            tb_h_count += parseInt(p[2]);
+                            var points = parseInt(p[1]) + parseInt(p[2]) * 2;
+                            $('#edit_patterns_table td.total_points').eq(i).html(points);
+                        });
+
+                        // update total if not match
+                        $('#edit_patterns_table th .o_count').html(tb_o_count != o_count ? "(" + tb_o_count + ")" : "");
+                        $('#edit_patterns_table th .f_count').html(tb_f_count != f_count ? "(" + tb_f_count + ")" : "");
+                        $('#edit_patterns_table th .h_count').html(tb_h_count != h_count ? "(" + tb_h_count + ")" : "");
+                    }
+                });
+
+            }
+        });
     });
 
     function update_summary_duties(groups_duties) {
