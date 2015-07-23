@@ -194,6 +194,9 @@ $(function() {
                     };
                     $("#cal1").fullCalendar('renderEvent', event, true);
                     $("#cal2").fullCalendar('renderEvent', event, true);
+
+                    // update suggested patterns
+                    calculate_suggested_patterns();
                 }
             } else {
                 myGrowlUI("Warning", duty_conflict_status);
@@ -304,6 +307,9 @@ $(function() {
             '刪除': function() {
                 $("#cal1").fullCalendar('removeEvents', $('#eventId').val());
                 $("#cal2").fullCalendar('removeEvents', $('#eventId').val());
+                if (duty_type == 'eventPropHoliday') {
+                    calculate_suggested_patterns();
+                }
                 $(this).dialog("close");
             },
             '取消': function() {
