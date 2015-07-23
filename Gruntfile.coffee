@@ -21,7 +21,7 @@ module.exports = (grunt) ->
       main: {
         files: [
           { src: ['assets/**', 'index.html'], dest: '<%= opts.base_path %>'},
-          { cwd: 'bower_components/jquery/dist/', src: 'jquery.min.js', dest: '<%= opts.js_path %>' },
+          { cwd: 'bower_components/jquery/', src: 'jquery.min.js', dest: '<%= opts.js_path %>' },
           { cwd: 'bower_components/moment/min/', src: 'moment.min.js', dest: '<%= opts.js_path %>' },
           { cwd: 'bower_components/jquery-ui/', src: ['themes/redmond/**'], dest: '<%= opts.css_path %>' },
           { cwd: 'bower_components/jquery-ui/', src: 'jquery-ui.min.js', dest: '<%= opts.js_path %>' },
@@ -41,6 +41,7 @@ module.exports = (grunt) ->
           { cwd: 'bower_components/fullcalendar/dist/', src: 'gcal.js', dest: '<%= opts.js_path %>' },
           { cwd: 'bower_components/cryptojslib/rollups/', src: 'md5.js', dest: '<%= opts.js_path %>' },
           { cwd: 'bower_components/excellentexport/', src: 'excellentexport.min.js', dest: '<%= opts.js_path %>' },
+          { cwd: 'bower_components/jquery.contenteditable/', src: 'jquery.contenteditable.js', dest: '<%= opts.js_path %>' },
         ],
         verbose: true,
         pretend: false, # Don't do any disk operations - just write log
