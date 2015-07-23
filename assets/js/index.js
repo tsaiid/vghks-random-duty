@@ -211,7 +211,6 @@ $(function() {
             title_html = '<input type="text" class="form-control" id="eventTitle" />';
         } else {
             var people = parseInt($('#inputPeopleSlider').slider("option", "value"));
-            $('#eventTitle').empty();
             title_html = '<select type="text" class="form-control" name="eventTitle" id="eventTitle">';
             for (var i = 1; i <= people; i++) {
                 title_html += '<option>' + i + '</option>';
@@ -227,7 +226,7 @@ $(function() {
         width: 400,
     });
 
-    $('input[name=eventProp]').change(function(){
+    $('input[name=eventProp]').change(function() {
         update_dialog_title_type($(this).val())
     });
 
@@ -277,18 +276,23 @@ $(function() {
     var calEventClick = function(calEvent, jsEvent, view) {
         $('#eventStart').val(calEvent.start.format("YYYY-MM-DD"));
         $('#eventId').val(calEvent.id);
-        var title;
+        var title, duty_type;
         if (calEvent.title.indexOf("  假日 ") > -1) {
             $('#eventPropHoliday').prop("checked", true);
             title = calEvent.title.split("  假日 ")[1]; // trim for a space prepend to non-duty
+            duty_type = 'eventPropHoliday';
         } else if (calEvent.title.indexOf(" 不值") > -1) {
             $('#eventPropNonduty').prop("checked", true);
             title = calEvent.title.trim().split(" 不值")[0]; // trim for a space prepend to non-duty
+            duty_type = 'eventPropNonduty';
         } else {
             $('#eventPropDuty').prop("checked", true);
+            title = calEvent.title;
+            duty_type = 'eventPropDuty';
         }
-        $('#calEventDialog #eventTitle').val(title);
-        $('#calEventDialog #eventOrigTitle').val(title);
+        update_dialog_title_type(duty_type);
+        $('#eventTitle').val(title);
+        $('#eventOrigTitle').val(title);
 
         // set ui dialog
         $("#calEventDialog").dialog("option", "title", "Edit Duty");
