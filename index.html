@@ -41,7 +41,7 @@
                     <li><a href="#">Dashboard</a></li>
                     <li><a href="#">Settings</a></li>
                     <li><a href="#">Profile</a></li>
-                    <li><a href="#">Help</a></li>
+                    <li><a href="#" data-toggle="modal" data-target="#usageModal">Help</a></li>
                 </ul>
                 <form class="navbar-form navbar-right">
                     <input type="text" class="form-control" placeholder="Search...">
@@ -52,11 +52,17 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-sm-3 sidebar">
-                <button id="func_random_duty" class="btn btn-primary" type="submit">自動排班</button>
-                <button id="func_clear_calendar" class="btn btn-danger" type="submit">清除自動排班</button>
-                <button id="func_get_holiday_condition" class="btn btn-info" type="submit">更新建議班表</button>
-                <button id="func_deploy_test_data" class="btn btn-default" type="submit">Deploy Test Data</button>
-                <button id="func_deploy_test_data_ordinary" class="btn btn-default" type="submit">Deploy Test Ord Data</button>
+                <div class="btn-toolbar" role="toolbar" aria-label="...">
+                    <div class="btn-group" role="group" aria-label="...">
+                        <button id="func_random_duty" class="btn btn-primary" type="submit">自動排班</button>
+                        <button id="func_clear_calendar" class="btn btn-danger" type="submit">清除自動排班</button>
+                        <button id="func_get_holiday_condition" class="btn btn-info" type="submit">更新建議班表</button>
+                    </div>
+                </div>
+                <div class="btn-toolbar" role="toolbar" aria-label="...">
+                    <button id="func_deploy_test_data" class="btn btn-default" type="submit">Deploy Test Data</button>
+                    <button id="func_deploy_test_data_ordinary" class="btn btn-default" type="submit">Deploy Test Ord Data</button>
+                </div>
                 <a class="btn btn-default" id="func_download_excel" download="duties.xls" href="#" role="button">下載值班表 Excel</a>
                 <form class="form-horizontal">
                     <div class="form-group">
@@ -172,6 +178,40 @@
                 <div class="row">
                     <div class="col-sm-12" id="summary_duties"></div>
                     <div id="duties_datatable_div"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Help Modal -->
+    <div class="modal fade bootstrap-dialog type-info" id="usageModal" tabindex="-1" role="dialog" aria-labelledby="usageModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <div class="modal-title bootstrap-dialog-title" id="usageModalLabel">使用說明</div>
+                </div>
+                <div class="modal-body">
+                    <h4>步驟</h4>
+                    <ol>
+                        <li>選擇月份模式並移至欲排班的月份，選擇完畢後建議不要再更動</li>
+                        <li>檢查月曆中的假日是否有誤，可點選做刪除的動作</li>
+                        <li>設定人數</li>
+                        <li>檢查建議班表是否可以接受，可點選「更新建議班表」隨機調整</li>
+                        <li>依次填入班表，直到建議班表中「五」、「假」的紅字皆消除</li>
+                        <li>填入班表時，也可設定不值班的入員</li>
+                        <li>選擇是否開啟「QOD 上限」或「Std Dev」，並設定其數值</li>
+                        <li>點選「自動排班」，等候亂數班表產生</li>
+                        <li>若無法產生結果，可調降或關閉參數</li>
+                    </ol>
+                    <h4>限制</h4>
+                    <ul>
+                        <li>月份更動會造成已調整的假日失效</li>
+                        <li>在「2 月」模式中，建議不要開啟「Std Dev」，可能會跑不出結果</li>
+                        <li>不論是手動填入或自動產生的班表皆無法線上儲存，可用「下載值班表 Excel」或螢幕截圖的方式儲存</li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
