@@ -66,7 +66,7 @@
                 <a class="btn btn-default" id="func_download_excel" download="duties.xls" href="#" role="button">下載值班表 Excel</a>
                 <form class="form-horizontal">
                     <div class="form-group">
-                        <label for="modeSwitch" class="col-sm-5 control-label">模式</label>
+                        <label for="modeSwitch" class="col-sm-5 control-label">月份模式</label>
                         <div class="col-sm-7">
                             <input type="checkbox" id="mode_switch">
                         </div>
@@ -106,6 +106,9 @@
                 </form>
                 <div class="panel panel-default" id="suggested_pattern">
                     <div class="panel-heading">
+                        <button id="func_edit_duty_patterns" type="button" class="btn btn-warning btn-xs pull-right" aria-label="Edit Pattern">
+                            <i class="fa fa-pencil-square-o"></i>
+                        </button>
                         <h3 class="panel-title">建議排班（已排班數）</h3>
                     </div>
                 </div>
@@ -196,7 +199,7 @@
                         <li>選擇月份模式並移至欲排班的月份，選擇完畢後建議不要再更動</li>
                         <li>檢查月曆中的假日是否有誤，可點選做刪除的動作</li>
                         <li>設定人數</li>
-                        <li>檢查建議班表是否可以接受，可點選「更新建議班表」隨機調整</li>
+                        <li>檢查建議班表是否可以接受，可點選「更新建議班表」隨機調整或手動修改</li>
                         <li>依次填入班表，直到建議班表中「五」、「假」的紅字皆消除</li>
                         <li>填入班表時，也可設定不值班的入員</li>
                         <li>選擇是否開啟「QOD 上限」或「Std Dev」，並設定其數值</li>
@@ -229,6 +232,7 @@
     <script src="vendor/js/fullcalendar.min.js"></script>
     <script src="vendor/js/gcal.js"></script>
     <script src="vendor/js/excellentexport.min.js"></script>
+    <script src="vendor/js/jquery.contenteditable.js"></script>
     <script src="assets/js/private_functions.js"></script>
     <script src="assets/js/lib_duties.js"></script>
     <script src="assets/js/lib_holidays.js"></script>

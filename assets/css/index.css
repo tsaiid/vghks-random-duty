@@ -34,3 +34,11 @@ div.growlUI h1 {
 div.growlUI h2 {
     font-size: 16px;
 }
+
+/*
+ * bootstrap modal related
+ */
+
+#edit_patterns_table td, #edit_patterns_table th {
+    width: 25%;
+}
