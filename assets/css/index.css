@@ -2,7 +2,7 @@
  * blockUI
  */
 
-#block_ui_box, #block_ui_dialog, #duties_datatable_div {
+#block_ui_box, #block_ui_dialog, #duties_datatable_div, .second_cal {
     display: none;
 }
 

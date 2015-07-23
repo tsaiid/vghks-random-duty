@@ -8,9 +8,6 @@ $(function() {
     //
     // global vars
     //
-    var is_cal1_finished = false;
-    var is_cal2_finished = false;
-
     $('#mode_switch').bootstrapSwitch({
         onText: "2 月",
         offText: "1 月",
@@ -20,6 +17,7 @@ $(function() {
             if (state) { // 2-month mode
                 $('.first_cal').toggleClass('col-sm-6', state, 600).promise().done(function() {
                     $('.second_cal').show();
+                    $('#cal2').fullCalendar('render');  // force render the cal, needed for from hidden div
                 });
             } else { // 1-month mode
                 $('.second_cal').hide();
@@ -322,33 +320,32 @@ $(function() {
         eventClick: calEventClick,
         eventRender: onlyTheMonthEventRender,
         eventAfterAllRender: function() {
-            is_cal2_finished = true;
         }
-    }).promise().done(function() {
-        $("#cal1").fullCalendar({
-            defaultDate: nextMonth,
-            header: {
-                left: 'title',
-                center: '',
-                right: ''
-            },
-            height: 580,
-            firstDay: 1,
-            theme: true,
-            googleCalendarApiKey: calGoogleCalendarApiKey,
-            eventSources: calEventSources,
-            selectable: true,
-            dayClick: calDayClick,
-            editable: true,
-            eventDrop: calEventDrop,
-            eventClick: calEventClick,
-            eventRender: onlyTheMonthEventRender,
-            eventAfterAllRender: function() {
-                update_current_duty_status();
-                var groups = calculate_group_duties(get_all_duties());
-                update_summary_duties(groups);
-            }
-        });
+    });
+
+    $("#cal1").fullCalendar({
+        defaultDate: nextMonth,
+        header: {
+            left: 'title',
+            center: '',
+            right: ''
+        },
+        height: 580,
+        firstDay: 1,
+        theme: true,
+        googleCalendarApiKey: calGoogleCalendarApiKey,
+        eventSources: calEventSources,
+        selectable: true,
+        dayClick: calDayClick,
+        editable: true,
+        eventDrop: calEventDrop,
+        eventClick: calEventClick,
+        eventRender: onlyTheMonthEventRender,
+        eventAfterAllRender: function() {
+            update_current_duty_status();
+            var groups = calculate_group_duties(get_all_duties());
+            update_summary_duties(groups);
+        }
     });
 
     // navigator for next and prev months
