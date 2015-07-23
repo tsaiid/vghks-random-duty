@@ -10,7 +10,7 @@ task :deploy do
   cd "_site" do
     system "git add -A"
 
-    message = "Site updated at #{Time.now.utc}"
+    message = "vghks-random-duty updated at #{Time.now.utc}"
     puts "## Commiting: #{message}"
     system "git commit -m \"#{message}\""
 
