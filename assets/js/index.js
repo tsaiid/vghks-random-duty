@@ -634,7 +634,7 @@ $(function() {
         update_current_duty_status();
     });
 
-    $('#func_edit_suggested_patterns').click(function() {
+    $('#func_edit_duty_patterns').click(function() {
         var patterns = $('#suggested_pattern').data("patterns");
         if (patterns === undefined) {
             BootstrapDialog.alert('Patterns are undefinde!');
