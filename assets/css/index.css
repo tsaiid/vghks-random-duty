@@ -2,7 +2,7 @@
  * blockUI
  */
 
-#block_ui_box, #block_ui_dialog, #duties_datatable_div, .second_cal {
+#block_ui_box, #block_ui_dialog {
     display: none;
 }
 
@@ -41,4 +41,9 @@ div.growlUI h2 {
 
 #edit_patterns_table td, #edit_patterns_table th {
     width: 25%;
+}
+
+/* hide div initially */
+#duties_datatable_div, .second_cal, #calEventDialog {
+    display: none;
 }
