@@ -203,6 +203,31 @@
             </div>
         </div>
     </div>
+    <!-- About Modal -->
+    <div class="modal fade bootstrap-dialog type-info" id="aboutModal" tabindex="-1" role="dialog" aria-labelledby="aboutModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <div class="modal-title bootstrap-dialog-title" id="aboutModalLabel">關於</div>
+                </div>
+                <div class="modal-body">
+                    <h3>VGHKS Random Duty Generator <span id="appVersion"></span></h3>
+                    <p>班表產生器，以亂數排列的方式產生班表，可加上 QOD 值班及班距標準差等限制，以期獲取排班最大的公平性。目前只適用高榮放射線部的積點排班方式。</p>
+                    <h4>Author</h4>
+                    <p>I-Ta Tsai, 現為高榮放射線部住院醫師</p>
+                    <p><a class="btn btn-default btn-xs" href="https://twitter.com/tsaiid" role="button"><i class="fa fa-twitter"></i> Follow @tsaiid</a> <a class="btn btn-default btn-xs" href="https://tsai.it/" role="button"><i class="fa fa-rss"></i> Blog</a></p>
+                    <h4>License</h4>
+                    <p>MIT</p>
+                    <h4>Sources</h4>
+                    <p><a class="btn btn-default btn-xs" href="https://github.com/tsaiid/vghks-random-duty" role="button"><i class="fa fa-github"></i> Hosted on GitHub</a></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Help Modal -->
     <div class="modal fade bootstrap-dialog type-info" id="usageModal" tabindex="-1" role="dialog" aria-labelledby="usageModalLabel">
         <div class="modal-dialog modal-lg" role="document">
@@ -215,7 +240,7 @@
                     <h4>步驟</h4>
                     <ol>
                         <li>選擇月份模式並移至欲排班的月份，選擇完畢後建議不要再更動</li>
-                        <li>檢查月曆中的假日是否有誤，可點選做刪除的動作</li>
+                        <li>檢查月曆中的假日是否有誤，可點選做刪除的動作，或新增自訂假日</li>
                         <li>設定人數</li>
                         <li>檢查建議班表是否可以接受，可點選「更新建議班表」隨機調整或手動修改</li>
                         <li>依次填入班表，直到建議班表中「五」、「假」的紅字皆消除</li>
