@@ -1,3 +1,8 @@
+// block UI before fullcalendar loads
+$.blockUI({
+    message: '<h2><i class="fa fa-spinner fa-pulse"></i> Loading...</h2>'
+});
+
 $(function() {
     //
     // flags
@@ -8,6 +13,9 @@ $(function() {
     //
     // global vars
     //
+    var is_cal1_loaded = false;
+    var is_cal2_loaded = false; // may only be used in 2-month mode
+
     $('#mode_switch').bootstrapSwitch({
         onText: "2 月",
         offText: "1 月",
@@ -401,22 +409,22 @@ $(function() {
             update_current_duty_status();
             var groups = calculate_group_duties(get_all_duties());
             update_summary_duties(groups);
+
+            if (!is_cal1_loaded) {
+                is_cal1_loaded = true;
+            }
         }
     });
 
     // navigator for next and prev months
     $('#next_month').click(function() {
         //console.log('prev is clicked, do something');
-        is_cal1_finished = false;
-        is_cal2_finished = false;
         $('#cal1').fullCalendar('next');
         $('#cal2').fullCalendar('next');
     });
 
     $('#prev_month').click(function() {
         //console.log('next is clicked, do something');
-        is_cal1_finished = false;
-        is_cal2_finished = false;
         $('#cal1').fullCalendar('prev');
         $('#cal2').fullCalendar('prev');
     });
@@ -1150,4 +1158,11 @@ $(function() {
     //
     // Must be done at first time
     //
+    // unblock UI after cal1 is fully loaded.
+    var check_cal_loaded = setInterval(function() {
+        if (is_cal1_loaded) {
+            $.unblockUI();
+            clearInterval(check_cal_loaded);
+        }
+    }, 200);
 });
