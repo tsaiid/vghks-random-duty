@@ -8,6 +8,7 @@ task :deploy do
   system "grunt build"
 
   cd "_site" do
+    system "git pull"
     system "git add -A"
 
     message = "vghks-random-duty updated at #{Time.now.utc}"
