@@ -238,7 +238,14 @@ $(function() {
     });
 
     $('input[name=eventProp]').change(function() {
-        update_dialog_title_type($(this).val())
+        var duty_type = $(this).val();
+        if (duty_type != 'eventPropHoliday') {
+            var orig_duty_val = parseInt($('#eventTitle').val()) || parseInt($('#eventOrigTitle').val()) || 1;
+        }
+        update_dialog_title_type(duty_type);
+        if (duty_type != 'eventPropHoliday') {
+            $('#eventTitle').val(orig_duty_val);
+        }
     });
 
     //
