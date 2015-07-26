@@ -457,7 +457,7 @@ $(function() {
         });
 
         var preset_non_duties = [];
-        preset_non_duty_events.forEach(function(event) {
+        $.each(preset_non_duty_events, function(i, event) {
             var date = event.start.format("YYYY-MM-DD");
             preset_non_duties.push([date, parseInt(event.title)]); // parseInt("1 不值") == 1
         });
@@ -475,7 +475,7 @@ $(function() {
         });
 
         var preset_duties = [];
-        preset_duty_events.forEach(function(event) {
+        $.each(preset_duty_events, function(i, event) {
             var date = event.start.format("YYYY-MM-DD");
             preset_duties.push([date, parseInt(event.title)]);
         });
@@ -493,7 +493,7 @@ $(function() {
         });
 
         var all_duties = [];
-        all_duty_events.forEach(function(event) {
+        $.each(all_duty_events, function(i, event) {
             var date = event.start.format("YYYY-MM-DD");
             all_duties.push([date, parseInt(event.title)]);
         });
@@ -518,7 +518,7 @@ $(function() {
             }
         });
 
-        var preset_holidays = preset_holidays1.concat(preset_holidays2).map(function(event) {
+        var preset_holidays = $.map(preset_holidays1.concat(preset_holidays2), function(event) {
             return event.start.format("YYYY-MM-DD");
         });
 
@@ -587,9 +587,6 @@ $(function() {
             }
             the_day.add(1, 'days');
         }
-        //console.log(ordinary_count);
-        //console.log(friday_count);
-        //console.log(holiday_count);
 
         var c = 0;
         var patterns;
@@ -675,7 +672,7 @@ $(function() {
             var o_count = 0,
                 f_count = 0,
                 h_count = 0;
-            patterns.forEach(function(pattern, index) {
+            $.each(patterns, function(index, pattern) {
                 var point = parseInt(pattern[1]) + parseInt(pattern[2]) * 2;
                 pattern_html += '<tr id="person_' + (index + 1) + '"><td>' + (index + 1) + '</td><td class="ordinary_count">' + pattern[0] + ' <span class="current_status"></span></td><td class="friday_count">' + pattern[1] + ' <span class="current_status"></span></td><td class="holiday_count">' + pattern[2] + ' <span class="current_status"></span></td><td>' + point + '</td></tr>';
                 o_count += pattern[0];
@@ -717,7 +714,7 @@ $(function() {
             f_count = 0,
             h_count = 0;
         var table_html = '<table id="edit_patterns_table" class="table"><tr><th>No.</th><th>平</th><th>五</th><th>假</th><th>P</th></tr>';
-        patterns.forEach(function(p, i) {
+        $.each(patterns, function(i, p) {
             o_count += p[0];
             f_count += p[1];
             h_count += p[2];
@@ -752,7 +749,7 @@ $(function() {
                     var tb_o_count = 0,
                         tb_f_count = 0,
                         tb_h_count = 0;
-                    table_data.forEach(function(p) {
+                    $.each(table_data, function(i, p) {
                         tb_o_count += parseInt(p[0]);
                         tb_f_count += parseInt(p[1]);
                         tb_h_count += parseInt(p[2]);
@@ -781,7 +778,7 @@ $(function() {
                         var tb_o_count = 0,
                             tb_f_count = 0,
                             tb_h_count = 0;
-                        table_data.forEach(function(p, i) {
+                        $.each(table_data, function(i, p) {
                             tb_o_count += parseInt(p[0]);
                             tb_f_count += parseInt(p[1]);
                             tb_h_count += parseInt(p[2]);
@@ -805,7 +802,7 @@ $(function() {
             var summary_duties_html = '<table class="table table-striped"><tr><th>No.</th><th>Dates</th><th>Intervals</th><th>Std Dev</th></tr>';
             var preset_holidays = get_preset_holidays();
             for (var p in groups_duties) {
-                var dates = groups_duties[p].dates.sort().map(function(d) {
+                var dates = $.map(groups_duties[p].dates.sort(), function(d) {
                     var date_html = '<span class="';
                     // colorize if friday or holiday
                     if (is_holiday(preset_holidays, d) || is_weekend(d)) {
@@ -854,7 +851,7 @@ $(function() {
         var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
         var table_html = '<table id="duties_datatable" class="table">';
         var duties_map = {};
-        duties.map(function(x) {
+        $.map(duties, function(x) {
             return duties_map[x[0]] = x[1]
         });
 
@@ -964,7 +961,7 @@ $(function() {
                     var groups = e.data["groups"];
                     //console.log(groups);
 
-                    duties.forEach(function(duty) {
+                    $.each(duties, function(i, duty) {
                         var date = moment(duty[0], "YYYY-MM-DD");
                         if (get_preset_duty(presets.duties, duty[0]) === undefined) {
                             var event = {
@@ -1083,7 +1080,7 @@ $(function() {
                 return;
         }
 
-        test_data.forEach(function(data) {
+        $.each(test_data, function(i, data) {
             var event = {
                 title: data[0].toString(),
                 start: data[1],
@@ -1129,7 +1126,7 @@ $(function() {
                 return;
         }
 
-        test_data.forEach(function(data) {
+        $.each(test_data, function(i, data) {
             var event = {
                 title: data[0].toString(),
                 start: data[1],
@@ -1169,6 +1166,16 @@ $(function() {
     var check_cal_loaded = setInterval(function() {
         if (is_cal1_loaded) {
             $.unblockUI();
+
+            // check if browser supports web workers.
+            if (typeof window.Worker !== "function") {
+                $.blockUI({
+                    theme: true,
+                    title: 'Error',
+                    message: '<h4><i class="fa fa-exclamation-circle"></i> 此瀏覽器不支援 Web Worker 技術</h4><p>請使用下列版本以上的瀏覽器：</p><div class="row"><div class="col-sm-4 text-center"><img src="https://raw.githubusercontent.com/alrra/browser-logos/master/chrome/chrome_64x64.png"><br>Chrome<br>&ge; 4.0</div><div class="col-sm-4 text-center"><img src="https://raw.githubusercontent.com/alrra/browser-logos/master/firefox/firefox_64x64.png"><br>Firefox<br>&ge; 3.5</div><div class="col-sm-4 text-center"><img src="https://raw.githubusercontent.com/alrra/browser-logos/master/internet-explorer/internet-explorer_64x64.png"><br>Internet Explorer<br>&ge; 10.0</div></div>'
+                });
+            }
+
             clearInterval(check_cal_loaded);
         }
     }, 200);

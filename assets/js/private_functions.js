@@ -56,6 +56,10 @@ Array.prototype.multiIndexOf = function(el) {
     return idxs;
 };
 
+function is_worker_env() {
+    return typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+}
+
 // currently unused
 /*
 function entropy(arr) {
