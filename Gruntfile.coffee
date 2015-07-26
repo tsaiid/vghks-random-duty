@@ -21,7 +21,7 @@ module.exports = (grunt) ->
       main: {
         files: [
           { src: ['assets/**', 'index.html'], dest: '<%= opts.base_path %>'},
-          { cwd: 'bower_components/jquery/', src: 'jquery.min.js', dest: '<%= opts.js_path %>' },
+          { cwd: 'bower_components/jquery/', src: 'jquery.min.*', dest: '<%= opts.js_path %>' },
           { cwd: 'bower_components/moment/min/', src: 'moment.min.js', dest: '<%= opts.js_path %>' },
           { cwd: 'bower_components/jquery-ui/', src: ['themes/redmond/**'], dest: '<%= opts.css_path %>' },
           { cwd: 'bower_components/jquery-ui/', src: 'jquery-ui.min.js', dest: '<%= opts.js_path %>' },
