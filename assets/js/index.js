@@ -1139,6 +1139,29 @@ $(function() {
         });
     });
 
+    function is_each_day_has_a_duty(start_date, month_span, duties) {
+        var _is_each_day_has_a_duty = true;
+        var end_date = start_date.clone().add(month_span, 'months');
+        var total_days = end_date.diff(start_date, 'days');
+        if (total_days != duties.length) {
+            _is_each_day_has_a_duty = false;
+            console.log(total_days + ' unequal: ' + duties.length);
+        } else {
+            var sorted_duties = duties.sort(function(a, b) {
+                return a[0].localeCompare(b[0])
+            });
+            for (the_date = start_date.clone(), i = 0; the_date < end_date; i++, the_date.add(1, 'day')) {
+                if (sorted_duties[i][0] != the_date.format('YYYY-MM-DD')) {
+                    _is_each_day_has_a_duty = false;
+                    console.log(sorted_duties[i][0] + ' diff: ' + the_date.format());
+                    break;
+                }
+            }
+        }
+
+        return _is_each_day_has_a_duty;
+    }
+
     $('#func_download_excel').click(function(event) {
         // set duration as file name.
         var start_date = $('#cal1').fullCalendar('getDate').startOf('month');
@@ -1151,12 +1174,33 @@ $(function() {
         }
         var excel_path = duration_str + '_duties.xls';
 
-        // write table for downloading
         var duties = get_all_duties();
-        generate_duties_datatable(duties);
-
-        $(this).attr('download', excel_path);
-        ExcellentExport.excel(this, 'duties_datatable', 'duration_str');
+        var export_excel = function(){
+            // write table for downloading
+            generate_duties_datatable(duties);
+            a = document.createElement("a");
+            a.download = excel_path;
+            ExcellentExport.excel(a, 'duties_datatable', duration_str);
+            a.click();
+        }
+        // check if every date has a duty
+        if (is_each_day_has_a_duty(start_date, month_span, duties)) {
+            export_excel();
+        } else {
+            BootstrapDialog.confirm({
+                title: 'Warning',
+                message: '班表尚未完全設定，確定下載 Excel 檔？',
+                type: BootstrapDialog.TYPE_WARNING,
+                closable: true,
+                btnCancelLabel: '取消',
+                btnOKLabel: '下載',
+                callback: function(result) {
+                    if (result) {
+                        export_excel();
+                    }
+                }
+            });
+        }
     });
 
     //
