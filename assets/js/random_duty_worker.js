@@ -1,5 +1,5 @@
 importScripts(
-    'https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js',
+    '../../vendor/js/moment.min.js',
     'private_functions.js',
     'lib_duties.js',
     'lib_holidays.js'
