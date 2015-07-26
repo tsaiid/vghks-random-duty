@@ -1,3 +1,14 @@
+// check if browser supports web workers.
+if (typeof window.Worker !== "function") {
+    $.blockUI({
+        theme: true,
+        title: 'Error',
+        message: '<h4><i class="fa fa-exclamation-circle"></i> 此瀏覽器不支援 Web Worker 技術</h4><p>請使用下列版本以上的瀏覽器：</p><div class="row"><div class="col-sm-4 text-center"><img src="https://raw.githubusercontent.com/alrra/browser-logos/master/chrome/chrome_64x64.png"><br>Chrome<br>&ge; 4.0</div><div class="col-sm-4 text-center"><img src="https://raw.githubusercontent.com/alrra/browser-logos/master/firefox/firefox_64x64.png"><br>Firefox<br>&ge; 3.5</div><div class="col-sm-4 text-center"><img src="https://raw.githubusercontent.com/alrra/browser-logos/master/internet-explorer/internet-explorer_64x64.png"><br>Internet Explorer<br>&ge; 10.0</div></div>'
+    });
+
+    return;
+}
+
 // block UI before fullcalendar loads
 $.blockUI({
     message: '<h2><i class="fa fa-spinner fa-pulse"></i> Loading...</h2>'
