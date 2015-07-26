@@ -639,8 +639,9 @@ $(function() {
             }
         });
 
-        // clear summary
-        $('#summary_duties').html('');
+        // update summary
+        var groups = calculate_group_duties(get_all_duties());
+        update_summary_duties(groups);
     });
 
     function update_current_duty_status() {
