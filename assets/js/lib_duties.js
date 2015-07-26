@@ -1,6 +1,6 @@
 function get_preset_duty(preset_duties, date_str) {
     var duty;
-    preset_duties.some(function(d) {
+    $.each(preset_duties, function(i, d) {
         if (d[0] == date_str) {
             duty = parseInt(d[1]);
             return true;
@@ -11,7 +11,7 @@ function get_preset_duty(preset_duties, date_str) {
 
 function get_preset_non_duties_by_date(preset_non_duties, date_str) {
     var duties = [];
-    preset_non_duties.forEach(function(d) {
+    $.each(preset_non_duties, function(i, d) {
         if (d[0] == date_str) {
             duties.push(parseInt(d[1]));
         }
@@ -23,7 +23,7 @@ function count_duty_pattern(dates, preset_holidays) {
     var o_count = 0,
         f_count = 0,
         h_count = 0;
-    dates.forEach(function(date) {
+    $.each(dates, function(i, date) {
         if (is_weekend(date) || is_holiday(preset_holidays, date)) {
             h_count++;
         } else if (is_friday(preset_holidays, date)) {
@@ -55,13 +55,13 @@ function calculate_group_duties(duties, is_continuous_duties) {
         //return moment(a[0], "YYYY-MM-DD") - moment(b[0], "YYYY-MM-DD")
         return a[0].localeCompare(b[0])
     }); // sort by date
-    var duties_simple_array = sorted_duties.map(function(d) {
+    var duties_simple_array = $.map(sorted_duties, function(d) {
         return d[1]
     });
 
     var groups = {};
     var total_people = 0;
-    sorted_duties.forEach(function(duty, index) {
+    $.each(sorted_duties, function(index, duty) {
         var person = duty[1];
         if (groups[person] === undefined) {
             groups[person] = {
