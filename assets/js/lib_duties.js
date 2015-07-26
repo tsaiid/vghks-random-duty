@@ -1,21 +1,38 @@
 function get_preset_duty(preset_duties, date_str) {
     var duty;
-    $.each(preset_duties, function(i, d) {
-        if (d[0] == date_str) {
-            duty = parseInt(d[1]);
-            return true;
-        }
-    });
+    if (is_worker_env()) { // cannot use jquery in web workers
+        preset_duties.some(function(d) {
+            if (d[0] == date_str) {
+                duty = parseInt(d[1]);
+                return true;
+            }
+        });
+    } else {
+        $.each(preset_duties, function(i, d) {
+            if (d[0] == date_str) {
+                duty = parseInt(d[1]);
+                return true;
+            }
+        });
+    }
     return duty;
 }
 
 function get_preset_non_duties_by_date(preset_non_duties, date_str) {
     var duties = [];
-    $.each(preset_non_duties, function(i, d) {
-        if (d[0] == date_str) {
-            duties.push(parseInt(d[1]));
-        }
-    });
+    if (is_worker_env()) { // cannot use jquery in web workers
+        preset_non_duties.forEach(function(d) {
+            if (d[0] == date_str) {
+                duties.push(parseInt(d[1]));
+            }
+        });
+    } else {
+        $.each(preset_non_duties, function(i, d) {
+            if (d[0] == date_str) {
+                duties.push(parseInt(d[1]));
+            }
+        });
+    }
     return duties;
 }
 
@@ -23,15 +40,27 @@ function count_duty_pattern(dates, preset_holidays) {
     var o_count = 0,
         f_count = 0,
         h_count = 0;
-    $.each(dates, function(i, date) {
-        if (is_weekend(date) || is_holiday(preset_holidays, date)) {
-            h_count++;
-        } else if (is_friday(preset_holidays, date)) {
-            f_count++;
-        } else {
-            o_count++;
-        }
-    });
+    if (is_worker_env()) { // cannot use jquery in web workers
+        dates.forEach(function(date) {
+            if (is_weekend(date) || is_holiday(preset_holidays, date)) {
+                h_count++;
+            } else if (is_friday(preset_holidays, date)) {
+                f_count++;
+            } else {
+                o_count++;
+            }
+        });
+    } else {
+        $.each(dates, function(i, date) {
+            if (is_weekend(date) || is_holiday(preset_holidays, date)) {
+                h_count++;
+            } else if (is_friday(preset_holidays, date)) {
+                f_count++;
+            } else {
+                o_count++;
+            }
+        });
+    }
     //console.log("dates: " + dates);
     //console.log("pattern: " + [o_count, f_count, h_count].toString());
     return [o_count, f_count, h_count];
@@ -55,13 +84,26 @@ function calculate_group_duties(duties, is_continuous_duties) {
         //return moment(a[0], "YYYY-MM-DD") - moment(b[0], "YYYY-MM-DD")
         return a[0].localeCompare(b[0])
     }); // sort by date
-    var duties_simple_array = $.map(sorted_duties, function(d) {
-        return d[1]
-    });
+
+    // cannot use $.map or Array.map
+    var duties_simple_array = [];
+    for (var i = 0; i < sorted_duties.length; i++) {
+        duties_simple_array.push(sorted_duties[i]);
+    }
 
     var groups = {};
     var total_people = 0;
-    $.each(sorted_duties, function(index, duty) {
+
+    var do_group_duties = function(arg1, arg2) {
+        var index, duty;
+        if (is_worker_env()) { // cannot use jquery in web workers
+            index = arg2;
+            duty = arg1;
+        } else {
+            index = arg1;
+            duty = arg2;
+        }
+
         var person = duty[1];
         if (groups[person] === undefined) {
             groups[person] = {
@@ -85,7 +127,13 @@ function calculate_group_duties(duties, is_continuous_duties) {
             }
             groups[person].intervals.push(interval);
         }
-    });
+    };
+
+    if (is_worker_env()) { // cannot use jquery in web workers
+        sorted_duties.forEach(do_group_duties);
+    } else {
+        $.each(sorted_duties, do_group_duties);
+    }
 
     // calculate standard deviations
     for (var person in groups) {
