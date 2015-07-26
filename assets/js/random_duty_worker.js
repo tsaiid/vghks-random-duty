@@ -56,20 +56,6 @@ function generate_non_preset_duty_match_patterns(total_days, since_date_str, pre
     return non_preset_duties;
 }
 
-function has_continuous_duties(duties) {
-    var sorted_duties = duties.sort(function(a, b) {
-        //return moment(a[0], "YYYY-MM-DD") - moment(b[0], "YYYY-MM-DD")
-        return a[0].localeCompare(b[0])
-    }); // sort by date
-    var len = sorted_duties.length;
-    for (var i = 0; i < len; i++) {
-        if (sorted_duties[i + 1] !== undefined && sorted_duties[i][1] == sorted_duties[i + 1][1]) {
-            return true;
-        }
-    }
-    return false;
-}
-
 function less_than_std_dev_level(group_duties, std_dev_level) {
     for (var person in group_duties) {
         if (group_duties[person].std_dev > std_dev_level) {
@@ -131,7 +117,7 @@ function is_match_filters(merged_duties, group_duties, filters) {
     var use_std_dev_level = filters.use_std_dev_level;
     var std_dev_level = filters.std_dev_level;
 
-    if (has_continuous_duties(merged_duties)) {
+    if (has_continuous_duties(group_duties)) {
         return false;
     }
 
