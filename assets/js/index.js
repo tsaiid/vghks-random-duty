@@ -248,6 +248,20 @@ $(function() {
         }
     });
 
+    function WarningDialog(msg) {
+        BootstrapDialog.show({
+            type: BootstrapDialog.TYPE_WARNING,
+            title: 'Warning',
+            message: msg,
+            buttons: [{
+                label: 'Close',
+                action: function(dialogItself) {
+                    dialogItself.close();
+                }
+            }],
+        });
+    }
+
     //
     // FullCalendar related
     //
@@ -706,7 +720,7 @@ $(function() {
     $('#func_edit_duty_patterns').click(function() {
         var patterns = $('#suggested_pattern').data("patterns");
         if (patterns === undefined) {
-            BootstrapDialog.alert('Patterns are undefinde!');
+            WarningDialog('Patterns are undefinde!');
             return;
         }
 
@@ -755,7 +769,7 @@ $(function() {
                         tb_h_count += parseInt(p[2]);
                     });
                     if (tb_o_count != o_count || tb_f_count != f_count || tb_h_count != h_count) {
-                        BootstrapDialog.alert("總班數錯誤，請再檢查");
+                        WarningDialog('總班數錯誤，請再檢查');
                         console.log(table_data);
                         return;
                     }
@@ -896,17 +910,7 @@ $(function() {
         // check if calculated patterns.
         var patterns = $('#suggested_pattern').data("patterns");
         if (patterns === undefined) {
-            BootstrapDialog.show({
-                type: BootstrapDialog.TYPE_WARNING,
-                title: 'Warning',
-                message: 'Please calculate duty patterns first!',
-                buttons: [{
-                    label: 'Close',
-                    action: function(dialogItself) {
-                        dialogItself.close();
-                    }
-                }],
-            });
+            WarningDialog('請先更新排班樣式');
             return;
         }
 
@@ -917,50 +921,20 @@ $(function() {
         var groups = calculate_group_duties(presets.duties);
         if (use_qod_limit) {
             if (!less_than_qod_times(groups, qod_limit)) {
-                BootstrapDialog.show({
-                    type: BootstrapDialog.TYPE_WARNING,
-                    title: 'Warning',
-                    message: '目前排班已超過 QOD 設定上限，請調整',
-                    buttons: [{
-                        label: 'Close',
-                        action: function(dialogItself) {
-                            dialogItself.close();
-                        }
-                    }],
-                });
+                WarningDialog('目前排班已超過 QOD 設定上限，請調整');
                 return;
             }
         }
 
         // check if preset duties has qd duty
         if (has_continuous_duties(groups)) {
-            BootstrapDialog.show({
-                type: BootstrapDialog.TYPE_WARNING,
-                title: 'Warning',
-                message: '目前排班出現連值狀況，請調整',
-                buttons: [{
-                    label: 'Close',
-                    action: function(dialogItself) {
-                        dialogItself.close();
-                    }
-                }],
-            });
+            WarningDialog('目前排班出現連值狀況，請調整');
             return;
         }
 
         // check if friday, weekend, holiday duties are set and fit pattern.
         if (!is_preset_duties_fit_pattern(presets, patterns)) {
-            BootstrapDialog.show({
-                type: BootstrapDialog.TYPE_WARNING,
-                title: 'Warning',
-                message: 'The preset duties do not fit the patterns. Please adjust them!',
-                buttons: [{
-                    label: 'Close',
-                    action: function(dialogItself) {
-                        dialogItself.close();
-                    }
-                }],
-            });
+            WarningDialog('已排班表不符合樣式，請調整');
             return;
         }
 
