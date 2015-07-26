@@ -1230,7 +1230,7 @@ $(function() {
             $.unblockUI();
 
             // check if browser supports web workers.
-            if (typeof window.Worker !== "function") {
+            if (typeof window.Worker === "undefined") {
                 $.blockUI({
                     theme: true,
                     title: 'Error',
