@@ -2,7 +2,8 @@ importScripts(
     '../../vendor/js/moment.min.js',
     'private_functions.js',
     'lib_duties.js',
-    'lib_holidays.js'
+    'lib_holidays.js',
+    'lib_filters.js'
 );
 
 var ENABLE_CONDITIONING = true;
@@ -72,18 +73,6 @@ function has_continuous_duties(duties) {
 function less_than_std_dev_level(group_duties, std_dev_level) {
     for (var person in group_duties) {
         if (group_duties[person].std_dev > std_dev_level) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-function less_than_qod_times(group_duties, qod_limit) {
-    for (var person in group_duties) {
-        var qod_times = group_duties[person].intervals.multiIndexOf(2).length;
-        if (qod_times > parseInt(qod_limit)) {
-            // console.log("qod_times: " + qod_times + ", intervals: " + group_duties[person].intervals.toString());
             return false;
         }
     }
