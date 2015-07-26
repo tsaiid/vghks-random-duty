@@ -975,8 +975,10 @@ $(function() {
                     $.each(duties, function(i, duty) {
                         var date = moment(duty[0], "YYYY-MM-DD");
                         if (get_preset_duty(presets.duties, duty[0]) === undefined) {
+                            var eventTitle = duty[1].toString();
                             var event = {
-                                title: duty[1].toString(),
+                                id: CryptoJS.MD5(date + eventTitle).toString(),
+                                title: eventTitle,
                                 start: date,
                                 allDay: true,
                                 color: duty_colors[duty[1]],
@@ -1092,8 +1094,10 @@ $(function() {
         }
 
         $.each(test_data, function(i, data) {
+            var eventTitle = data[0].toString();
             var event = {
-                title: data[0].toString(),
+                id: CryptoJS.MD5(data[1] + eventTitle).toString(),
+                title: eventTitle,
                 start: data[1],
                 allDay: true,
                 className: "preset-duty-event",
@@ -1139,7 +1143,8 @@ $(function() {
 
         $.each(test_data, function(i, data) {
             var event = {
-                title: data[0].toString(),
+                id: CryptoJS.MD5(data[1] + eventTitle).toString(),
+                title: eventTitle,
                 start: data[1],
                 allDay: true,
                 className: "duty-event",
