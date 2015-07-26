@@ -100,23 +100,23 @@ $(function() {
         if (is_edit_dialog) {
             if (duty_type == "eventPropNonduty") {
                 if ($.inArray(parseInt(title), prev_set_non_duties) > -1) {
-                    status = "Already set the same non-duty!";
+                    status = "重覆設定不值班人員";
                 } else if (prev_set_duty == title && title != orig_title) {
-                    status = "Conflict! The staff (" + title + ") is already on duty!";
+                    status = "人員 " + title + " 本日已設為值班，不可再設為不值！";
                 }
             } else if (duty_type == "eventPropDuty") {
                 if (already_had_duty) {
                     if (title == prev_set_duty && title != orig_title) {
-                        status = "Already had a duty!";
+                        status = "本日已有人值班";
                     } else if (title != prev_set_duty && title == orig_title) {
-                        status = "Already had a duty!";
+                        status = "本日已有人值班";
                     } else if ($.inArray(parseInt(title), prev_set_non_duties) > -1) {
-                        status = "Conflict! The staff (" + title + ") should not be on duty!";
+                        status = "人員 " + title + " 本日已設為不可值班！";
                     }
                 } else {
                     if ($.inArray(parseInt(title), prev_set_non_duties) > -1) {
                         if (title != orig_title) {
-                            status = "Conflict! The staff (" + title + ") should not be on duty!";
+                            status = "人員 " + title + " 本日已設為不可值班！";
                         }
                     }
                 }
@@ -124,16 +124,16 @@ $(function() {
         } else {
             if (duty_type == "eventPropNonduty") {
                 if ($.inArray(parseInt(title), prev_set_non_duties) > -1) {
-                    status = "Already had a same non-duty!";
+                    status = "重覆設定不值班人員";
                 }
                 if (prev_set_duty == title) {
-                    status = "Conflict! The staff (" + title + ") should be on duty!";
+                    status = "人員 " + title + " 本日已設為值班，不可再設為不值！";
                 }
             } else if (duty_type == "eventPropDuty") {
                 if (already_had_duty) {
-                    status = "Already had a duty!";
+                    status = "本日已有人值班";
                 } else if ($.inArray(parseInt(title), prev_set_non_duties) > -1) {
-                    status = "Conflict! The staff (" + title + ") should not be on duty!";
+                    status = "人員 " + title + " 本日已設為不可值班！";
                 }
             }
         }
@@ -350,7 +350,7 @@ $(function() {
     var calEventDrop = function(event, delta, revertFunc, jsEvent, ui, view) {
         // holiday can not be dragged and dropped. only can be deleted or created.
         if ($.inArray('gcal-holiday', event.className) > -1) {
-            myGrowlUI('Error', 'Holiday cannot be moved!');
+            myGrowlUI('Error', '不可移動假日，請使用刪除功能');
             revertFunc();
         }
 
@@ -994,7 +994,7 @@ $(function() {
                     // unblock ui
                     $.unblockUI({
                         onUnblock: function() {
-                            myGrowlUI('Random Duty Completed', 'Have a nice day!');
+                            myGrowlUI('Success', '自動排班已完成');
                         }
                     });
                     break;
