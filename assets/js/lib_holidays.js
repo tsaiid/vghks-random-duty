@@ -1,5 +1,5 @@
 function is_holiday(preset_holidays, date_str) {
-    var _is_holiday = $.inArray(date_str, preset_holidays);
+    var _is_holiday = ($.inArray(date_str, preset_holidays) > -1);
     return _is_holiday;
 }
 
