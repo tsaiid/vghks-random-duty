@@ -1,9 +1,5 @@
 function is_holiday(preset_holidays, date_str) {
-    var _is_holiday = preset_holidays.some(function(holiday) {
-        if (holiday === date_str) {
-            return true;
-        }
-    });
+    var _is_holiday = $.inArray(date_str, preset_holidays);
     return _is_holiday;
 }
 
