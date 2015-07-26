@@ -1,10 +1,10 @@
 {
   "name": "vghks-random-duty",
   "main": "index.html",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "homepage": "https://github.com/tsaiid/vghks-random-duty",
   "authors": [
-    "I-Ta Tsai@MBPR <ittsai@gmail.com>"
+    "I-Ta Tsai <ittsai@gmail.com>"
   ],
   "license": "MIT",
   "ignore": [
