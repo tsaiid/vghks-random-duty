@@ -910,8 +910,29 @@ $(function() {
             return;
         }
 
-        // check if friday, weekend, holiday duties are set and fit pattern.
+        // check if preset duties exceed qod limit
+        var use_qod_limit = $('#use_qod_limit').is(':checked');
+        var qod_limit = parseInt($('#inputQodLimitSlider').slider('option', 'value'));
         var presets = get_presets();
+        var groups = calculate_group_duties(presets.duties);
+        if (use_qod_limit) {
+            if (!less_than_qod_times(groups, qod_limit)) {
+                BootstrapDialog.show({
+                    type: BootstrapDialog.TYPE_WARNING,
+                    title: 'Warning',
+                    message: '目前排班已超過 QOD 設定上限，請調整',
+                    buttons: [{
+                        label: 'Close',
+                        action: function(dialogItself) {
+                            dialogItself.close();
+                        }
+                    }],
+                });
+                return;
+            }
+        }
+
+        // check if friday, weekend, holiday duties are set and fit pattern.
         if (!is_preset_duties_fit_pattern(presets, patterns)) {
             BootstrapDialog.show({
                 type: BootstrapDialog.TYPE_WARNING,
@@ -943,8 +964,8 @@ $(function() {
             "patterns": patterns,
             "use_std_dev_level": $('#use_std_dev_level').is(':checked'),
             "std_dev_level": parseFloat($('#inputStdDevSlider').slider('option', 'value')),
-            "use_qod_limit": $('#use_qod_limit').is(':checked'),
-            "qod_limit": parseInt($('#inputQodLimitSlider').slider('option', 'value')),
+            "use_qod_limit": use_qod_limit,
+            "qod_limit": qod_limit,
         };
 
         random_duty_worker = new Worker("assets/js/random_duty_worker.js");
@@ -1175,7 +1196,8 @@ $(function() {
         var excel_path = duration_str + '_duties.xls';
 
         var duties = get_all_duties();
-        var export_excel = function(){
+
+        function export_excel() {
             // write table for downloading
             generate_duties_datatable(duties);
             a = document.createElement("a");
