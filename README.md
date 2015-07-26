@@ -2,9 +2,7 @@
 
 A single page application to assist resident duty arrangement for Radiology department of VGHKS.
 
-符合高榮放射線部住院醫師排班規則的排班小工具。
-
-Demo: [http://radtools.tsai.it/vghks-random-duty/]()
+符合高榮放射線部住院醫師排班規則的排班小工具。[Demo Site](http://radtools.tsai.it/vghks-random-duty/)
 
 ## Feature
 
@@ -15,8 +13,9 @@ Demo: [http://radtools.tsai.it/vghks-random-duty/]()
 
 ## Limitation
 
-1. 無法於網頁版儲存結果，僅可匯出 excel 檔
-2. 經更動的 google calendar 假日如有切換月份會失效
+1. 因需要大量運算，會用到 Web Workers 技術，故建議使用新版的瀏覽器，IE9 以下並不支援。
+2. 無法於網頁版儲存結果，僅可匯出 excel 檔
+3. 經更動的 google calendar 假日如有切換月份會失效
 
 ## License
 
