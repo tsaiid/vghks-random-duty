@@ -932,6 +932,22 @@ $(function() {
             }
         }
 
+        // check if preset duties has qd duty
+        if (has_continuous_duties(groups)) {
+            BootstrapDialog.show({
+                type: BootstrapDialog.TYPE_WARNING,
+                title: 'Warning',
+                message: '目前排班出現連值狀況，請調整',
+                buttons: [{
+                    label: 'Close',
+                    action: function(dialogItself) {
+                        dialogItself.close();
+                    }
+                }],
+            });
+            return;
+        }
+
         // check if friday, weekend, holiday duties are set and fit pattern.
         if (!is_preset_duties_fit_pattern(presets, patterns)) {
             BootstrapDialog.show({
