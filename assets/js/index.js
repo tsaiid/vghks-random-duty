@@ -15,6 +15,8 @@ $(function() {
     //
     var is_cal1_loaded = false;
     var is_cal2_loaded = false; // may only be used in 2-month mode
+    var is_cal1_all_rendered = false;
+    var is_cal2_all_rendered = false;
 
     $('#mode_switch').bootstrapSwitch({
         onText: "2 月",
@@ -23,14 +25,24 @@ $(function() {
         onSwitchChange: function(event, state) {
             //console.log(state); // true | false
             if (state) { // 2-month mode
+                is_cal2_all_rendered = false;
                 $('.first_cal').toggleClass('col-sm-6', state, 600).promise().done(function() {
                     $('.second_cal').show();
-                    $('#cal2').fullCalendar('render'); // force render the cal, needed for from hidden div
+                    if (!is_cal2_loaded) {
+                        $('#cal2').fullCalendar('render'); // force render the cal, needed for from hidden div
+                    } else {
+                        $('#cal2').fullCalendar('render'); // force render the cal, needed for from hidden div
+                        $('#cal2').fullCalendar('rerenderEvents'); // force re-render cal2, to update suggested patterns
+                    }
                 });
             } else { // 1-month mode
+                is_cal1_all_rendered = false;
                 $('.second_cal').hide();
-                $('.first_cal').toggleClass('col-sm-6', state, 600);
+                $('.first_cal').toggleClass('col-sm-6', state, 600).promise().done(function() {
+                    $('#cal1').fullCalendar('rerenderEvents'); // force re-render cal1, to update suggested patterns
+                });
             }
+            wait_and_update_suggested_patterns();
         }
     });
 
@@ -405,7 +417,14 @@ $(function() {
         eventDrop: calEventDrop,
         eventClick: calEventClick,
         eventRender: onlyTheMonthEventRender,
-        eventAfterAllRender: function() {}
+        eventAfterAllRender: function() {
+            //console.log('cal2 eventAfterAllRender');
+            is_cal2_all_rendered = true;
+
+            if (!is_cal2_loaded) {
+                is_cal2_loaded = true;
+            }
+        }
     });
 
     $("#cal1").fullCalendar({
@@ -427,6 +446,9 @@ $(function() {
         eventClick: calEventClick,
         eventRender: onlyTheMonthEventRender,
         eventAfterAllRender: function() {
+            //console.log("eventAfterAllRender");
+            is_cal1_all_rendered = true;
+
             update_current_duty_status();
             var groups = calculate_group_duties(get_all_duties());
             update_summary_duties(groups);
@@ -437,17 +459,37 @@ $(function() {
         }
     });
 
+    function wait_and_update_suggested_patterns() {
+        var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
+        var check_cal_all_rendered = setInterval(function() {
+            //console.log("200ms passed.");
+            if (month_span == 1 && is_cal1_all_rendered) {
+                //console.log("detect cal1 all rendered.");
+                update_patterns();
+                clearInterval(check_cal_all_rendered);
+            } else if (month_span == 2 && is_cal1_all_rendered && is_cal2_all_rendered) {
+                //console.log("detect cal1 and cal2 all rendered.");
+                update_patterns();
+                clearInterval(check_cal_all_rendered);
+            }
+        }, 200);
+    }
+
     // navigator for next and prev months
     $('#next_month').click(function() {
-        //console.log('prev is clicked, do something');
+        is_cal1_all_rendered = false;
+        is_cal2_all_rendered = false;
         $('#cal1').fullCalendar('next');
         $('#cal2').fullCalendar('next');
+        wait_and_update_suggested_patterns();
     });
 
     $('#prev_month').click(function() {
-        //console.log('next is clicked, do something');
+        is_cal1_all_rendered = false;
+        is_cal2_all_rendered = false;
         $('#cal1').fullCalendar('prev');
         $('#cal2').fullCalendar('prev');
+        wait_and_update_suggested_patterns();
     });
 
     //
