@@ -498,10 +498,20 @@ $(function() {
         return preset_duties;
     }
 
+    function get_current_date_range() {
+        // consider month mode
+        var range = {};
+        var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
+        range.start_date = $('#cal1').fullCalendar('getView').intervalStart;
+        range.end_date = range.start_date.clone().add(month_span, 'months');
+        return range;
+    }
+
     function get_all_duties() {
+        var range = get_current_date_range();
         var all_duty_events = $('#cal1').fullCalendar('clientEvents', function(event) {
             if ($.inArray('preset-duty-event', event.className) > -1 || $.inArray('duty-event', event.className) > -1) {
-                return true;
+                return (event.start >= range.start_date && event.start < range.end_date);
             } else {
                 return false;
             }
