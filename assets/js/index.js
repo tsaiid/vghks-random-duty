@@ -58,8 +58,7 @@ $(function() {
         value: 4,
         create: update_dialog_title_type,
         change: function() {
-            calculate_suggested_patterns();
-            update_current_duty_status();
+            update_patterns();
             update_dialog_title_type();
         },
     }).slider("pips", {
@@ -724,9 +723,13 @@ $(function() {
         update_duty_patterns(suggested_patterns);
     }
 
-    $('#func_get_holiday_condition').click(function() {
+    function update_patterns() {
         calculate_suggested_patterns();
         update_current_duty_status();
+    }
+
+    $('#func_get_holiday_condition').click(function() {
+        update_patterns();
     });
 
     $('#func_edit_duty_patterns').click(function() {
