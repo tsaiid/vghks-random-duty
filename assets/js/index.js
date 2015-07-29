@@ -1242,4 +1242,9 @@ $(function() {
             clearInterval(check_cal_loaded);
         }
     }, 200);
+
+    // update version text
+    $.get('../../VERSION', function(data){
+        $('#appVersion').html(data);
+    });
 });
