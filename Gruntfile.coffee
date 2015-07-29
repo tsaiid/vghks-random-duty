@@ -20,7 +20,7 @@ module.exports = (grunt) ->
     sync: {
       main: {
         files: [
-          { src: ['assets/**', 'index.html'], dest: '<%= opts.base_path %>'},
+          { src: ['assets/**', 'index.html', 'VERSION'], dest: '<%= opts.base_path %>'},
           { cwd: 'bower_components/jquery/dist/', src: 'jquery.min.*', dest: '<%= opts.js_path %>' },
           { cwd: 'bower_components/moment/min/', src: 'moment.min.js', dest: '<%= opts.js_path %>' },
           { cwd: 'bower_components/jquery-ui/', src: ['themes/redmond/**'], dest: '<%= opts.css_path %>' },

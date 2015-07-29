@@ -47,3 +47,7 @@ div.growlUI h2 {
 #duties_datatable_div, .second_cal, #calEventDialog {
     display: none;
 }
+
+#appVersion {
+    font-size: small;
+}
