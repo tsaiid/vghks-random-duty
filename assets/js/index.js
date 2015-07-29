@@ -235,6 +235,7 @@ $(function() {
         resizable: false,
         autoOpen: false,
         width: 400,
+        modal: true,
     });
 
     $('input[name=eventProp]').change(function() {
