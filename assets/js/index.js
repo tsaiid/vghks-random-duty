@@ -1244,7 +1244,7 @@ $(function() {
     }, 200);
 
     // update version text
-    $.get('../../VERSION', function(data){
-        $('#appVersion').html(data);
+    $.getJSON('../../bower.json', function(data) {
+        $('#appVersion').html('v' + data.version);
     });
 });
