@@ -16,21 +16,18 @@
     <link rel="stylesheet" type="text/css" href="assets/css/dashboard.css">
     <link rel="stylesheet" type="text/css" href="assets/css/calendar.css">
     <link rel="stylesheet" type="text/css" href="assets/css/index.css">
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
         <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
     <!--[if gte IE 9]>
         <script type="text/javascript" src="vendor/js/jquery.min.js"></script>
     <![endif]-->
     <!--[if !IE]>
         <!--><script type="text/javascript" src="vendor/js/jquery.min.js"></script><!-->
-    <![endif]-->
-
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
 </head>
 
@@ -56,7 +53,7 @@
     </nav>
     <div class="container-fluid">
         <div class="row">
-            <div class="col-sm-3 sidebar">
+            <div class="col-sm-3">
                 <nav class="navbar">
                     <div class="container-fluid">
                         <div class="btn-toolbar navbar-right" role="toolbar" aria-label="...">
@@ -158,41 +155,8 @@
                     <h2>Have a nice day!</h2>
                 </div>
             </div>
-            <div class="col-sm-9 col-sm-offset-3 main">
-                <div id="calEventDialog">
-                    <form class="form-horizontal">
-                        <div class="form-group">
-                            <label for="eventTitle" class="col-sm-2 control-label">Title</label>
-                            <div class="col-sm-10">
-                                <select type="text" class="form-control" name="eventTitle" id="eventTitle"></select>
-                                <input type="hidden" name="eventOrigTitle" id="eventOrigTitle" />
-                                <input type="hidden" name="eventStart" id="eventStart" />
-                                <input type="hidden" name="eventId" id="eventId" />
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="eventProp" class="col-sm-2 control-label">類別</label>
-                            <div class="col-sm-10">
-                                <div class="radio">
-                                    <label>
-                                        <input type="radio" name="eventProp" id="eventPropDuty" value="eventPropDuty" checked /> 值班
-                                    </label>
-                                </div>
-                                <div class="radio">
-                                    <label>
-                                        <input type="radio" name="eventProp" id="eventPropNonduty" value="eventPropNonduty" /> 設為不值
-                                    </label>
-                                </div>
-                                <div class="radio">
-                                    <label>
-                                        <input type="radio" name="eventProp" id="eventPropHoliday" value="eventPropHoliday" /> 設為假日
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div id="cal_nav" style="position: absolute;">
+            <div class="col-sm-9">
+                <div id="cal_nav">
                     <nav>
                         <ul class="pager">
                             <li><a href="#" id="prev_month"><span aria-hidden="true">&larr;</span> Prev</a></li>
@@ -214,6 +178,40 @@
                 </div>
             </div>
         </div>
+    </div>
+    <!-- Event Modal -->
+    <div id="calEventDialog">
+        <form class="form-horizontal">
+            <div class="form-group">
+                <label for="eventTitle" class="col-sm-2 control-label">Title</label>
+                <div class="col-sm-10">
+                    <select type="text" class="form-control" name="eventTitle" id="eventTitle"></select>
+                    <input type="hidden" name="eventOrigTitle" id="eventOrigTitle" />
+                    <input type="hidden" name="eventStart" id="eventStart" />
+                    <input type="hidden" name="eventId" id="eventId" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="eventProp" class="col-sm-2 control-label">類別</label>
+                <div class="col-sm-10">
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="eventProp" id="eventPropDuty" value="eventPropDuty" checked /> 值班
+                        </label>
+                    </div>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="eventProp" id="eventPropNonduty" value="eventPropNonduty" /> 設為不值
+                        </label>
+                    </div>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="eventProp" id="eventPropHoliday" value="eventPropHoliday" /> 設為假日
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </form>
     </div>
     <!-- About Modal -->
     <div class="modal fade bootstrap-dialog type-info" id="aboutModal" tabindex="-1" role="dialog" aria-labelledby="aboutModalLabel">
