@@ -17,6 +17,7 @@ $(function() {
     var is_cal2_loaded = false; // may only be used in 2-month mode
     var is_cal1_all_rendered = false;
     var is_cal2_all_rendered = false;
+    var deleted_holidays = [];  // cache deleted gcal-holiday that will not be rendered again.
 
     $('#mode_switch').bootstrapSwitch({
         onText: "2 月",
@@ -191,8 +192,13 @@ $(function() {
                         color = "";
                         eventTitle = '  假日 ' + title; // add two spaces for sort first
                 }
+                // remove event.id already in the cache
+                var event_md5_id = CryptoJS.MD5(date + eventTitle).toString();
+                deleted_holidays = deleted_holidays.filter(function(e){
+                    return e != event_md5_id
+                });
                 var event = {
-                    id: CryptoJS.MD5(date + eventTitle).toString(),
+                    id: event_md5_id,
                     title: eventTitle,
                     start: date,
                     allDay: true,
@@ -205,7 +211,7 @@ $(function() {
                 // Holiday should add a background event
                 if (duty_type == "eventPropHoliday") {
                     var event = {
-                        id: CryptoJS.MD5(date + eventTitle).toString(),
+                        id: event_md5_id,
                         start: date,
                         backgroundColor: holiday_bg_color,
                         rendering: 'background',
@@ -350,6 +356,7 @@ $(function() {
                 $("#cal2").fullCalendar('removeEvents', $('#eventId').val());
                 if (duty_type == 'eventPropHoliday') {
                     calculate_suggested_patterns();
+                    deleted_holidays.push($('#eventId').val());
                 }
                 $(this).dialog("close");
             },
@@ -381,8 +388,13 @@ $(function() {
 
         other_cal.fullCalendar('renderEvent', other_event, true);
     };
-    var onlyTheMonthEventRender = function(event, element, view) {
+    var myEventRender = function(event, element, view) {
+        // show events only in visible areas.
         if (event.start.month() != view.intervalStart.month()) {
+            return false;
+        }
+        // discard deleted gcal-holidays
+        if ($.inArray(event.id, deleted_holidays) > -1) {
             return false;
         }
     };
@@ -416,7 +428,7 @@ $(function() {
         editable: true,
         eventDrop: calEventDrop,
         eventClick: calEventClick,
-        eventRender: onlyTheMonthEventRender,
+        eventRender: myEventRender,
         eventAfterAllRender: function() {
             //console.log('cal2 eventAfterAllRender');
             is_cal2_all_rendered = true;
@@ -444,7 +456,7 @@ $(function() {
         editable: true,
         eventDrop: calEventDrop,
         eventClick: calEventClick,
-        eventRender: onlyTheMonthEventRender,
+        eventRender: myEventRender,
         eventAfterAllRender: function() {
             //console.log("eventAfterAllRender");
             is_cal1_all_rendered = true;
