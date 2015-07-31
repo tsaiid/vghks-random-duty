@@ -870,7 +870,7 @@ $(function() {
 
     function update_summary_duties(groups_duties) {
         if (!$.isEmptyObject(groups_duties)) {
-            var summary_duties_html = '<table class="table table-striped"><tr><th>No.</th><th>Dates</th><th>Intervals</th><th>Std Dev</th></tr>';
+            var summary_duties_html = '<table class="table table-striped"><tr><th>No.</th><th>Dates</th><th>Intervals</th><th>QOD</th><th>Std Dev</th></tr>';
             var preset_holidays = get_preset_holidays();
             for (var p in groups_duties) {
                 var dates = $.map(groups_duties[p].dates.sort(), function(d) {
@@ -884,9 +884,19 @@ $(function() {
                     date_html += '">' + moment(d, "YYYY-MM-DD").format("M/D") + '</span>';
                     return date_html;
                 }).join(', ');
-                var intervals = groups_duties[p].intervals.join(', ');
+                var qod_count = 0;
+                var intervals = $.map(groups_duties[p].intervals, function(i){
+                    var interval_html = '<span class="';
+                    // colerize if qod
+                    if (i == 2) {
+                        interval_html += 'bg-danger';
+                        qod_count++;
+                    }
+                    interval_html += '">' + i + '</span>';
+                    return interval_html;
+                });
                 var std_dev = groups_duties[p].std_dev;
-                summary_duties_html += '<tr><th>' + p + '</th><th>' + dates + '</th><th>' + intervals + '</th><th>' + std_dev + '</th></tr>';
+                summary_duties_html += '<tr><th>' + p + '</th><th>' + dates + '</th><th>' + intervals + '</th><th>' + qod_count + '</th><th>' + std_dev + '</th></tr>';
             }
             summary_duties_html += '</table>';
             $('#summary_duties').html(summary_duties_html);
