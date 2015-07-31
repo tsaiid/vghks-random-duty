@@ -388,7 +388,8 @@ $(function() {
 
         other_cal.fullCalendar('renderEvent', other_event, true);
     };
-    var onlyTheMonthEventRender = function(event, element, view) {
+    var myEventRender = function(event, element, view) {
+        // show events only in visible areas.
         if (event.start.month() != view.intervalStart.month()) {
             return false;
         }
@@ -427,7 +428,7 @@ $(function() {
         editable: true,
         eventDrop: calEventDrop,
         eventClick: calEventClick,
-        eventRender: onlyTheMonthEventRender,
+        eventRender: myEventRender,
         eventAfterAllRender: function() {
             //console.log('cal2 eventAfterAllRender');
             is_cal2_all_rendered = true;
@@ -455,7 +456,7 @@ $(function() {
         editable: true,
         eventDrop: calEventDrop,
         eventClick: calEventClick,
-        eventRender: onlyTheMonthEventRender,
+        eventRender: myEventRender,
         eventAfterAllRender: function() {
             //console.log("eventAfterAllRender");
             is_cal1_all_rendered = true;
