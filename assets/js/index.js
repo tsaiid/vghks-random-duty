@@ -421,6 +421,7 @@ $(function() {
         height: 580,
         firstDay: 1,
         theme: true,
+        eventLimit: true,   // strang bug, without this, bottom border disappears in firefox
         googleCalendarApiKey: calGoogleCalendarApiKey,
         eventSources: calEventSources,
         selectable: true,
@@ -449,6 +450,7 @@ $(function() {
         height: 580,
         firstDay: 1,
         theme: true,
+        eventLimit: true,   // strang bug, without this, bottom border disappears in firefox
         googleCalendarApiKey: calGoogleCalendarApiKey,
         eventSources: calEventSources,
         selectable: true,
