@@ -694,25 +694,7 @@ $(function() {
     // Debug UI Buttons
     //
     $('#func_clear_calendar').click(function() {
-        // clear fullCalendar
-        $('#cal1').fullCalendar('removeEvents', function(event) {
-            if ($.inArray('duty-event', event.className) > -1) {
-                return true;
-            } else {
-                return false;
-            }
-        });
-        $('#cal2').fullCalendar('removeEvents', function(event) {
-            if ($.inArray('duty-event', event.className) > -1) {
-                return true;
-            } else {
-                return false;
-            }
-        });
-
-        // update summary
-        var groups = calculate_group_duties(get_all_duties());
-        update_summary_duties(groups);
+        clear_random_duties();
     });
 
     function update_current_duty_status() {
@@ -989,6 +971,28 @@ $(function() {
 
         table_html += '</table>';
         $('#duties_datatable_div').html(table_html);
+    }
+
+    function clear_random_duties() {
+        // clear fullCalendar
+        $('#cal1').fullCalendar('removeEvents', function(event) {
+            if ($.inArray('duty-event', event.className) > -1) {
+                return true;
+            } else {
+                return false;
+            }
+        });
+        $('#cal2').fullCalendar('removeEvents', function(event) {
+            if ($.inArray('duty-event', event.className) > -1) {
+                return true;
+            } else {
+                return false;
+            }
+        });
+
+        // update summary
+        var groups = calculate_group_duties(get_all_duties());
+        update_summary_duties(groups);
     }
 
     var random_duty_worker;
