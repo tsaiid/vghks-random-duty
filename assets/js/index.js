@@ -13,6 +13,7 @@ $(function() {
     var is_cal1_all_rendered = false;
     var is_cal2_all_rendered = false;
     var deleted_holidays = []; // cache deleted gcal-holiday that will not be rendered again.
+    var is_already_random_duty = false; // bool: record if random_duty executed.
 
     $('#mode_switch').bootstrapSwitch({
         onText: "2 月",
@@ -1008,6 +1009,16 @@ $(function() {
             "qod_limit": qod_limit,
         };
 
+        is_already_random_duty = false; // reset global var
+
+        // block ui
+        $('#block_ui_message').html("Please wait...");
+        $.blockUI({
+            theme: true,
+            title: 'Generating Duties',
+            message: $('#block_ui_box')
+        });
+
         random_duty_worker = new Worker("assets/js/random_duty_worker.js");
         random_duty_worker.postMessage({
             "presets": presets,
@@ -1042,6 +1053,9 @@ $(function() {
 
                     // outline the result and std_dev
                     update_summary_duties(groups);
+
+                    // record is_already_random_duty
+                    is_already_random_duty = true;
 
                     // unblock ui
                     $.unblockUI({
@@ -1099,15 +1113,24 @@ $(function() {
             return;
         }
 
-        // block ui
-        $('#block_ui_message').html("Please wait...");
-        $.blockUI({
-            theme: true,
-            title: 'Generating Duties',
-            message: $('#block_ui_box')
-        });
-
-        do_random_duty();
+        // check if already random duty and show a confirm dialog
+        if (is_already_random_duty) {
+            BootstrapDialog.confirm({
+                title: 'Warning',
+                message: '已有排定班表，確定清除並重排？',
+                type: BootstrapDialog.TYPE_WARNING,
+                closable: true,
+                btnCancelLabel: '取消',
+                btnOKLabel: '重新排班',
+                callback: function(result) {
+                    if (result) {
+                        do_random_duty();
+                    }
+                }
+            });
+        } else {
+            do_random_duty();
+        }
     });
 
     $('.btn_stop_random_duty_worker').click(function() {
