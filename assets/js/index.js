@@ -12,7 +12,7 @@ $(function() {
     var is_cal2_loaded = false; // may only be used in 2-month mode
     var is_cal1_all_rendered = false;
     var is_cal2_all_rendered = false;
-    var deleted_holidays = [];  // cache deleted gcal-holiday that will not be rendered again.
+    var deleted_holidays = []; // cache deleted gcal-holiday that will not be rendered again.
 
     $('#mode_switch').bootstrapSwitch({
         onText: "2 月",
@@ -189,7 +189,7 @@ $(function() {
                 }
                 // remove event.id already in the cache
                 var event_md5_id = CryptoJS.MD5(date + eventTitle).toString();
-                deleted_holidays = deleted_holidays.filter(function(e){
+                deleted_holidays = deleted_holidays.filter(function(e) {
                     return e != event_md5_id
                 });
                 var event = {
@@ -416,7 +416,7 @@ $(function() {
         height: 580,
         firstDay: 1,
         theme: true,
-        eventLimit: true,   // strang bug, without this, bottom border disappears in firefox
+        eventLimit: true, // strang bug, without this, bottom border disappears in firefox
         googleCalendarApiKey: calGoogleCalendarApiKey,
         eventSources: calEventSources,
         selectable: true,
@@ -445,7 +445,7 @@ $(function() {
         height: 580,
         firstDay: 1,
         theme: true,
-        eventLimit: true,   // strang bug, without this, bottom border disappears in firefox
+        eventLimit: true, // strang bug, without this, bottom border disappears in firefox
         googleCalendarApiKey: calGoogleCalendarApiKey,
         eventSources: calEventSources,
         selectable: true,
@@ -622,7 +622,7 @@ $(function() {
                 var points = 2 * h_count + 1 * f_count;
                 var ratio = total_points / people;
                 var threshold = {};
-                if (total_points / people < 4) {    // in extreme condition (too many people), use loose threshold
+                if (total_points / people < 4) { // in extreme condition (too many people), use loose threshold
                     threshold.lower = parseInt(total_points / people) - 1;
                     threshold.upper = parseInt(total_points / people) + 2;
                 } else {
@@ -903,7 +903,7 @@ $(function() {
                     return date_html;
                 }).join(', ');
                 var qod_count = 0;
-                var intervals = $.map(groups_duties[p].intervals, function(i){
+                var intervals = $.map(groups_duties[p].intervals, function(i) {
                     var interval_html = '<span class="';
                     // colerize if qod
                     if (i == 2) {
@@ -991,46 +991,11 @@ $(function() {
     }
 
     var random_duty_worker;
-    $('#func_random_duty').click(function() {
-        // check if calculated patterns.
+    function do_random_duty() {
         var patterns = $('#suggested_pattern').data("patterns");
-        if (patterns === undefined) {
-            WarningDialog('請先更新排班樣式');
-            return;
-        }
-
-        // check if preset duties exceed qod limit
         var use_qod_limit = $('#use_qod_limit').is(':checked');
         var qod_limit = parseInt($('#inputQodLimitSlider').slider('option', 'value'));
         var presets = get_presets();
-        var groups = calculate_group_duties(presets.duties);
-        if (use_qod_limit) {
-            if (!less_than_qod_times(groups, qod_limit)) {
-                WarningDialog('目前排班已超過 QOD 設定上限，請調整');
-                return;
-            }
-        }
-
-        // check if preset duties has qd duty
-        if (has_continuous_duties(groups)) {
-            WarningDialog('目前排班出現連值狀況，請調整');
-            return;
-        }
-
-        // check if friday, weekend, holiday duties are set and fit pattern.
-        if (!is_preset_duties_fit_pattern(presets, patterns)) {
-            WarningDialog('已排班表不符合樣式，請調整');
-            return;
-        }
-
-        // block ui
-        $('#block_ui_message').html("Please wait...");
-        $.blockUI({
-            theme: true,
-            title: 'Generating Duties',
-            message: $('#block_ui_box')
-        });
-
         var start_date = $('#cal1').fullCalendar('getDate').startOf('month');
         var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
         var end_date = start_date.clone().add(month_span, 'months');
@@ -1100,6 +1065,49 @@ $(function() {
                     console.log(e.data["msg"]);
             }
         }
+    }
+
+    $('#func_random_duty').click(function() {
+        // check if calculated patterns.
+        var patterns = $('#suggested_pattern').data("patterns");
+        if (patterns === undefined) {
+            WarningDialog('請先更新排班樣式');
+            return;
+        }
+
+        // check if preset duties exceed qod limit
+        var use_qod_limit = $('#use_qod_limit').is(':checked');
+        var qod_limit = parseInt($('#inputQodLimitSlider').slider('option', 'value'));
+        var presets = get_presets();
+        var groups = calculate_group_duties(presets.duties);
+        if (use_qod_limit) {
+            if (!less_than_qod_times(groups, qod_limit)) {
+                WarningDialog('目前排班已超過 QOD 設定上限，請調整');
+                return;
+            }
+        }
+
+        // check if preset duties has qd duty
+        if (has_continuous_duties(groups)) {
+            WarningDialog('目前排班出現連值狀況，請調整');
+            return;
+        }
+
+        // check if friday, weekend, holiday duties are set and fit pattern.
+        if (!is_preset_duties_fit_pattern(presets, patterns)) {
+            WarningDialog('已排班表不符合樣式，請調整');
+            return;
+        }
+
+        // block ui
+        $('#block_ui_message').html("Please wait...");
+        $.blockUI({
+            theme: true,
+            title: 'Generating Duties',
+            message: $('#block_ui_box')
+        });
+
+        do_random_duty();
     });
 
     $('.btn_stop_random_duty_worker').click(function() {
