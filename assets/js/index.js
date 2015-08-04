@@ -1013,6 +1013,7 @@ $(function() {
             "qod_limit": qod_limit,
         };
 
+        clear_random_duties(); // always clean previous random duties
         is_already_random_duty = false; // reset global var
 
         // block ui
