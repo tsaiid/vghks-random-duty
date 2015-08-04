@@ -559,7 +559,16 @@ $(function() {
             if (ENABLE_PATTERN_CONDITIONING) {
                 var total_points = 2 * holiday_count + 1 * friday_count;
                 var points = 2 * h_count + 1 * f_count;
-                if (points < total_points / people - 1 || points > total_points / people + 1) {
+                var ratio = total_points / people;
+                var threshold = {};
+                if (total_points / people < 4) {    // in extreme condition (too many people), use loose threshold
+                    threshold.lower = parseInt(total_points / people) - 1;
+                    threshold.upper = parseInt(total_points / people) + 2;
+                } else {
+                    threshold.lower = total_points / people - 1;
+                    threshold.upper = total_points / people + 1;
+                }
+                if (points < threshold.lower || points > threshold.upper) {
                     return false;
                 }
 
