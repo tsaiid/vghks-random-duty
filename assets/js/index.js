@@ -1,8 +1,3 @@
-// block UI before fullcalendar loads
-$.blockUI({
-    message: '<h2><i class="fa fa-spinner fa-pulse"></i> Loading...</h2>'
-});
-
 $(function() {
     //
     // flags

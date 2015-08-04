@@ -42,6 +42,8 @@ module.exports = (grunt) ->
           { cwd: 'bower_components/cryptojslib/rollups/', src: 'md5.js', dest: '<%= opts.js_path %>' },
           { cwd: 'bower_components/excellentexport/', src: 'excellentexport.min.js', dest: '<%= opts.js_path %>' },
           { cwd: 'bower_components/jquery.contenteditable/', src: 'jquery.contenteditable.js', dest: '<%= opts.js_path %>' },
+          { cwd: 'bower_components/pace/', src: 'pace.min.js', dest: '<%= opts.js_path %>' },
+          { cwd: 'bower_components/pace/themes/blue/', src: 'pace-theme-loading-bar.css', dest: '<%= opts.css_path %>' },
         ],
         verbose: true,
         pretend: false, # Don't do any disk operations - just write log
