@@ -44,6 +44,7 @@ module.exports = (grunt) ->
           { cwd: 'bower_components/jquery.contenteditable/', src: 'jquery.contenteditable.js', dest: '<%= opts.js_path %>' },
           { cwd: 'bower_components/pace/', src: 'pace.min.js', dest: '<%= opts.js_path %>' },
           { cwd: 'bower_components/pace/themes/blue/', src: 'pace-theme-loading-bar.css', dest: '<%= opts.css_path %>' },
+          { cwd: 'bower_components/js-cookie/src/', src: 'js.cookie.js', dest: '<%= opts.js_path %>' },
         ],
         verbose: true,
         pretend: false, # Don't do any disk operations - just write log
