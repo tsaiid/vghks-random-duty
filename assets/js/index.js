@@ -926,6 +926,8 @@ $(function() {
             }
             summary_duties_html += '</table>';
             $('#summary_duties').html(summary_duties_html);
+        } else {    // if clear, groups_duties is empty
+            $('#summary_duties').html("");
         }
     }
 
