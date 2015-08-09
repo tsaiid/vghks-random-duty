@@ -15,6 +15,15 @@ $(function() {
     var deleted_holidays = []; // cache deleted gcal-holiday that will not be rendered again.
     var is_already_random_duty = false; // bool: record if random_duty executed.
 
+    $('#vghks_mode_switch').bootstrapSwitch({
+        onText: "先假日",
+        offText: "一般",
+        offColor: 'info',
+        onSwitchChange: function(event, state) {
+            Cookies.set('vghks_mode_switch', state);
+        }
+    });
+
     $('#mode_switch').bootstrapSwitch({
         onText: "2 月",
         offText: "1 月",
@@ -1052,7 +1061,7 @@ $(function() {
                 case "success":
                     var duties = e.data["duties"];
                     var groups = e.data["groups"];
-                    //console.log(groups);
+                    //console.log(duties.toString());
 
                     $.each(duties, function(i, duty) {
                         var date = moment(duty[0], "YYYY-MM-DD");
@@ -1098,6 +1107,8 @@ $(function() {
                     break;
                 default:
                     console.log(e.data["msg"]);
+                    console.log(e.data["duties"]);
+                    console.log(e.data["groups"]);
             }
         }
     }
@@ -1128,10 +1139,14 @@ $(function() {
             return;
         }
 
-        // check if friday, weekend, holiday duties are set and fit pattern.
-        if (!is_preset_duties_fit_pattern(presets, patterns)) {
-            WarningDialog('已排班表不符合樣式，請調整');
-            return;
+        // VGHKS vs General mode
+        var vghks_mode = $('#vghks_mode_switch').bootstrapSwitch('state');
+        if (vghks_mode) {
+            // check if friday, weekend, holiday duties are set and fit pattern.
+            if (!is_preset_duties_fit_pattern(presets, patterns)) {
+                WarningDialog('已排班表不符合樣式，請調整');
+                return;
+            }
         }
 
         // check if already random duty and show a confirm dialog
