@@ -718,6 +718,7 @@ $(function() {
     // Debug UI Buttons
     //
     $('#func_clear_calendar').click(function() {
+        is_already_random_duty = false; // reset global var
         clear_random_duties();
     });
 
