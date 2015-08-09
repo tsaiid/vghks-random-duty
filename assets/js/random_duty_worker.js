@@ -26,14 +26,32 @@ onmessage = function(oEvent) {
 };
 
 function generate_non_preset_duty_match_patterns(total_days, since_date_str, presets, patterns) {
-    var non_preset_duties = [];
+    var non_preset_duties = {
+        ordinary: [],
+        friday: [],
+        holiday: []
+    };
 
     //console.log(preset_duties.toString());
 
-    var tmp_duties = [];
-    patterns.forEach(function(pattern, person_no) {
-        for (var i = 0; i < pattern[0]; i++) {
-            tmp_duties.push(person_no + 1);
+    var tmp_duties_ordinary = [],
+        tmp_duties_friday = [],
+        tmp_duties_holiday = [];
+    var groups = calculate_group_duties_status(calculate_group_duties(presets.duties, false), presets.holidays);
+    patterns.forEach(function(pattern, index) {
+        var person_no = index + 1;
+        var residual_count = 0;
+        residual_count = (groups[person_no] !== undefined && groups[person_no].ordinary_count !== undefined ? pattern[0] - groups[person_no].ordinary_count : pattern[0]);
+        for (var i = 0; i < residual_count; i++) {
+            tmp_duties_ordinary.push(person_no);
+        }
+        residual_count = (groups[person_no] !== undefined && groups[person_no].friday_count !== undefined ? pattern[1] - groups[person_no].friday_count : pattern[1]);
+        for (var i = 0; i < residual_count; i++) {
+            tmp_duties_friday.push(person_no);
+        }
+        residual_count = (groups[person_no] !== undefined && groups[person_no].holiday_count !== undefined ? pattern[2] - groups[person_no].holiday_count : pattern[2]);
+        for (var i = 0; i < residual_count; i++) {
+            tmp_duties_holiday.push(person_no);
         }
     });
 
@@ -41,13 +59,21 @@ function generate_non_preset_duty_match_patterns(total_days, since_date_str, pre
     for (i = 0; i < total_days; i++) {
         var the_date = since_date.format("YYYY-MM-DD");
         if (get_preset_duty(presets.duties, the_date) === undefined) {
-            duty = tmp_duties.pop();
-            non_preset_duties.push([the_date, duty]);
+            if (is_holiday(presets.holidays, the_date) || is_weekend(the_date)) {
+                duty = tmp_duties_holiday.pop();
+                non_preset_duties.holiday.push([the_date, duty]);
+            } else if (is_friday(presets.holidays, the_date)) {
+                duty = tmp_duties_friday.pop();
+                non_preset_duties.friday.push([the_date, duty]);
+            } else {
+                duty = tmp_duties_ordinary.pop();
+                non_preset_duties.ordinary.push([the_date, duty]);
+            }
         }
         since_date.add(1, 'days');
     }
 
-    if (tmp_duties.length > 0) {
+    if (tmp_duties_ordinary.length > 0 || tmp_duties_friday.length > 0 || tmp_duties_holiday.length > 0) {
         console.log("tmp_duties should not more than zero.");
     }
 
@@ -88,13 +114,15 @@ function shuffle(array) {
 }
 
 function shuffle_duties(date_duties) {
-    var duties = date_duties.map(function(d) {
-        return d[1]
-    });
-    shuffle(duties);
-    date_duties.forEach(function(d, i) {
-        d[1] = duties[i];
-    });
+    for (date_type in date_duties) {
+        var duties = date_duties[date_type].map(function(d) {
+            return d[1]
+        });
+        shuffle(duties);
+        date_duties[date_type].forEach(function(d, i) {
+            d[1] = duties[i];
+        });
+    }
     return date_duties;
 }
 
@@ -132,6 +160,14 @@ function is_match_filters(merged_duties, group_duties, filters) {
     return true;
 }
 
+function merge_preset_non_preset_duties(preset_duties, non_preset_duties) {
+    var merged_duties = preset_duties;
+    for (date_type in non_preset_duties) {
+        merged_duties = merged_duties.concat(non_preset_duties[date_type]);
+    }
+    return merged_duties;
+}
+
 function random_duty(total_days, since_date_str, presets, filters) {
     var patterns = filters.patterns;
 
@@ -143,9 +179,9 @@ function random_duty(total_days, since_date_str, presets, filters) {
     var c = 0;
     while (1) {
         shuffle_duties(non_preset_duties);
-        //        console.log(non_preset_duties.toString());
-        var merged_duties = non_preset_duties.concat(presets.duties);
-        //        console.log(has_continuous_duties(merged_duties));
+        //console.log(non_preset_duties.toString());
+        var merged_duties = merge_preset_non_preset_duties(presets.duties, non_preset_duties);
+        //console.log(has_continuous_duties(merged_duties));
         var group_duties = calculate_group_duties(merged_duties, true);
         if (is_match_non_duties(merged_duties, presets.non_duties) && is_match_filters(merged_duties, group_duties, filters)) {
             duties = merged_duties;
@@ -155,10 +191,12 @@ function random_duty(total_days, since_date_str, presets, filters) {
 
         if (TEST_CONDITIONING_FUNCTION) {
             msg = "test conditioning function. run only once. ";
-            status = "test";
-            //            console.log(merged_duties.toString());
-            //            console.log(group_duties);
-            //            console.log(patterns.toString());
+            //status = "test";
+            duties = merged_duties;
+            groups = group_duties;
+            //console.log(merged_duties.toString());
+            //console.log(group_duties);
+            //console.log(patterns.toString());
             break;
         }
 
