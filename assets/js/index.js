@@ -21,6 +21,7 @@ $(function() {
         offColor: 'info',
         onSwitchChange: function(event, state) {
             //console.log(state); // true | false
+            Cookies.set('mode_switch', state);
             if (state) { // 2-month mode
                 is_cal2_all_rendered = false;
                 $('.first_cal').toggleClass('col-sm-6', state, 600).promise().done(function() {
@@ -46,7 +47,10 @@ $(function() {
     $('#inputQodLimitSlider').slider({
         max: 4,
         min: 0,
-        value: 1
+        value: 1,
+        change: function(event, ui) {
+            Cookies.set('inputQodLimitSlider', ui.value);
+        }
     }).slider("pips", {
         rest: "label"
     });
@@ -55,7 +59,10 @@ $(function() {
         max: 2,
         min: 1,
         step: 0.1,
-        value: 1.8
+        value: 1.8,
+        change: function(event, ui) {
+            Cookies.set('inputStdDevSlider', ui.value);
+        }
     }).slider("pips", {
         rest: "label",
         step: 2
@@ -66,12 +73,20 @@ $(function() {
         min: 3,
         value: 4,
         create: update_dialog_title_type,
-        change: function() {
+        change: function(event, ui) {
             update_patterns();
             update_dialog_title_type();
+            Cookies.set('inputPeopleSlider', ui.value);
         },
     }).slider("pips", {
         rest: "label"
+    });
+
+    //
+    // Update Cookie Preferences
+    //
+    $('#use_qod_limit, #use_std_dev_level').change(function() {
+        Cookies.set($(this).attr('id'), $(this).is(':checked'));
     });
 
     $.blockUI.defaults.growlCSS.top = '60px'; // show below the nav bar.
@@ -996,6 +1011,7 @@ $(function() {
     }
 
     var random_duty_worker;
+
     function do_random_duty() {
         var patterns = $('#suggested_pattern').data("patterns");
         var use_qod_limit = $('#use_qod_limit').is(':checked');
@@ -1357,6 +1373,27 @@ $(function() {
                     message: '<h4><i class="fa fa-exclamation-circle"></i> 此瀏覽器不支援 Web Worker 技術</h4><p>請使用下列版本以上的瀏覽器：</p><div class="row"><div class="col-sm-4 text-center"><img src="https://raw.githubusercontent.com/alrra/browser-logos/master/chrome/chrome_64x64.png"><br>Chrome<br>&ge; 4.0</div><div class="col-sm-4 text-center"><img src="https://raw.githubusercontent.com/alrra/browser-logos/master/firefox/firefox_64x64.png"><br>Firefox<br>&ge; 3.5</div><div class="col-sm-4 text-center"><img src="https://raw.githubusercontent.com/alrra/browser-logos/master/internet-explorer/internet-explorer_64x64.png"><br>Internet Explorer<br>&ge; 10.0</div></div>'
                 });
             }
+
+            //
+            // Load Preferences From Cookie
+            //
+            var pref = Cookies.get();
+            $.each(pref, function(key, value) {
+                if (value == "true" || value == "false") {
+                    pref[key] = (value === "true");
+                }
+            });
+            if (pref.mode_switch !== undefined) {
+                $('#mode_switch').bootstrapSwitch('state', pref.mode_switch);
+            }
+            $('#use_qod_limit').prop("checked", pref.use_qod_limit);
+            if (pref.inputQodLimitSlider !== undefined)
+                $('#inputQodLimitSlider').slider("option", "value", pref.inputQodLimitSlider);
+            $('#use_std_dev_level').prop("checked", pref.use_std_dev_level);
+            if (pref.inputStdDevSlider !== undefined)
+                $('#inputStdDevSlider').slider("option", "value", pref.inputStdDevSlider);
+            if (pref.inputPeopleSlider !== undefined)
+                $('#inputPeopleSlider').slider("option", "value", pref.inputPeopleSlider);
 
             clearInterval(check_cal_loaded);
         }
