@@ -9,12 +9,11 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks "grunt-contrib-watch"
   grunt.loadNpmTasks "grunt-sync"
 
-  opts = {
-    base_path: '_site/vghks-random-duty/',
-    js_path: '_site/vghks-random-duty/vendor/js/',
-    css_path: '_site/vghks-random-duty/vendor/css/',
-    font_path: '_site/vghks-random-duty/vendor/fonts/',
-  }
+  opts =
+    base_path: '_site/vghks-random-duty/'
+    js_path: '_site/vghks-random-duty/vendor/js/'
+    css_path: '_site/vghks-random-duty/vendor/css/'
+    font_path: '_site/vghks-random-duty/vendor/fonts/'
 
   files = [
     { expand: true, src: ['assets/**', 'index.html', 'bower.json'], dest: '<%= opts.base_path %>'},
@@ -45,16 +44,14 @@ module.exports = (grunt) ->
   ]
 
   grunt.initConfig
-    opts: opts,
-    sync: {
-      main: {
-        files: files,
-        verbose: true,
-        pretend: false, # Don't do any disk operations - just write log
-        ignoreInDest: "**/.git/**", # Never remove js files from destination
-        updateAndDelete: true # Remove all files from dest that are not found in src
-      }
-    }
+    opts: opts
+    sync:
+      main:
+        files: files
+        verbose: true
+        pretend: false              # Don't do any disk operations - just write log
+        ignoreInDest: "**/.git/**"  # Never remove js files from destination
+        updateAndDelete: true       # Remove all files from dest that are not found in src
 
     copy:
       main:
