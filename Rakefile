@@ -10,7 +10,7 @@ task :deploy do
   end
 
   puts "## Generating site"
-  system "grunt build"
+  system "grunt copy"
 
   cd "_site" do
     system "git add -A"
