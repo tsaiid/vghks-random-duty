@@ -15,7 +15,7 @@ A single page application to assist resident duty arrangement for Radiology depa
 
 1. 因需要大量運算，會用到 Web Workers 技術，故建議使用新版的瀏覽器，IE9 以下並不支援。
 2. 無法於網頁版儲存結果，僅可匯出 excel 檔
-3. 經更動的 google calendar 假日如有切換月份會失效
+3. 經更動的 google calendar 假日無法永久儲存，若重新整理頁面會失效
 
 ## License
 

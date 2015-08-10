@@ -1,8 +1,3 @@
-// block UI before fullcalendar loads
-$.blockUI({
-    message: '<h2><i class="fa fa-spinner fa-pulse"></i> Loading...</h2>'
-});
-
 $(function() {
     //
     // flags
@@ -15,6 +10,19 @@ $(function() {
     //
     var is_cal1_loaded = false;
     var is_cal2_loaded = false; // may only be used in 2-month mode
+    var is_cal1_all_rendered = false;
+    var is_cal2_all_rendered = false;
+    var deleted_holidays = []; // cache deleted gcal-holiday that will not be rendered again.
+    var is_already_random_duty = false; // bool: record if random_duty executed.
+
+    $('#vghks_mode_switch').bootstrapSwitch({
+        onText: "先假日",
+        offText: "一般",
+        offColor: 'info',
+        onSwitchChange: function(event, state) {
+            Cookies.set('vghks_mode_switch', state);
+        }
+    });
 
     $('#mode_switch').bootstrapSwitch({
         onText: "2 月",
@@ -22,22 +30,36 @@ $(function() {
         offColor: 'info',
         onSwitchChange: function(event, state) {
             //console.log(state); // true | false
+            Cookies.set('mode_switch', state);
             if (state) { // 2-month mode
+                is_cal2_all_rendered = false;
                 $('.first_cal').toggleClass('col-sm-6', state, 600).promise().done(function() {
                     $('.second_cal').show();
-                    $('#cal2').fullCalendar('render'); // force render the cal, needed for from hidden div
+                    if (!is_cal2_loaded) {
+                        $('#cal2').fullCalendar('render'); // force render the cal, needed for from hidden div
+                    } else {
+                        $('#cal2').fullCalendar('render'); // force render the cal, needed for from hidden div
+                        $('#cal2').fullCalendar('rerenderEvents'); // force re-render cal2, to update suggested patterns
+                    }
                 });
             } else { // 1-month mode
+                is_cal1_all_rendered = false;
                 $('.second_cal').hide();
-                $('.first_cal').toggleClass('col-sm-6', state, 600);
+                $('.first_cal').toggleClass('col-sm-6', state, 600).promise().done(function() {
+                    $('#cal1').fullCalendar('rerenderEvents'); // force re-render cal1, to update suggested patterns
+                });
             }
+            wait_and_update_suggested_patterns();
         }
     });
 
     $('#inputQodLimitSlider').slider({
         max: 4,
         min: 0,
-        value: 1
+        value: 1,
+        change: function(event, ui) {
+            Cookies.set('inputQodLimitSlider', ui.value);
+        }
     }).slider("pips", {
         rest: "label"
     });
@@ -46,7 +68,10 @@ $(function() {
         max: 2,
         min: 1,
         step: 0.1,
-        value: 1.8
+        value: 1.8,
+        change: function(event, ui) {
+            Cookies.set('inputStdDevSlider', ui.value);
+        }
     }).slider("pips", {
         rest: "label",
         step: 2
@@ -57,13 +82,20 @@ $(function() {
         min: 3,
         value: 4,
         create: update_dialog_title_type,
-        change: function() {
-            calculate_suggested_patterns();
-            update_current_duty_status();
+        change: function(event, ui) {
+            update_patterns();
             update_dialog_title_type();
+            Cookies.set('inputPeopleSlider', ui.value);
         },
     }).slider("pips", {
         rest: "label"
+    });
+
+    //
+    // Update Cookie Preferences
+    //
+    $('#use_qod_limit, #use_std_dev_level').change(function() {
+        Cookies.set($(this).attr('id'), $(this).is(':checked'));
     });
 
     $.blockUI.defaults.growlCSS.top = '60px'; // show below the nav bar.
@@ -180,8 +212,13 @@ $(function() {
                         color = "";
                         eventTitle = '  假日 ' + title; // add two spaces for sort first
                 }
+                // remove event.id already in the cache
+                var event_md5_id = CryptoJS.MD5(date + eventTitle).toString();
+                deleted_holidays = deleted_holidays.filter(function(e) {
+                    return e != event_md5_id
+                });
                 var event = {
-                    id: CryptoJS.MD5(date + eventTitle).toString(),
+                    id: event_md5_id,
                     title: eventTitle,
                     start: date,
                     allDay: true,
@@ -194,7 +231,7 @@ $(function() {
                 // Holiday should add a background event
                 if (duty_type == "eventPropHoliday") {
                     var event = {
-                        id: CryptoJS.MD5(date + eventTitle).toString(),
+                        id: event_md5_id,
                         start: date,
                         backgroundColor: holiday_bg_color,
                         rendering: 'background',
@@ -235,6 +272,7 @@ $(function() {
         resizable: false,
         autoOpen: false,
         width: 400,
+        modal: true,
     });
 
     $('input[name=eventProp]').change(function() {
@@ -338,6 +376,7 @@ $(function() {
                 $("#cal2").fullCalendar('removeEvents', $('#eventId').val());
                 if (duty_type == 'eventPropHoliday') {
                     calculate_suggested_patterns();
+                    deleted_holidays.push($('#eventId').val());
                 }
                 $(this).dialog("close");
             },
@@ -369,8 +408,13 @@ $(function() {
 
         other_cal.fullCalendar('renderEvent', other_event, true);
     };
-    var onlyTheMonthEventRender = function(event, element, view) {
+    var myEventRender = function(event, element, view) {
+        // show events only in visible areas.
         if (event.start.month() != view.intervalStart.month()) {
+            return false;
+        }
+        // discard deleted gcal-holidays
+        if ($.inArray(event.id, deleted_holidays) > -1) {
             return false;
         }
     };
@@ -397,6 +441,7 @@ $(function() {
         height: 580,
         firstDay: 1,
         theme: true,
+        eventLimit: true, // strang bug, without this, bottom border disappears in firefox
         googleCalendarApiKey: calGoogleCalendarApiKey,
         eventSources: calEventSources,
         selectable: true,
@@ -404,8 +449,15 @@ $(function() {
         editable: true,
         eventDrop: calEventDrop,
         eventClick: calEventClick,
-        eventRender: onlyTheMonthEventRender,
-        eventAfterAllRender: function() {}
+        eventRender: myEventRender,
+        eventAfterAllRender: function() {
+            //console.log('cal2 eventAfterAllRender');
+            is_cal2_all_rendered = true;
+
+            if (!is_cal2_loaded) {
+                is_cal2_loaded = true;
+            }
+        }
     });
 
     $("#cal1").fullCalendar({
@@ -418,6 +470,7 @@ $(function() {
         height: 580,
         firstDay: 1,
         theme: true,
+        eventLimit: true, // strang bug, without this, bottom border disappears in firefox
         googleCalendarApiKey: calGoogleCalendarApiKey,
         eventSources: calEventSources,
         selectable: true,
@@ -425,8 +478,11 @@ $(function() {
         editable: true,
         eventDrop: calEventDrop,
         eventClick: calEventClick,
-        eventRender: onlyTheMonthEventRender,
+        eventRender: myEventRender,
         eventAfterAllRender: function() {
+            //console.log("eventAfterAllRender");
+            is_cal1_all_rendered = true;
+
             update_current_duty_status();
             var groups = calculate_group_duties(get_all_duties());
             update_summary_duties(groups);
@@ -437,17 +493,37 @@ $(function() {
         }
     });
 
+    function wait_and_update_suggested_patterns() {
+        var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
+        var check_cal_all_rendered = setInterval(function() {
+            //console.log("200ms passed.");
+            if (month_span == 1 && is_cal1_all_rendered) {
+                //console.log("detect cal1 all rendered.");
+                update_patterns();
+                clearInterval(check_cal_all_rendered);
+            } else if (month_span == 2 && is_cal1_all_rendered && is_cal2_all_rendered) {
+                //console.log("detect cal1 and cal2 all rendered.");
+                update_patterns();
+                clearInterval(check_cal_all_rendered);
+            }
+        }, 200);
+    }
+
     // navigator for next and prev months
     $('#next_month').click(function() {
-        //console.log('prev is clicked, do something');
+        is_cal1_all_rendered = false;
+        is_cal2_all_rendered = false;
         $('#cal1').fullCalendar('next');
         $('#cal2').fullCalendar('next');
+        wait_and_update_suggested_patterns();
     });
 
     $('#prev_month').click(function() {
-        //console.log('next is clicked, do something');
+        is_cal1_all_rendered = false;
+        is_cal2_all_rendered = false;
         $('#cal1').fullCalendar('prev');
         $('#cal2').fullCalendar('prev');
+        wait_and_update_suggested_patterns();
     });
 
     //
@@ -497,10 +573,20 @@ $(function() {
         return preset_duties;
     }
 
+    function get_current_date_range() {
+        // consider month mode
+        var range = {};
+        var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
+        range.start_date = $('#cal1').fullCalendar('getView').intervalStart;
+        range.end_date = range.start_date.clone().add(month_span, 'months');
+        return range;
+    }
+
     function get_all_duties() {
+        var range = get_current_date_range();
         var all_duty_events = $('#cal1').fullCalendar('clientEvents', function(event) {
             if ($.inArray('preset-duty-event', event.className) > -1 || $.inArray('duty-event', event.className) > -1) {
-                return true;
+                return (event.start >= range.start_date && event.start < range.end_date);
             } else {
                 return false;
             }
@@ -561,7 +647,7 @@ $(function() {
                 var points = 2 * h_count + 1 * f_count;
                 var ratio = total_points / people;
                 var threshold = {};
-                if (total_points / people < 4) {    // in extreme condition (too many people), use loose threshold
+                if (total_points / people < 4) { // in extreme condition (too many people), use loose threshold
                     threshold.lower = parseInt(total_points / people) - 1;
                     threshold.upper = parseInt(total_points / people) + 2;
                 } else {
@@ -632,25 +718,8 @@ $(function() {
     // Debug UI Buttons
     //
     $('#func_clear_calendar').click(function() {
-        // clear fullCalendar
-        $('#cal1').fullCalendar('removeEvents', function(event) {
-            if ($.inArray('duty-event', event.className) > -1) {
-                return true;
-            } else {
-                return false;
-            }
-        });
-        $('#cal2').fullCalendar('removeEvents', function(event) {
-            if ($.inArray('duty-event', event.className) > -1) {
-                return true;
-            } else {
-                return false;
-            }
-        });
-
-        // update summary
-        var groups = calculate_group_duties(get_all_duties());
-        update_summary_duties(groups);
+        is_already_random_duty = false; // reset global var
+        clear_random_duties();
     });
 
     function update_current_duty_status() {
@@ -665,26 +734,30 @@ $(function() {
         var groups = calculate_group_duties(all_duties);
         calculate_group_duties_status(groups, preset_holidays);
         //        console.log(groups);
-        for (var person in groups) {
-            var person_id = '#person_' + person;
-            if ($(person_id).length == 1) {
-                var o_span = $(person_id + " .ordinary_count .current_status");
-                var f_span = $(person_id + " .friday_count .current_status");
-                var h_span = $(person_id + " .holiday_count .current_status");
-                var o_count = groups[person].ordinary_count;
-                var f_count = groups[person].friday_count;
-                var h_count = groups[person].holiday_count;
+        if ($.isEmptyObject(groups)) {  // clear the table
+            $("#suggested_pattern .current_status").html('');
+        } else {
+            for (var person in groups) {
+                var person_id = '#person_' + person;
+                if ($(person_id).length == 1) {
+                    var o_span = $(person_id + " .ordinary_count .current_status");
+                    var f_span = $(person_id + " .friday_count .current_status");
+                    var h_span = $(person_id + " .holiday_count .current_status");
+                    var o_count = groups[person].ordinary_count;
+                    var f_count = groups[person].friday_count;
+                    var h_count = groups[person].holiday_count;
 
-                o_span.html("(" + o_count + ")");
-                f_span.html("(" + f_count + ")");
-                h_span.html("(" + h_count + ")");
+                    o_span.html("(" + o_count + ")");
+                    f_span.html("(" + f_count + ")");
+                    h_span.html("(" + h_count + ")");
 
-                // show background if not fit pattern
-                o_span.toggleClass('bg-danger', (o_count != patterns[person - 1][0]), 800);
-                f_span.toggleClass('bg-danger', (f_count != patterns[person - 1][1]), 800);
-                h_span.toggleClass('bg-danger', (h_count != patterns[person - 1][2]), 800);
-            } else {
-                console.log("no such person: " + person);
+                    // show background if not fit pattern
+                    o_span.toggleClass('bg-danger', (o_count != patterns[person - 1][0]), 800);
+                    f_span.toggleClass('bg-danger', (f_count != patterns[person - 1][1]), 800);
+                    h_span.toggleClass('bg-danger', (h_count != patterns[person - 1][2]), 800);
+                } else {
+                    console.log("no such person: " + person);
+                }
             }
         }
     }
@@ -722,9 +795,13 @@ $(function() {
         update_duty_patterns(suggested_patterns);
     }
 
-    $('#func_get_holiday_condition').click(function() {
+    function update_patterns() {
         calculate_suggested_patterns();
         update_current_duty_status();
+    }
+
+    $('#func_get_holiday_condition').click(function() {
+        update_patterns();
     });
 
     $('#func_edit_duty_patterns').click(function() {
@@ -823,7 +900,7 @@ $(function() {
 
     function update_summary_duties(groups_duties) {
         if (!$.isEmptyObject(groups_duties)) {
-            var summary_duties_html = '<table class="table table-striped"><tr><th>No.</th><th>Dates</th><th>Intervals</th><th>Std Dev</th></tr>';
+            var summary_duties_html = '<table class="table table-striped"><tr><th>No.</th><th>Dates</th><th>Intervals</th><th>QOD</th><th>Std Dev</th></tr>';
             var preset_holidays = get_preset_holidays();
             for (var p in groups_duties) {
                 var dates = $.map(groups_duties[p].dates.sort(), function(d) {
@@ -837,12 +914,24 @@ $(function() {
                     date_html += '">' + moment(d, "YYYY-MM-DD").format("M/D") + '</span>';
                     return date_html;
                 }).join(', ');
-                var intervals = groups_duties[p].intervals.join(', ');
+                var qod_count = 0;
+                var intervals = $.map(groups_duties[p].intervals, function(i) {
+                    var interval_html = '<span class="';
+                    // colerize if qod
+                    if (i == 2) {
+                        interval_html += 'bg-danger';
+                        qod_count++;
+                    }
+                    interval_html += '">' + i + '</span>';
+                    return interval_html;
+                });
                 var std_dev = groups_duties[p].std_dev;
-                summary_duties_html += '<tr><th>' + p + '</th><th>' + dates + '</th><th>' + intervals + '</th><th>' + std_dev + '</th></tr>';
+                summary_duties_html += '<tr><th>' + p + '</th><th>' + dates + '</th><th>' + intervals + '</th><th>' + qod_count + '</th><th>' + std_dev + '</th></tr>';
             }
             summary_duties_html += '</table>';
             $('#summary_duties').html(summary_duties_html);
+        } else { // if clear, groups_duties is empty
+            $('#summary_duties').html("");
         }
     }
 
@@ -915,7 +1004,123 @@ $(function() {
         $('#duties_datatable_div').html(table_html);
     }
 
+    function clear_random_duties() {
+        // clear fullCalendar
+        $('#cal1').fullCalendar('removeEvents', function(event) {
+            if ($.inArray('duty-event', event.className) > -1) {
+                return true;
+            } else {
+                return false;
+            }
+        });
+        $('#cal2').fullCalendar('removeEvents', function(event) {
+            if ($.inArray('duty-event', event.className) > -1) {
+                return true;
+            } else {
+                return false;
+            }
+        });
+
+        // update summary
+        var groups = calculate_group_duties(get_all_duties());
+        update_summary_duties(groups);
+        update_current_duty_status();
+    }
+
     var random_duty_worker;
+
+    function do_random_duty() {
+        var patterns = $('#suggested_pattern').data("patterns");
+        var use_qod_limit = $('#use_qod_limit').is(':checked');
+        var qod_limit = parseInt($('#inputQodLimitSlider').slider('option', 'value'));
+        var presets = get_presets();
+        var start_date = $('#cal1').fullCalendar('getDate').startOf('month');
+        var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
+        var end_date = start_date.clone().add(month_span, 'months');
+        var total_days = end_date.diff(start_date, 'days');
+        var filters = {
+            "patterns": patterns,
+            "use_std_dev_level": $('#use_std_dev_level').is(':checked'),
+            "std_dev_level": parseFloat($('#inputStdDevSlider').slider('option', 'value')),
+            "use_qod_limit": use_qod_limit,
+            "qod_limit": qod_limit,
+        };
+
+        clear_random_duties(); // always clean previous random duties
+        is_already_random_duty = false; // reset global var
+
+        // block ui
+        $('#block_ui_message').html("Please wait...");
+        $.blockUI({
+            theme: true,
+            title: 'Generating Duties',
+            message: $('#block_ui_box')
+        });
+
+        random_duty_worker = new Worker("assets/js/random_duty_worker.js");
+        random_duty_worker.postMessage({
+            "presets": presets,
+            "since_date_str": start_date.format("YYYY-MM-DD"),
+            "total_days": total_days,
+            "filters": filters,
+        });
+        random_duty_worker.onmessage = function(e) {
+            switch (e.data.status) {
+                case "success":
+                    var duties = e.data["duties"];
+                    var groups = e.data["groups"];
+                    //console.log(duties.toString());
+
+                    $.each(duties, function(i, duty) {
+                        var date = moment(duty[0], "YYYY-MM-DD");
+                        if (get_preset_duty(presets.duties, duty[0]) === undefined) {
+                            var eventTitle = duty[1].toString();
+                            var event = {
+                                id: CryptoJS.MD5(date + eventTitle).toString(),
+                                title: eventTitle,
+                                start: date,
+                                allDay: true,
+                                color: duty_colors[duty[1]],
+                                className: "duty-event"
+                            };
+                            $('#cal1').fullCalendar('renderEvent', event, true);
+                            $('#cal2').fullCalendar('renderEvent', event, true);
+                            //console.log(duty[0] + ": " + duty[1]);
+                        }
+                    });
+
+                    // outline the result and std_dev
+                    update_summary_duties(groups);
+
+                    // record is_already_random_duty
+                    is_already_random_duty = true;
+
+                    // unblock ui
+                    $.unblockUI({
+                        onUnblock: function() {
+                            myGrowlUI('Success', '自動排班已完成');
+                        }
+                    });
+                    break;
+                case "running":
+                    $('#block_ui_message').html(e.data.msg);
+                    break;
+                case "fail":
+                    $('#block_ui_dialog_message').html(e.data.msg);
+                    $.blockUI({
+                        theme: true,
+                        title: 'Generating Failed',
+                        message: $('#block_ui_dialog'),
+                    });
+                    break;
+                default:
+                    console.log(e.data["msg"]);
+                    console.log(e.data["duties"]);
+                    console.log(e.data["groups"]);
+            }
+        }
+    }
+
     $('#func_random_duty').click(function() {
         // check if calculated patterns.
         var patterns = $('#suggested_pattern').data("patterns");
@@ -942,88 +1147,33 @@ $(function() {
             return;
         }
 
-        // check if friday, weekend, holiday duties are set and fit pattern.
-        if (!is_preset_duties_fit_pattern(presets, patterns)) {
-            WarningDialog('已排班表不符合樣式，請調整');
-            return;
+        // VGHKS vs General mode
+        var vghks_mode = $('#vghks_mode_switch').bootstrapSwitch('state');
+        if (vghks_mode) {
+            // check if friday, weekend, holiday duties are set and fit pattern.
+            if (!is_preset_duties_fit_pattern(presets, patterns)) {
+                WarningDialog('已排班表不符合樣式，請調整');
+                return;
+            }
         }
 
-        // block ui
-        $('#block_ui_message').html("Please wait...");
-        $.blockUI({
-            theme: true,
-            title: 'Generating Duties',
-            message: $('#block_ui_box')
-        });
-
-        var start_date = $('#cal1').fullCalendar('getDate').startOf('month');
-        var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
-        var end_date = start_date.clone().add(month_span, 'months');
-        var total_days = end_date.diff(start_date, 'days');
-        var filters = {
-            "patterns": patterns,
-            "use_std_dev_level": $('#use_std_dev_level').is(':checked'),
-            "std_dev_level": parseFloat($('#inputStdDevSlider').slider('option', 'value')),
-            "use_qod_limit": use_qod_limit,
-            "qod_limit": qod_limit,
-        };
-
-        random_duty_worker = new Worker("assets/js/random_duty_worker.js");
-        random_duty_worker.postMessage({
-            "presets": presets,
-            "since_date_str": start_date.format("YYYY-MM-DD"),
-            "total_days": total_days,
-            "filters": filters,
-        });
-        random_duty_worker.onmessage = function(e) {
-            switch (e.data.status) {
-                case "success":
-                    var duties = e.data["duties"];
-                    var groups = e.data["groups"];
-                    //console.log(groups);
-
-                    $.each(duties, function(i, duty) {
-                        var date = moment(duty[0], "YYYY-MM-DD");
-                        if (get_preset_duty(presets.duties, duty[0]) === undefined) {
-                            var eventTitle = duty[1].toString();
-                            var event = {
-                                id: CryptoJS.MD5(date + eventTitle).toString(),
-                                title: eventTitle,
-                                start: date,
-                                allDay: true,
-                                color: duty_colors[duty[1]],
-                                className: "duty-event"
-                            };
-                            $('#cal1').fullCalendar('renderEvent', event, true);
-                            $('#cal2').fullCalendar('renderEvent', event, true);
-                            //console.log(duty[0] + ": " + duty[1]);
-                        }
-                    });
-
-                    // outline the result and std_dev
-                    update_summary_duties(groups);
-
-                    // unblock ui
-                    $.unblockUI({
-                        onUnblock: function() {
-                            myGrowlUI('Success', '自動排班已完成');
-                        }
-                    });
-                    break;
-                case "running":
-                    $('#block_ui_message').html(e.data.msg);
-                    break;
-                case "fail":
-                    $('#block_ui_dialog_message').html(e.data.msg);
-                    $.blockUI({
-                        theme: true,
-                        title: 'Generating Failed',
-                        message: $('#block_ui_dialog'),
-                    });
-                    break;
-                default:
-                    console.log(e.data["msg"]);
-            }
+        // check if already random duty and show a confirm dialog
+        if (is_already_random_duty) {
+            BootstrapDialog.confirm({
+                title: 'Warning',
+                message: '已有排定班表，確定清除並重排？',
+                type: BootstrapDialog.TYPE_WARNING,
+                closable: true,
+                btnCancelLabel: '取消',
+                btnOKLabel: '重新排班',
+                callback: function(result) {
+                    if (result) {
+                        do_random_duty();
+                    }
+                }
+            });
+        } else {
+            do_random_duty();
         }
     });
 
@@ -1247,7 +1397,33 @@ $(function() {
                 });
             }
 
+            //
+            // Load Preferences From Cookie
+            //
+            var pref = Cookies.get();
+            $.each(pref, function(key, value) {
+                if (value == "true" || value == "false") {
+                    pref[key] = (value === "true");
+                }
+            });
+            if (pref.mode_switch !== undefined) {
+                $('#mode_switch').bootstrapSwitch('state', pref.mode_switch);
+            }
+            $('#use_qod_limit').prop("checked", pref.use_qod_limit);
+            if (pref.inputQodLimitSlider !== undefined)
+                $('#inputQodLimitSlider').slider("option", "value", pref.inputQodLimitSlider);
+            $('#use_std_dev_level').prop("checked", pref.use_std_dev_level);
+            if (pref.inputStdDevSlider !== undefined)
+                $('#inputStdDevSlider').slider("option", "value", pref.inputStdDevSlider);
+            if (pref.inputPeopleSlider !== undefined)
+                $('#inputPeopleSlider').slider("option", "value", pref.inputPeopleSlider);
+
             clearInterval(check_cal_loaded);
         }
     }, 200);
+
+    // update version text
+    $.getJSON('../../bower.json', function(data) {
+        $('#appVersion').html('v' + data.version);
+    });
 });

@@ -4,11 +4,15 @@ desc "Deploy to Github Pages"
 task :deploy do
   puts "## Deploying to Github Pages"
 
+  cd "_site" do
+    system "git checkout -- ."
+    system "git pull"
+  end
+
   puts "## Generating site"
   system "grunt build"
 
   cd "_site" do
-    system "git pull"
     system "git add -A"
 
     message = "vghks-random-duty updated at #{Time.now.utc}"

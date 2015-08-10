@@ -1,5 +1,19 @@
 # Change Log
 
+### v0.2 - 2015-08-10
+
+1. Add a switch to control if VGHKS mode or general mode. (#19)
+2. Show QOD status and colorize the duty dates in summary. (#30)
+3. Cache deleted gcal events preventing rerendering while changing month. (#32)
+4. Use cookie to store preferences. (#33)
+5. Show an alert before re-random if a result exists. (#35)
+6. Fix some bugs. (#31, #34)
+7. Show a loading page before all elements get ready.
+
+### v0.1.1 - 2015-08-05
+
+1. Fix #36: Random patterns sometimes do not have a solution!
+
 ### v0.1 - 2015-07-26
 
 1. Initial release: [official site](http://radtools.tsai.it/vghks-random-duty/).

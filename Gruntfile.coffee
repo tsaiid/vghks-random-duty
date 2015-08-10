@@ -20,8 +20,8 @@ module.exports = (grunt) ->
     sync: {
       main: {
         files: [
-          { src: ['assets/**', 'index.html'], dest: '<%= opts.base_path %>'},
-          { cwd: 'bower_components/jquery/', src: 'jquery.min.*', dest: '<%= opts.js_path %>' },
+          { src: ['assets/**', 'index.html', 'bower.json'], dest: '<%= opts.base_path %>'},
+          { cwd: 'bower_components/jquery/dist/', src: 'jquery.min.*', dest: '<%= opts.js_path %>' },
           { cwd: 'bower_components/moment/min/', src: 'moment.min.js', dest: '<%= opts.js_path %>' },
           { cwd: 'bower_components/jquery-ui/', src: ['themes/redmond/**'], dest: '<%= opts.css_path %>' },
           { cwd: 'bower_components/jquery-ui/', src: 'jquery-ui.min.js', dest: '<%= opts.js_path %>' },
@@ -36,12 +36,15 @@ module.exports = (grunt) ->
           { cwd: 'bower_components/bootstrap-switch/dist/js/', src: 'bootstrap-switch.min.js', dest: '<%= opts.js_path %>' },
           { cwd: 'bower_components/bootstrap-dialog/dist/css/', src: 'bootstrap-dialog.min.css', dest: '<%= opts.css_path %>' },
           { cwd: 'bower_components/bootstrap-dialog/dist/js/', src: 'bootstrap-dialog.min.js', dest: '<%= opts.js_path %>' },
-          { cwd: 'bower_components/fullcalendar/dist/', src: 'fullcalendar.min.css', dest: '<%= opts.css_path %>' },
+          { cwd: 'bower_components/fullcalendar/dist/', src: ['fullcalendar.min.css', 'fullcalendar.print.css'], dest: '<%= opts.css_path %>' },
           { cwd: 'bower_components/fullcalendar/dist/', src: 'fullcalendar.min.js', dest: '<%= opts.js_path %>' },
           { cwd: 'bower_components/fullcalendar/dist/', src: 'gcal.js', dest: '<%= opts.js_path %>' },
           { cwd: 'bower_components/cryptojslib/rollups/', src: 'md5.js', dest: '<%= opts.js_path %>' },
           { cwd: 'bower_components/excellentexport/', src: 'excellentexport.min.js', dest: '<%= opts.js_path %>' },
           { cwd: 'bower_components/jquery.contenteditable/', src: 'jquery.contenteditable.js', dest: '<%= opts.js_path %>' },
+          { cwd: 'bower_components/pace/', src: 'pace.min.js', dest: '<%= opts.js_path %>' },
+          { cwd: 'bower_components/pace/themes/blue/', src: 'pace-theme-loading-bar.css', dest: '<%= opts.css_path %>' },
+          { cwd: 'bower_components/js-cookie/src/', src: 'js.cookie.js', dest: '<%= opts.js_path %>' },
         ],
         verbose: true,
         pretend: false, # Don't do any disk operations - just write log
