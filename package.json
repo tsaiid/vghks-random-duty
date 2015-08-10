@@ -20,6 +20,7 @@
     "grunt": "latest",
     "grunt-bower-task": "latest",
     "grunt-contrib-connect": "latest",
+    "grunt-contrib-copy": "latest",
     "grunt-contrib-watch": "latest",
     "grunt-sync": "latest"
   }
