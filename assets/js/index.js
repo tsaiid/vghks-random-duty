@@ -378,6 +378,7 @@ $(function() {
                     calculate_suggested_patterns();
                     deleted_holidays.push($('#eventId').val());
                 }
+                update_current_duty_status();
                 $(this).dialog("close");
             },
             '取消': function() {
