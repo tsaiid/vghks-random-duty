@@ -1446,4 +1446,13 @@ $(function() {
     $.getJSON('bower.json', function(data) {
         $('#appVersion').html('v' + data.version);
     });
+
+    // update change log
+    $.ajax({
+        url: 'ChangeLog.md',
+        dataType: 'text',
+        success: function(data) {
+            $('#changeLogModal .modal-body').html(marked(data));
+        }
+    });
 });

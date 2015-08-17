@@ -57,11 +57,19 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="#">VGHKS Random Duty Generator</a>
+                <a class="navbar-brand" href="/vghks-random-duty/">VGHKS Random Duty Generator</a>
             </div>
             <div id="navbar" class="navbar-collapse collapse">
                 <ul class="nav navbar-nav navbar-right">
                     <li><a href="#" data-toggle="modal" data-target="#aboutModal"><i class="fa fa-info-circle"></i> 關於</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-code-fork"></i> 版本 <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/vghks-random-duty/"><i class="fa fa-star"></i> 最新版本</a></li>
+                            <li role="separator" class="divider"></li>
+                            <li><a href="#" data-toggle="modal" data-target="#changeLogModal"><i class="fa fa-history"></i> 歷史版本</a></li>
+                        </ul>
+                    </li>
                     <li><a href="#" data-toggle="modal" data-target="#usageModal"><i class="fa fa-book"></i> 使用說明</a></li>
                 </ul>
             </div>
@@ -253,6 +261,22 @@
             </div>
         </div>
     </div>
+    <!-- About Modal -->
+    <div class="modal fade bootstrap-dialog type-info" id="changeLogModal" tabindex="-1" role="dialog" aria-labelledby="changeLogModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <div class="modal-title bootstrap-dialog-title" id="aboutModalLabel">歷史版本</div>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Help Modal -->
     <div class="modal fade bootstrap-dialog type-info" id="usageModal" tabindex="-1" role="dialog" aria-labelledby="usageModalLabel">
         <div class="modal-dialog modal-lg" role="document">
@@ -302,6 +326,7 @@
     <script src="vendor/js/gcal.js"></script>
     <script src="vendor/js/excellentexport.min.js"></script>
     <script src="vendor/js/jquery.contenteditable.js"></script>
+    <script src="vendor/js/marked.min.js"></script>
     <script src="assets/js/private_functions.js"></script>
     <script src="assets/js/lib_duties.js"></script>
     <script src="assets/js/lib_holidays.js"></script>
