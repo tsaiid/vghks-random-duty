@@ -1,6 +1,9 @@
-# Change Log
+### [v0.2.1](http://radtools.tsai.it/vghks-random-duty/ver/0.2.1/) – 2015-08-15
 
-### v0.2 - 2015-08-10
+1. Fix: update duty status after deleting holiday. (#42)
+2. Fix: check current month range if already has random duty. (#37)
+
+### [v0.2](http://radtools.tsai.it/vghks-random-duty/ver/0.2.0/) - 2015-08-10
 
 1. Add a switch to control if VGHKS mode or general mode. (#19)
 2. Show QOD status and colorize the duty dates in summary. (#30)
@@ -10,11 +13,11 @@
 6. Fix some bugs. (#31, #34)
 7. Show a loading page before all elements get ready.
 
-### v0.1.1 - 2015-08-05
+### [v0.1.1](http://radtools.tsai.it/vghks-random-duty/ver/0.1.1/) - 2015-08-05
 
 1. Fix #36: Random patterns sometimes do not have a solution!
 
-### v0.1 - 2015-07-26
+### [v0.1](http://radtools.tsai.it/vghks-random-duty/ver/0.1.0/) - 2015-07-26
 
 1. Initial release: [official site](http://radtools.tsai.it/vghks-random-duty/).
 2. VGHKS Rad mode random duty generator.
