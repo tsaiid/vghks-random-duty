@@ -1,3 +1,9 @@
+### [v0.2.2](/vghks-random-duty/ver/0.2.2/) – 2015-08-17
+
+1. Fix: correct the path for version info file. (#43)
+2. Add more colors for duties. (#38)
+3. Add links to all previous releases, and show change logs. (#44)
+
 ### [v0.2.1](/vghks-random-duty/ver/0.2.1/) – 2015-08-15
 
 1. Fix: update duty status after deleting holiday. (#42)
