@@ -77,7 +77,7 @@ module.exports = (grunt) ->
       server:
         options:
           port: 4000
-          base: '<%= opts.base_path %>'
+          base: '_site'
           livereload: true
 
   grunt.registerTask "build", [
