@@ -16,7 +16,7 @@ module.exports = (grunt) ->
     font_path: '_site/vghks-random-duty/vendor/fonts/'
 
   files = [
-    { expand: true, src: ['assets/**', 'index.html', 'bower.json'], dest: '<%= opts.base_path %>'},
+    { expand: true, src: ['assets/**', 'index.html', 'bower.json', 'ChangeLog.md'], dest: '<%= opts.base_path %>'},
     { expand: true, cwd: 'bower_components/jquery/dist/', src: 'jquery.min.*', dest: '<%= opts.js_path %>' },
     { expand: true, cwd: 'bower_components/moment/min/', src: 'moment.min.js', dest: '<%= opts.js_path %>' },
     { expand: true, cwd: 'bower_components/jquery-ui/', src: ['themes/redmond/**'], dest: '<%= opts.css_path %>' },
@@ -41,6 +41,7 @@ module.exports = (grunt) ->
     { expand: true, cwd: 'bower_components/pace/', src: 'pace.min.js', dest: '<%= opts.js_path %>' },
     { expand: true, cwd: 'bower_components/pace/themes/blue/', src: 'pace-theme-loading-bar.css', dest: '<%= opts.css_path %>' },
     { expand: true, cwd: 'bower_components/js-cookie/src/', src: 'js.cookie.js', dest: '<%= opts.js_path %>' },
+    { expand: true, cwd: 'bower_components/marked/', src: 'marked.min.js', dest: '<%= opts.js_path %>' },
   ]
 
   grunt.initConfig
@@ -50,7 +51,7 @@ module.exports = (grunt) ->
         files: files
         verbose: true
         pretend: false              # Don't do any disk operations - just write log
-        ignoreInDest: "**/.git/**"  # Never remove js files from destination
+        ignoreInDest: ["**/.git/**", "**/ver/**"]  # Never remove js files from destination
         updateAndDelete: true       # Remove all files from dest that are not found in src
 
     copy:
@@ -65,6 +66,8 @@ module.exports = (grunt) ->
         files: [
           "assets/**/*"
           "*.html"
+          "bower.json"
+          "ChangeLog.md"
         ]
         tasks: [
           "sync"
