@@ -924,18 +924,39 @@ $(function() {
 
     function update_summary_duties(groups_duties) {
         if (!$.isEmptyObject(groups_duties)) {
-            var summary_duties_html = '<table class="table table-striped"><tr><th>No.</th><th>Dates</th><th>Intervals</th><th>QOD</th><th>Std Dev</th></tr>';
+            var summary_duties_html = '<table class="table table-striped"><tr><th>No.</th><th>值班日</th><th>班距</th><th>週工時</th><th>QOD 次數</th><th>班距標準差</th></tr>';
             var preset_holidays = get_preset_holidays();
+
             for (var p in groups_duties) {
+                // calculate week distribution
+                var week_hours = [];
+                var date_range = get_current_date_range();
+                for (var i = date_range.start_date.clone(); i < date_range.end_date; i.add(1, 'day')) {
+                    var date_str = i.format("YYYY-MM-DD");
+                    var week_no = i.week();
+                    if (week_hours[week_no] === undefined) {
+                        week_hours[week_no] = 0;
+                    }
+                    if (!is_holiday(preset_holidays, date_str) && !is_weekend(date_str)) {
+                        week_hours[week_no] += 8;
+                    }
+                }
+
                 var dates = $.map(groups_duties[p].dates.sort(), function(d) {
+                    var moment_d = moment(d, "YYYY-MM-DD");
+                    var week_no = moment_d.week();
                     var date_html = '<span class="';
                     // colorize if friday or holiday
                     if (is_holiday(preset_holidays, d) || is_weekend(d)) {
                         date_html += 'bg-danger';
+                        week_hours[week_no] += 24;
                     } else if (is_friday(preset_holidays, d)) {
                         date_html += 'bg-success';
+                        week_hours[week_no] += 16;
+                    } else {
+                        week_hours[week_no] += 16;
                     }
-                    date_html += '">' + moment(d, "YYYY-MM-DD").format("M/D") + '</span>';
+                    date_html += '">' + moment_d.format("M/D") + '</span>';
                     return date_html;
                 }).join(', ');
                 var qod_count = 0;
@@ -949,8 +970,18 @@ $(function() {
                     interval_html += '">' + i + '</span>';
                     return interval_html;
                 });
+                var week_hours_str = $.map(week_hours.filter(Number), function(hours){
+                    var hours_html = '<span class="';
+                    if (hours > 88) {
+                        hours_html += 'bg-danger';
+                    } else if (hours >= 80) {
+                        hours_html += 'bg-warning';
+                    }
+                    hours_html += '">' + hours + '</span>';
+                    return hours_html;
+                }).join(', ');
                 var std_dev = groups_duties[p].std_dev;
-                summary_duties_html += '<tr><th>' + p + '</th><th>' + dates + '</th><th>' + intervals + '</th><th>' + qod_count + '</th><th>' + std_dev + '</th></tr>';
+                summary_duties_html += '<tr><th>' + p + '</th><th>' + dates + '</th><th>' + intervals + '</th><th>' + week_hours_str + '</th><th>' + qod_count + '</th><th>' + std_dev + '</th></tr>';
             }
             summary_duties_html += '</table>';
             $('#summary_duties').html(summary_duties_html);
