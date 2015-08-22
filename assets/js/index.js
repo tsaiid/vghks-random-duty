@@ -328,6 +328,11 @@ $(function() {
         }
     }];
     var calDayClick = function(date, jsEvent, view) {
+        // check if is in the available date range
+        if (date.format("YYYY-MM") != view.intervalStart.format("YYYY-MM")) {
+            return;
+        }
+
         $('#eventStart').val(date.format("YYYY-MM-DD"));
 
         // set ui dialog
@@ -594,11 +599,18 @@ $(function() {
 
     function get_current_date_range() {
         // consider month mode
-        var range = {};
         var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
-        range.start_date = $('#cal1').fullCalendar('getView').intervalStart;
-        range.end_date = range.start_date.clone().add(month_span, 'months');
-        return range;
+        var start_date = $('#cal1').fullCalendar('getView').intervalStart;
+        var end_date = start_date.clone().add(month_span, 'months');
+        var month_str = start_date.format("YYYY-MM");
+        if (month_span > 1) {
+            month_str += '_' + end_date.clone().subtract(1, 'day').format("YYYY-MM");
+        }
+        return {
+            start_date: start_date,
+            end_date: end_date,
+            month_str: month_str
+        };
     }
 
     function get_all_duties() {
@@ -662,11 +674,11 @@ $(function() {
             var h_count = holiday_duties.multiIndexOf(i).length;
 
             if (ENABLE_PATTERN_CONDITIONING) {
-                var total_points = 2 * holiday_count + 1 * friday_count;
-                var points = 2 * h_count + 1 * f_count;
+                var total_points = 2 * holiday_count + 1 * friday_count + 1 * ordinary_count;
+                var points = 2 * h_count + 1 * f_count + 1 * o_count;
                 var ratio = total_points / people;
                 var threshold = {};
-                if (total_points / people < 4) { // in extreme condition (too many people), use loose threshold
+                if (total_points / people < 6) { // in extreme condition (too many people), use loose threshold
                     threshold.lower = parseInt(total_points / people) - 1;
                     threshold.upper = parseInt(total_points / people) + 2;
                 } else {
@@ -686,7 +698,7 @@ $(function() {
         var residual_ordinary_count = ordinary_count % people;
         if (residual_ordinary_count != 0) {
             patterns = patterns.sort(function(a, b) {
-                return (a[2] * 2 + a[1]) - (b[2] * 2 + b[1])
+                return (a[2] * 2 + a[1] + a[0]) - (b[2] * 2 + b[1] + b[0]);
             });
             for (i = 0; i < residual_ordinary_count; i++) {
                 patterns[i][0]++;
@@ -789,7 +801,7 @@ $(function() {
                 f_count = 0,
                 h_count = 0;
             $.each(patterns, function(index, pattern) {
-                var point = parseInt(pattern[1]) + parseInt(pattern[2]) * 2;
+                var point = parseInt(pattern[0]) + parseInt(pattern[1]) + parseInt(pattern[2]) * 2;
                 pattern_html += '<tr id="person_' + (index + 1) + '"><td>' + (index + 1) + '</td><td class="ordinary_count">' + pattern[0] + ' <span class="current_status"></span></td><td class="friday_count">' + pattern[1] + ' <span class="current_status"></span></td><td class="holiday_count">' + pattern[2] + ' <span class="current_status"></span></td><td>' + point + '</td></tr>';
                 o_count += pattern[0];
                 f_count += pattern[1];
@@ -838,7 +850,7 @@ $(function() {
             o_count += p[0];
             f_count += p[1];
             h_count += p[2];
-            var pt = p[1] + p[2] * 2;
+            var pt = p[0] + p[1] + p[2] * 2;
             table_html += '<tr><td>' + (i + 1) + '</td><td class="duty_data" contentEditable>' + p[0] + '</td><td class="duty_data" contentEditable>' + p[1] + '</td><td class="duty_data" contentEditable>' + p[2] + '</td><td class="total_points">' + pt + '</td></tr>';
         });
         var t_count = o_count + f_count + h_count;
@@ -919,18 +931,39 @@ $(function() {
 
     function update_summary_duties(groups_duties) {
         if (!$.isEmptyObject(groups_duties)) {
-            var summary_duties_html = '<table class="table table-striped"><tr><th>No.</th><th>Dates</th><th>Intervals</th><th>QOD</th><th>Std Dev</th></tr>';
+            var summary_duties_html = '<table class="table table-striped"><tr><th>No.</th><th>值班日</th><th>班距</th><th>週工時</th><th>QOD 次數</th><th>班距標準差</th></tr>';
             var preset_holidays = get_preset_holidays();
+
             for (var p in groups_duties) {
+                // calculate week distribution
+                var week_hours = [];
+                var date_range = get_current_date_range();
+                for (var i = date_range.start_date.clone(); i < date_range.end_date; i.add(1, 'day')) {
+                    var date_str = i.format("YYYY-MM-DD");
+                    var week_no = i.week();
+                    if (week_hours[week_no] === undefined) {
+                        week_hours[week_no] = 0;
+                    }
+                    if (!is_holiday(preset_holidays, date_str) && !is_weekend(date_str)) {
+                        week_hours[week_no] += 8;
+                    }
+                }
+
                 var dates = $.map(groups_duties[p].dates.sort(), function(d) {
+                    var moment_d = moment(d, "YYYY-MM-DD");
+                    var week_no = moment_d.week();
                     var date_html = '<span class="';
                     // colorize if friday or holiday
                     if (is_holiday(preset_holidays, d) || is_weekend(d)) {
                         date_html += 'bg-danger';
+                        week_hours[week_no] += 24;
                     } else if (is_friday(preset_holidays, d)) {
                         date_html += 'bg-success';
+                        week_hours[week_no] += 16;
+                    } else {
+                        week_hours[week_no] += 16;
                     }
-                    date_html += '">' + moment(d, "YYYY-MM-DD").format("M/D") + '</span>';
+                    date_html += '">' + moment_d.format("M/D") + '</span>';
                     return date_html;
                 }).join(', ');
                 var qod_count = 0;
@@ -944,8 +977,18 @@ $(function() {
                     interval_html += '">' + i + '</span>';
                     return interval_html;
                 });
+                var week_hours_str = $.map(week_hours.filter(Number), function(hours){
+                    var hours_html = '<span class="';
+                    if (hours > 88) {
+                        hours_html += 'bg-danger';
+                    } else if (hours >= 80) {
+                        hours_html += 'bg-warning';
+                    }
+                    hours_html += '">' + hours + '</span>';
+                    return hours_html;
+                }).join(', ');
                 var std_dev = groups_duties[p].std_dev;
-                summary_duties_html += '<tr><th>' + p + '</th><th>' + dates + '</th><th>' + intervals + '</th><th>' + qod_count + '</th><th>' + std_dev + '</th></tr>';
+                summary_duties_html += '<tr><th>' + p + '</th><th>' + dates + '</th><th>' + intervals + '</th><th>' + week_hours_str + '</th><th>' + qod_count + '</th><th>' + std_dev + '</th></tr>';
             }
             summary_duties_html += '</table>';
             $('#summary_duties').html(summary_duties_html);
@@ -1357,6 +1400,19 @@ $(function() {
 
         return _is_each_day_has_a_duty;
     }
+
+    $('#func_download_screenshot').click(function(event) {
+        html2canvas(document.body, {
+            onrendered: function(canvas) {
+                var range = get_current_date_range();
+                filename = 'random_duty_' + range.month_str + '.png';
+                $("#screenshot_download_link").attr('href', canvas.toDataURL("image/png"));
+                $("#screenshot_download_link").attr('download', filename);
+                lnk = document.getElementById("screenshot_download_link");
+                lnk.click();
+            }
+        });
+    });
 
     $('#func_download_excel').click(function(event) {
         // set duration as file name.
