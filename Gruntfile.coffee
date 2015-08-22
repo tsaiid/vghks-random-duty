@@ -42,6 +42,7 @@ module.exports = (grunt) ->
     { expand: true, cwd: 'bower_components/pace/themes/blue/', src: 'pace-theme-loading-bar.css', dest: '<%= opts.css_path %>' },
     { expand: true, cwd: 'bower_components/js-cookie/src/', src: 'js.cookie.js', dest: '<%= opts.js_path %>' },
     { expand: true, cwd: 'bower_components/marked/', src: 'marked.min.js', dest: '<%= opts.js_path %>' },
+    { expand: true, cwd: 'bower_components/html2canvas/build/', src: 'html2canvas.min.js', dest: '<%= opts.js_path %>' },
   ]
 
   grunt.initConfig
