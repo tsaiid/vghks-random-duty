@@ -599,11 +599,18 @@ $(function() {
 
     function get_current_date_range() {
         // consider month mode
-        var range = {};
         var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
-        range.start_date = $('#cal1').fullCalendar('getView').intervalStart;
-        range.end_date = range.start_date.clone().add(month_span, 'months');
-        return range;
+        var start_date = $('#cal1').fullCalendar('getView').intervalStart;
+        var end_date = start_date.clone().add(month_span, 'months');
+        var month_str = start_date.format("YYYY-MM");
+        if (month_span > 1) {
+            month_str += '_' + end_date.clone().subtract(1, 'day').format("YYYY-MM");
+        }
+        return {
+            start_date: start_date,
+            end_date: end_date,
+            month_str: month_str
+        };
     }
 
     function get_all_duties() {
@@ -1393,6 +1400,19 @@ $(function() {
 
         return _is_each_day_has_a_duty;
     }
+
+    $('#func_download_screenshot').click(function(event) {
+        html2canvas(document.body, {
+            onrendered: function(canvas) {
+                var range = get_current_date_range();
+                filename = 'random_duty_' + range.month_str + '.png';
+                $("#screenshot_download_link").attr('href', canvas.toDataURL("image/png"));
+                $("#screenshot_download_link").attr('download', filename);
+                lnk = document.getElementById("screenshot_download_link");
+                lnk.click();
+            }
+        });
+    });
 
     $('#func_download_excel').click(function(event) {
         // set duration as file name.
