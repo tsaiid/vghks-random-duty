@@ -662,8 +662,8 @@ $(function() {
             var h_count = holiday_duties.multiIndexOf(i).length;
 
             if (ENABLE_PATTERN_CONDITIONING) {
-                var total_points = 2 * holiday_count + 1 * friday_count;
-                var points = 2 * h_count + 1 * f_count;
+                var total_points = 2 * holiday_count + 1 * friday_count + 1 * ordinary_count;
+                var points = 2 * h_count + 1 * f_count + 1 * o_count;
                 var ratio = total_points / people;
                 var threshold = {};
                 if (total_points / people < 4) { // in extreme condition (too many people), use loose threshold
@@ -686,7 +686,7 @@ $(function() {
         var residual_ordinary_count = ordinary_count % people;
         if (residual_ordinary_count != 0) {
             patterns = patterns.sort(function(a, b) {
-                return (a[2] * 2 + a[1]) - (b[2] * 2 + b[1])
+                return (a[2] * 2 + a[1] + a[0]) - (b[2] * 2 + b[1] + b[0]);
             });
             for (i = 0; i < residual_ordinary_count; i++) {
                 patterns[i][0]++;
@@ -789,7 +789,7 @@ $(function() {
                 f_count = 0,
                 h_count = 0;
             $.each(patterns, function(index, pattern) {
-                var point = parseInt(pattern[1]) + parseInt(pattern[2]) * 2;
+                var point = parseInt(pattern[0]) + parseInt(pattern[1]) + parseInt(pattern[2]) * 2;
                 pattern_html += '<tr id="person_' + (index + 1) + '"><td>' + (index + 1) + '</td><td class="ordinary_count">' + pattern[0] + ' <span class="current_status"></span></td><td class="friday_count">' + pattern[1] + ' <span class="current_status"></span></td><td class="holiday_count">' + pattern[2] + ' <span class="current_status"></span></td><td>' + point + '</td></tr>';
                 o_count += pattern[0];
                 f_count += pattern[1];
@@ -838,7 +838,7 @@ $(function() {
             o_count += p[0];
             f_count += p[1];
             h_count += p[2];
-            var pt = p[1] + p[2] * 2;
+            var pt = p[0] + p[1] + p[2] * 2;
             table_html += '<tr><td>' + (i + 1) + '</td><td class="duty_data" contentEditable>' + p[0] + '</td><td class="duty_data" contentEditable>' + p[1] + '</td><td class="duty_data" contentEditable>' + p[2] + '</td><td class="total_points">' + pt + '</td></tr>';
         });
         var t_count = o_count + f_count + h_count;
