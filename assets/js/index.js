@@ -328,6 +328,11 @@ $(function() {
         }
     }];
     var calDayClick = function(date, jsEvent, view) {
+        // check if is in the available date range
+        if (date.format("YYYY-MM") != view.intervalStart.format("YYYY-MM")) {
+            return;
+        }
+
         $('#eventStart').val(date.format("YYYY-MM-DD"));
 
         // set ui dialog
