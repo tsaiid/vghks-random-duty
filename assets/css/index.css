@@ -44,7 +44,7 @@ div.growlUI h2 {
 }
 
 /* hide div initially */
-#duties_datatable_div, .second_cal, #calEventDialog {
+#duties_datatable_div, .second_cal, #calEventDialog, #screenshot_download_link {
     display: none;
 }
 
