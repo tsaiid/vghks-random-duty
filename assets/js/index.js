@@ -671,7 +671,7 @@ $(function() {
                 var points = 2 * h_count + 1 * f_count + 1 * o_count;
                 var ratio = total_points / people;
                 var threshold = {};
-                if (total_points / people < 4) { // in extreme condition (too many people), use loose threshold
+                if (total_points / people < 6) { // in extreme condition (too many people), use loose threshold
                     threshold.lower = parseInt(total_points / people) - 1;
                     threshold.upper = parseInt(total_points / people) + 2;
                 } else {
