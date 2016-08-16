@@ -931,6 +931,7 @@ $(function() {
 
     function update_summary_duties(groups_duties) {
         if (!$.isEmptyObject(groups_duties)) {
+            var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
             var summary_duties_html = '<table class="table table-striped"><tr><th>No.</th><th>值班日</th><th>班距</th><th>週工時</th><th>QOD 次數</th><th>班距標準差</th></tr>';
             var preset_holidays = get_preset_holidays();
 
@@ -963,7 +964,8 @@ $(function() {
                     } else {
                         week_hours[week_no] += 16;
                     }
-                    date_html += '">' + moment_d.format("M/D") + '</span>';
+                    var date_str = (month_span == 1 ? moment_d.format("D") : moment_d.format("M/D"));
+                    date_html += '">' + date_str + '</span>';
                     return date_html;
                 }).join(', ');
                 var qod_count = 0;
