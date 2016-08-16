@@ -1,4 +1,9 @@
-### [0.2.3](/vghks-random-duty/ver/0.2.2/) – 2015-08-22
+### [0.2.4](/vghks-random-duty/ver/0.2.4/) – 2016-08-16
+
+1. Show only the DAY instead of MONTH/DAY in 1-month mode. (#51)
+2. Confirm that there is no friday determination error. (#47)
+
+### [0.2.3](/vghks-random-duty/ver/0.2.3/) – 2015-08-22
 
 1. Fix: should calculate ordinary duty for total points. (#45)
 2. Fix: ignore if clicking on day not in the month range. (#40)
