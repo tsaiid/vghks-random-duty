@@ -205,12 +205,12 @@ $(function() {
                     case "eventPropNonduty":
                         className = 'preset-non-duty-event';
                         color = non_duty_color;
-                        eventTitle = ' ' + title + ' 不值'; // add a space for sort first
+                        eventTitle = title + ' 不值';
                         break;
                     default: // eventPropHoliday
                         className = 'gcal-holiday';
                         color = "";
-                        eventTitle = '  假日 ' + title; // add two spaces for sort first
+                        eventTitle = '假日 ' + title;
                 }
                 // remove event.id already in the cache
                 var event_md5_id = CryptoJS.MD5(date + eventTitle).toString();
@@ -320,7 +320,7 @@ $(function() {
         eventDataTransform: function(rawEventData) { // drop url from google cal
             return {
                 id: rawEventData.id,
-                title: '  假日 ' + rawEventData.title, // prepend two spaces to be sort first.
+                title: '假日 ' + rawEventData.title,
                 start: rawEventData.start,
                 end: rawEventData.end,
                 className: 'gcal-holiday'
@@ -352,9 +352,9 @@ $(function() {
         $('#eventStart').val(calEvent.start.format("YYYY-MM-DD"));
         $('#eventId').val(calEvent.id);
         var title, duty_type;
-        if (calEvent.title.indexOf("  假日 ") > -1) {
+        if (calEvent.title.indexOf("假日 ") > -1) {
             $('#eventPropHoliday').prop("checked", true);
-            title = calEvent.title.split("  假日 ")[1]; // trim for a space prepend to non-duty
+            title = calEvent.title.split("假日 ")[1];
             duty_type = 'eventPropHoliday';
         } else if (calEvent.title.indexOf(" 不值") > -1) {
             $('#eventPropNonduty').prop("checked", true);
@@ -424,6 +424,20 @@ $(function() {
             return false;
         }
     };
+    var myEventOrder = function(a, b) {
+        var classOrder = {
+                "preset-duty-event": 0,
+                "duty-event": 1,
+                "gcal-holiday": 2,
+                "preset-non-duty-event": 3
+        };
+        var aClassOrder = classOrder[a.className.toString()];
+        var bClassOrder = classOrder[b.className.toString()];
+        if (aClassOrder != bClassOrder) {
+            return aClassOrder - bClassOrder;
+        }
+        return a.title >= b.title;
+    };
     var duty_colors = [
         "#000000",
         "#2D6100",
@@ -459,6 +473,7 @@ $(function() {
         eventDrop: calEventDrop,
         eventClick: calEventClick,
         eventRender: myEventRender,
+        eventOrder: myEventOrder,
         eventAfterAllRender: function() {
             //console.log('cal2 eventAfterAllRender');
             is_cal2_all_rendered = true;
@@ -488,6 +503,7 @@ $(function() {
         eventDrop: calEventDrop,
         eventClick: calEventClick,
         eventRender: myEventRender,
+        eventOrder: myEventOrder,
         eventAfterAllRender: function() {
             //console.log("eventAfterAllRender");
             is_cal1_all_rendered = true;
