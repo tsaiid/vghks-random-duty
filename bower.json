@@ -15,19 +15,19 @@
     "tests"
   ],
   "dependencies": {
-    "bootstrap": "~3.3.5",
-    "jquery-ui": "~1.11.4",
+    "bootstrap": "~3",
+    "jquery-ui": "~1",
     "bootstrap-switch": "~3.3.2",
     "blockUI": "*",
-    "fullcalendar": "~2.3.2",
-    "jquery-ui-slider-pips": "~1.10.5",
+    "fullcalendar": "~3",
+    "jquery-ui-slider-pips": "~1",
     "font-awesome": "~4",
     "cryptojslib": "~3.1.2",
     "excellentexport": "*",
-    "bootstrap-dialog": "~1.34.5",
+    "bootstrap-dialog": "~1",
     "jquery.contenteditable": "master",
     "pace": "~1.0.2",
-    "js-cookie": "~2.0.3",
+    "js-cookie": "~2",
     "marked": "~0.3.5",
     "html2canvas": "~0.4.1"
   }
