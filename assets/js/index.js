@@ -948,38 +948,53 @@ $(function() {
     function update_summary_duties(groups_duties) {
         if (!$.isEmptyObject(groups_duties)) {
             var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
-            var summary_duties_html = '<table class="table table-striped"><tr><th>No.</th><th>值班日</th><th>班距</th><th>週工時</th><th>QOD 次數</th><th>班距標準差</th></tr>';
+            var summary_duties_html = '<table class="table table-striped"><tr><th>No.</th><th>值班日</th><th>班距</th><th>週工時</th><th>週工時 (PM Off)</th><th>QOD 次數</th><th>班距標準差</th></tr>';
             var preset_holidays = get_preset_holidays();
 
             var date_range = get_current_date_range();
             for (var p in groups_duties) {
                 // calculate week distribution
                 var week_hours = [];
+                var week_hours_pm_off = [];
                 for (var i = date_range.start_date.isoWeek(); i <= date_range.end_date.isoWeek(); i++) {
                     week_hours[i] = 0;
+                    week_hours_pm_off[i] = 0;
                 }
+
                 for (var i = date_range.start_date.clone(); i < date_range.end_date; i.add(1, 'day')) {
                     var date_str = i.format("YYYY-MM-DD");
                     var week_no = i.isoWeek();
                     if (!is_holiday(preset_holidays, date_str) && !is_weekend(date_str)) {
                         week_hours[week_no] += 8;
+                        week_hours_pm_off[week_no] += 8;
                     }
                 }
-
                 var dates = $.map(groups_duties[p].dates.sort(), function(d) {
                     var moment_d = moment(d, "YYYY-MM-DD");
+                    var next_d = moment_d.clone().add(1, 'day').format("YYYY-MM-DD");
                     var week_no = moment_d.isoWeek();
                     var date_html = '<span class="';
                     // colorize if friday or holiday
                     if (is_holiday(preset_holidays, d) || is_weekend(d)) {
                         date_html += 'bg-danger';
                         week_hours[week_no] += 24;
+                        week_hours_pm_off[week_no] += 24;
                     } else if (is_friday(preset_holidays, d)) {
                         date_html += 'bg-success';
                         week_hours[week_no] += 16;
+                        week_hours_pm_off[week_no] += 16;
                     } else {
                         week_hours[week_no] += 16;
+                        week_hours_pm_off[week_no] += 16;
                     }
+
+                    // pm off
+                    // default qd duty is unacceptable. no matter if not checked
+                    // if qd duty is acceptable, the next day still can be pm off.
+                    if (!is_holiday(preset_holidays, next_d) && !is_weekend(next_d)) {
+                        week_hours_pm_off[week_no] -= 4;
+                    }
+
                     var date_str = (month_span == 1 ? moment_d.format("D") : moment_d.format("M/D"));
                     date_html += '">' + date_str + '</span>';
                     return date_html;
@@ -1008,8 +1023,18 @@ $(function() {
                     hours_html += '">' + hours + '</span>';
                     return hours_html;
                 }).join(', ');
+                var week_hours_pm_off_str = $.map(week_hours_pm_off.filter(__removeUndefined), function(hours){
+                    var hours_html = '<span class="';
+                    if (hours > 88) {
+                        hours_html += 'bg-danger';
+                    } else if (hours >= 80) {
+                        hours_html += 'bg-warning';
+                    }
+                    hours_html += '">' + hours + '</span>';
+                    return hours_html;
+                }).join(', ');
                 var std_dev = groups_duties[p].std_dev;
-                summary_duties_html += '<tr><th>' + p + '</th><th>' + dates + '</th><th>' + intervals + '</th><th>' + week_hours_str + '</th><th>' + qod_count + '</th><th>' + std_dev + '</th></tr>';
+                summary_duties_html += '<tr><th>' + p + '</th><th>' + dates + '</th><th>' + intervals + '</th><th>' + week_hours_str + '</th><th>' + week_hours_pm_off_str + '</th><th>' + qod_count + '</th><th>' + std_dev + '</th></tr>';
             }
             summary_duties_html += '</table>';
             $('#summary_duties').html(summary_duties_html);
