@@ -951,16 +951,16 @@ $(function() {
             var summary_duties_html = '<table class="table table-striped"><tr><th>No.</th><th>值班日</th><th>班距</th><th>週工時</th><th>QOD 次數</th><th>班距標準差</th></tr>';
             var preset_holidays = get_preset_holidays();
 
+            var date_range = get_current_date_range();
             for (var p in groups_duties) {
                 // calculate week distribution
                 var week_hours = [];
-                var date_range = get_current_date_range();
+                for (var i = date_range.start_date.isoWeek(); i <= date_range.end_date.isoWeek(); i++) {
+                    week_hours[i] = 0;
+                }
                 for (var i = date_range.start_date.clone(); i < date_range.end_date; i.add(1, 'day')) {
                     var date_str = i.format("YYYY-MM-DD");
                     var week_no = i.isoWeek();
-                    if (week_hours[week_no] === undefined) {
-                        week_hours[week_no] = 0;
-                    }
                     if (!is_holiday(preset_holidays, date_str) && !is_weekend(date_str)) {
                         week_hours[week_no] += 8;
                     }
@@ -995,7 +995,10 @@ $(function() {
                     interval_html += '">' + i + '</span>';
                     return interval_html;
                 });
-                var week_hours_str = $.map(week_hours.filter(Number), function(hours){
+                var __removeUndefined = function(val) {
+                    return val !== undefined;
+                };
+                var week_hours_str = $.map(week_hours.filter(__removeUndefined), function(hours){
                     var hours_html = '<span class="';
                     if (hours > 88) {
                         hours_html += 'bg-danger';
