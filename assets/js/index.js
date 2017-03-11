@@ -957,7 +957,7 @@ $(function() {
                 var date_range = get_current_date_range();
                 for (var i = date_range.start_date.clone(); i < date_range.end_date; i.add(1, 'day')) {
                     var date_str = i.format("YYYY-MM-DD");
-                    var week_no = i.week();
+                    var week_no = i.isoWeek();
                     if (week_hours[week_no] === undefined) {
                         week_hours[week_no] = 0;
                     }
@@ -968,7 +968,7 @@ $(function() {
 
                 var dates = $.map(groups_duties[p].dates.sort(), function(d) {
                     var moment_d = moment(d, "YYYY-MM-DD");
-                    var week_no = moment_d.week();
+                    var week_no = moment_d.isoWeek();
                     var date_html = '<span class="';
                     // colorize if friday or holiday
                     if (is_holiday(preset_holidays, d) || is_weekend(d)) {
