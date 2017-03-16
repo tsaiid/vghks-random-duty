@@ -945,11 +945,51 @@ $(function() {
         });
     });
 
+    function calculate_group_offs(groups_duties) {
+        var preset_holidays = get_preset_holidays();
+        var date_range = get_current_date_range();
+        var groups_offs = {};
+
+        for (var p in groups_duties) {
+            groups_offs[p] = {
+                intervals: [],
+                dates: []
+            };
+            for (var i = date_range.start_date.clone(); i < date_range.end_date; i.add(1, 'day')) {
+                var date_str = i.format("YYYY-MM-DD");
+                if ((is_holiday(preset_holidays, date_str) || is_weekend(date_str)) && $.inArray(date_str, groups_duties[p].dates) < 0) {
+                    groups_offs[p].dates.push(date_str);
+                }
+            }
+            var duties_length = groups_offs[p].dates.length;
+            for (i = 0; i < duties_length; i++) {
+                if (i + 1 < duties_length) {
+                    var duty_date = moment(groups_offs[p].dates[i]);
+                    var next_duty_date = moment(groups_offs[p].dates[i + 1]);
+                    var date_diff = next_duty_date.diff(duty_date, 'days');
+                    groups_offs[p].intervals.push(date_diff);
+                }
+            }
+        }
+        return groups_offs;
+    }
+
     function update_summary_duties(groups_duties) {
         if (!$.isEmptyObject(groups_duties)) {
             var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
-            var summary_duties_html = '<table class="table table-striped"><tr><th>No.</th><th>值班日</th><th>班距</th><th>週工時</th><th>週工時 (PM Off)</th><th>QOD 次數</th><th>班距標準差</th></tr>';
+            var summary_duties_html = '<table class="table table-striped">' +
+                                        '<tr>' +
+                                            '<th>No.</th>' +
+                                            '<th>值班日</th>' +
+                                            '<th>班距</th>' +
+                                            '<th>週工時</th>' +
+                                            '<th>週工時 (PM Off)</th>' +
+                                            '<th>最長連續工作日</th>' +
+                                            '<th>QOD 次數</th>' +
+                                            '<th>班距標準差</th>' +
+                                        '</tr>';
             var preset_holidays = get_preset_holidays();
+            var groups_offs = calculate_group_offs(groups_duties);
 
             var date_range = get_current_date_range();
             for (var p in groups_duties) {
@@ -1033,8 +1073,19 @@ $(function() {
                     hours_html += '">' + hours + '</span>';
                     return hours_html;
                 }).join(', ');
+                var max_cont_work_interval = Math.max.apply(null, groups_offs[p].intervals) - 1;
+                var max_cont_work_interval_str = '<span class="' + (max_cont_work_interval > 12 ? "bg-danger" : "") + '">' + max_cont_work_interval + '</span>';
                 var std_dev = groups_duties[p].std_dev;
-                summary_duties_html += '<tr><th>' + p + '</th><th>' + dates + '</th><th>' + intervals + '</th><th>' + week_hours_str + '</th><th>' + week_hours_pm_off_str + '</th><th>' + qod_count + '</th><th>' + std_dev + '</th></tr>';
+                summary_duties_html += '<tr>' +
+                                            '<th>' + p + '</th>' +
+                                            '<th>' + dates + '</th>' +
+                                            '<th>' + intervals + '</th>' +
+                                            '<th>' + week_hours_str + '</th>' +
+                                            '<th>' + week_hours_pm_off_str + '</th>' +
+                                            '<th>' + max_cont_work_interval_str + '</th>' +
+                                            '<th>' + qod_count + '</th>' +
+                                            '<th>' + std_dev + '</th>' +
+                                        '</tr>';
             }
             summary_duties_html += '</table>';
             $('#summary_duties').html(summary_duties_html);
