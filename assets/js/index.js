@@ -205,12 +205,12 @@ $(function() {
                     case "eventPropNonduty":
                         className = 'preset-non-duty-event';
                         color = non_duty_color;
-                        eventTitle = ' ' + title + ' 不值'; // add a space for sort first
+                        eventTitle = title + ' 不值';
                         break;
                     default: // eventPropHoliday
                         className = 'gcal-holiday';
                         color = "";
-                        eventTitle = '  假日 ' + title; // add two spaces for sort first
+                        eventTitle = '假日 ' + title;
                 }
                 // remove event.id already in the cache
                 var event_md5_id = CryptoJS.MD5(date + eventTitle).toString();
@@ -320,7 +320,7 @@ $(function() {
         eventDataTransform: function(rawEventData) { // drop url from google cal
             return {
                 id: rawEventData.id,
-                title: '  假日 ' + rawEventData.title, // prepend two spaces to be sort first.
+                title: '假日 ' + rawEventData.title,
                 start: rawEventData.start,
                 end: rawEventData.end,
                 className: 'gcal-holiday'
@@ -352,9 +352,9 @@ $(function() {
         $('#eventStart').val(calEvent.start.format("YYYY-MM-DD"));
         $('#eventId').val(calEvent.id);
         var title, duty_type;
-        if (calEvent.title.indexOf("  假日 ") > -1) {
+        if (calEvent.title.indexOf("假日 ") > -1) {
             $('#eventPropHoliday').prop("checked", true);
-            title = calEvent.title.split("  假日 ")[1]; // trim for a space prepend to non-duty
+            title = calEvent.title.split("假日 ")[1];
             duty_type = 'eventPropHoliday';
         } else if (calEvent.title.indexOf(" 不值") > -1) {
             $('#eventPropNonduty').prop("checked", true);
@@ -424,6 +424,20 @@ $(function() {
             return false;
         }
     };
+    var myEventOrder = function(a, b) {
+        var classOrder = {
+                "preset-duty-event": 0,
+                "duty-event": 1,
+                "gcal-holiday": 2,
+                "preset-non-duty-event": 3
+        };
+        var aClassOrder = classOrder[a.className.toString()];
+        var bClassOrder = classOrder[b.className.toString()];
+        if (aClassOrder != bClassOrder) {
+            return aClassOrder - bClassOrder;
+        }
+        return a.title >= b.title;
+    };
     var duty_colors = [
         "#000000",
         "#2D6100",
@@ -459,6 +473,7 @@ $(function() {
         eventDrop: calEventDrop,
         eventClick: calEventClick,
         eventRender: myEventRender,
+        eventOrder: myEventOrder,
         eventAfterAllRender: function() {
             //console.log('cal2 eventAfterAllRender');
             is_cal2_all_rendered = true;
@@ -488,6 +503,7 @@ $(function() {
         eventDrop: calEventDrop,
         eventClick: calEventClick,
         eventRender: myEventRender,
+        eventOrder: myEventOrder,
         eventAfterAllRender: function() {
             //console.log("eventAfterAllRender");
             is_cal1_all_rendered = true;
@@ -929,41 +945,96 @@ $(function() {
         });
     });
 
+    function calculate_group_offs(groups_duties) {
+        var preset_holidays = get_preset_holidays();
+        var date_range = get_current_date_range();
+        var groups_offs = {};
+
+        for (var p in groups_duties) {
+            groups_offs[p] = {
+                intervals: [],
+                dates: []
+            };
+            for (var i = date_range.start_date.clone(); i < date_range.end_date; i.add(1, 'day')) {
+                var date_str = i.format("YYYY-MM-DD");
+                if ((is_holiday(preset_holidays, date_str) || is_weekend(date_str)) && $.inArray(date_str, groups_duties[p].dates) < 0) {
+                    groups_offs[p].dates.push(date_str);
+                }
+            }
+            var duties_length = groups_offs[p].dates.length;
+            for (i = 0; i < duties_length; i++) {
+                if (i + 1 < duties_length) {
+                    var duty_date = moment(groups_offs[p].dates[i]);
+                    var next_duty_date = moment(groups_offs[p].dates[i + 1]);
+                    var date_diff = next_duty_date.diff(duty_date, 'days');
+                    groups_offs[p].intervals.push(date_diff);
+                }
+            }
+        }
+        return groups_offs;
+    }
+
     function update_summary_duties(groups_duties) {
         if (!$.isEmptyObject(groups_duties)) {
             var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
-            var summary_duties_html = '<table class="table table-striped"><tr><th>No.</th><th>值班日</th><th>班距</th><th>週工時</th><th>QOD 次數</th><th>班距標準差</th></tr>';
+            var summary_duties_html = '<table class="table table-striped">' +
+                                        '<tr>' +
+                                            '<th>No.</th>' +
+                                            '<th>值班日</th>' +
+                                            '<th>班距</th>' +
+                                            '<th>週工時</th>' +
+                                            '<th>週工時 (PM Off)</th>' +
+                                            '<th>最長連續工作日</th>' +
+                                            '<th>QOD 次數</th>' +
+                                            '<th>班距標準差</th>' +
+                                        '</tr>';
             var preset_holidays = get_preset_holidays();
+            var groups_offs = calculate_group_offs(groups_duties);
 
+            var date_range = get_current_date_range();
             for (var p in groups_duties) {
                 // calculate week distribution
                 var week_hours = [];
-                var date_range = get_current_date_range();
-                for (var i = date_range.start_date.clone(); i < date_range.end_date; i.add(1, 'day')) {
-                    var date_str = i.format("YYYY-MM-DD");
-                    var week_no = i.week();
-                    if (week_hours[week_no] === undefined) {
-                        week_hours[week_no] = 0;
-                    }
-                    if (!is_holiday(preset_holidays, date_str) && !is_weekend(date_str)) {
-                        week_hours[week_no] += 8;
-                    }
+                var week_hours_pm_off = [];
+                for (var i = date_range.start_date.isoWeek(); i <= date_range.end_date.isoWeek(); i++) {
+                    week_hours[i] = 0;
+                    week_hours_pm_off[i] = 0;
                 }
 
+                for (var i = date_range.start_date.clone(); i < date_range.end_date; i.add(1, 'day')) {
+                    var date_str = i.format("YYYY-MM-DD");
+                    var week_no = i.isoWeek();
+                    if (!is_holiday(preset_holidays, date_str) && !is_weekend(date_str)) {
+                        week_hours[week_no] += 8;
+                        week_hours_pm_off[week_no] += 8;
+                    }
+                }
                 var dates = $.map(groups_duties[p].dates.sort(), function(d) {
                     var moment_d = moment(d, "YYYY-MM-DD");
-                    var week_no = moment_d.week();
+                    var next_d = moment_d.clone().add(1, 'day').format("YYYY-MM-DD");
+                    var week_no = moment_d.isoWeek();
                     var date_html = '<span class="';
                     // colorize if friday or holiday
                     if (is_holiday(preset_holidays, d) || is_weekend(d)) {
                         date_html += 'bg-danger';
                         week_hours[week_no] += 24;
+                        week_hours_pm_off[week_no] += 24;
                     } else if (is_friday(preset_holidays, d)) {
                         date_html += 'bg-success';
                         week_hours[week_no] += 16;
+                        week_hours_pm_off[week_no] += 16;
                     } else {
                         week_hours[week_no] += 16;
+                        week_hours_pm_off[week_no] += 16;
                     }
+
+                    // pm off
+                    // default qd duty is unacceptable. no matter if not checked
+                    // if qd duty is acceptable, the next day still can be pm off.
+                    if (!is_holiday(preset_holidays, next_d) && !is_weekend(next_d)) {
+                        week_hours_pm_off[week_no] -= 4;
+                    }
+
                     var date_str = (month_span == 1 ? moment_d.format("D") : moment_d.format("M/D"));
                     date_html += '">' + date_str + '</span>';
                     return date_html;
@@ -979,7 +1050,10 @@ $(function() {
                     interval_html += '">' + i + '</span>';
                     return interval_html;
                 });
-                var week_hours_str = $.map(week_hours.filter(Number), function(hours){
+                var __removeUndefined = function(val) {
+                    return val !== undefined;
+                };
+                var week_hours_str = $.map(week_hours.filter(__removeUndefined), function(hours){
                     var hours_html = '<span class="';
                     if (hours > 88) {
                         hours_html += 'bg-danger';
@@ -989,8 +1063,29 @@ $(function() {
                     hours_html += '">' + hours + '</span>';
                     return hours_html;
                 }).join(', ');
+                var week_hours_pm_off_str = $.map(week_hours_pm_off.filter(__removeUndefined), function(hours){
+                    var hours_html = '<span class="';
+                    if (hours > 88) {
+                        hours_html += 'bg-danger';
+                    } else if (hours >= 80) {
+                        hours_html += 'bg-warning';
+                    }
+                    hours_html += '">' + hours + '</span>';
+                    return hours_html;
+                }).join(', ');
+                var max_cont_work_interval = Math.max.apply(null, groups_offs[p].intervals) - 1;
+                var max_cont_work_interval_str = '<span class="' + (max_cont_work_interval > 12 ? "bg-danger" : "") + '">' + max_cont_work_interval + '</span>';
                 var std_dev = groups_duties[p].std_dev;
-                summary_duties_html += '<tr><th>' + p + '</th><th>' + dates + '</th><th>' + intervals + '</th><th>' + week_hours_str + '</th><th>' + qod_count + '</th><th>' + std_dev + '</th></tr>';
+                summary_duties_html += '<tr>' +
+                                            '<th>' + p + '</th>' +
+                                            '<th>' + dates + '</th>' +
+                                            '<th>' + intervals + '</th>' +
+                                            '<th>' + week_hours_str + '</th>' +
+                                            '<th>' + week_hours_pm_off_str + '</th>' +
+                                            '<th>' + max_cont_work_interval_str + '</th>' +
+                                            '<th>' + qod_count + '</th>' +
+                                            '<th>' + std_dev + '</th>' +
+                                        '</tr>';
             }
             summary_duties_html += '</table>';
             $('#summary_duties').html(summary_duties_html);
