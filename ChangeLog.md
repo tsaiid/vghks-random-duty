@@ -1,3 +1,11 @@
+### [0.2.5](/vghks-random-duty/ver/0.2.5/) – 2017-06-20
+
+1. Change event order: duty, holiday, non-duty. (#52)
+2. Upgrade dependency packages.
+3. Use iso week, starting from Monday.
+4. Can calculate week work hours with pm off.
+5. Show alert if cont workday interval is more than 12.
+
 ### [0.2.4](/vghks-random-duty/ver/0.2.4/) – 2016-08-16
 
 1. Show only the DAY instead of MONTH/DAY in 1-month mode. (#51)
