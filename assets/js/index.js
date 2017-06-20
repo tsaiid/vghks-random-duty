@@ -1075,7 +1075,7 @@ $(function() {
                 }).join(', ');
                 var max_cont_work_interval = Math.max.apply(null, groups_offs[p].intervals) - 1;
                 var max_cont_work_interval_str = '<span class="' + (max_cont_work_interval > 12 ? "bg-danger" : "") + '">' + max_cont_work_interval + '</span>';
-                var std_dev = groups_duties[p].std_dev;
+                var std_dev = groups_duties[p].std_dev.toFixed(2);
                 summary_duties_html += '<tr>' +
                                             '<th>' + p + '</th>' +
                                             '<th>' + dates + '</th>' +
