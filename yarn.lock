@@ -2,10 +2,6 @@
 # yarn lockfile v1
 
 
-"@bower_components/jquery.contenteditable@git://github.com/makesites/jquery-contenteditable.git#master":
-  version "0.0.0"
-  resolved "git://github.com/makesites/jquery-contenteditable.git#6d850b825e282b0715f0f065a56bbe448d093e80"
-
 abbrev@1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/abbrev/-/abbrev-1.1.1.tgz#f8f2c887ad10bf67f634f005b6987fed3179aac8"
@@ -839,6 +835,10 @@ isarray@~1.0.0:
 isexe@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/isexe/-/isexe-2.0.0.tgz#e8fbf374dc556ff8947a10dcb0572d633f2cfa10"
+
+"jquery-contenteditable@https://github.com/makesites/jquery-contenteditable":
+  version "0.0.0"
+  resolved "https://github.com/makesites/jquery-contenteditable#6d850b825e282b0715f0f065a56bbe448d093e80"
 
 jquery-ui-dist@^1.12.1:
   version "1.12.1"

@@ -26,7 +26,6 @@
     "grunt-sync": "^0.7.0"
   },
   "dependencies": {
-    "@bower_components/jquery.contenteditable": "git://github.com/makesites/jquery-contenteditable.git#master",
     "blockui-npm": "^1.0.0",
     "bootstrap": "^3.3.7",
     "bootstrap-switch": "^3.3.4",
@@ -37,6 +36,7 @@
     "fullcalendar": "^3.6.2",
     "html2canvas": "^0.5.0-beta4",
     "jquery": "^3.2.1",
+    "jquery-contenteditable": "https://github.com/makesites/jquery-contenteditable",
     "jquery-ui-dist": "^1.12.1",
     "jquery-ui-slider-pips": "^1.11.4",
     "jquery-ui-themes": "^1.12.0",
