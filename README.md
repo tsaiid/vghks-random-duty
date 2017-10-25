@@ -20,3 +20,18 @@ A single page application to assist resident duty arrangement in General or VGHK
 ## License
 
 MIT License
+
+## Install
+
+1. Install [Yarn](https://yarnpkg.com/) for dependency management
+2. Install dependencies   
+
+   ```
+   yarn install
+   ```
+
+## Testing
+
+1. Run `grunt` will start a testing web server on http://localhost:4000
+2. For my own deployment purpose, the files will be copied to `_site/vghks-random-duty`, and the testing url will be http://localhost:4000/vghks-random-duty
+3. The path of the testing site can be changed in `Gruntfile.coffee`
