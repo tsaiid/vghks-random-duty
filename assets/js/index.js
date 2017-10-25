@@ -1596,7 +1596,7 @@ $(function() {
     }, 200);
 
     // update version text
-    $.getJSON('bower.json', function(data) {
+    $.getJSON('package.json', function(data) {
         $('#appVersion').html('v' + data.version);
     });
 
