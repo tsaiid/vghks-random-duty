@@ -3,7 +3,6 @@
 "use strict"
 
 module.exports = (grunt) ->
-  grunt.loadNpmTasks "grunt-bower-task"
   grunt.loadNpmTasks "grunt-contrib-connect"
   grunt.loadNpmTasks "grunt-contrib-copy"
   grunt.loadNpmTasks "grunt-contrib-watch"
@@ -67,7 +66,7 @@ module.exports = (grunt) ->
         files: [
           "assets/**/*"
           "*.html"
-          "bower.json"
+          "package.json"
           "ChangeLog.md"
         ]
         tasks: [

@@ -18,7 +18,6 @@
   "homepage": "https://github.com/tsaiid/vghks-random-duty#readme",
   "devDependencies": {
     "grunt": "latest",
-    "grunt-bower-task": "^0.5.0",
     "grunt-contrib-connect": "latest",
     "grunt-contrib-copy": "latest",
     "grunt-contrib-watch": "latest",
