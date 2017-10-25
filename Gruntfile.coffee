@@ -16,7 +16,7 @@ module.exports = (grunt) ->
     font_path: '_site/vghks-random-duty/vendor/fonts/'
 
   files = [
-    { expand: true, src: ['assets/**', 'index.html', 'bower.json', 'ChangeLog.md'], dest: '<%= opts.base_path %>'},
+    { expand: true, src: ['assets/**', 'index.html', 'package.json', 'ChangeLog.md'], dest: '<%= opts.base_path %>'},
     { expand: true, cwd: 'node_modules/jquery/dist/', src: 'jquery.min.*', dest: '<%= opts.js_path %>' },
     { expand: true, cwd: 'node_modules/moment/min/', src: 'moment.min.js', dest: '<%= opts.js_path %>' },
     { expand: true, cwd: 'node_modules/jquery-ui-themes/', src: ['themes/redmond/**'], dest: '<%= opts.css_path %>' },
