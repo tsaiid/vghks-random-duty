@@ -82,16 +82,6 @@ function generate_non_preset_duty_match_patterns(total_days, since_date_str, pre
     return non_preset_duties;
 }
 
-function less_than_std_dev_level(group_duties, std_dev_level) {
-    for (var person in group_duties) {
-        if (group_duties[person].std_dev > std_dev_level) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
 function shuffle(array) {
     var counter = array.length,
         temp, index;
@@ -142,7 +132,6 @@ function is_match_non_duties(merged_duties, preset_non_duties) {
 function is_match_filters(merged_duties, group_duties, filters) {
     var use_qod_limit = filters.use_qod_limit;
     var qod_limit = filters.qod_limit;
-    var use_std_dev_level = filters.use_std_dev_level;
     var std_dev_level = filters.std_dev_level;
 
     if (has_continuous_duties(group_duties)) {
@@ -150,10 +139,6 @@ function is_match_filters(merged_duties, group_duties, filters) {
     }
 
     if (use_qod_limit && !less_than_qod_times(group_duties, qod_limit)) {
-        return false;
-    }
-
-    if (use_std_dev_level && !less_than_std_dev_level(group_duties, std_dev_level)) {
         return false;
     }
 

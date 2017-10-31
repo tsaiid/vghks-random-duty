@@ -119,17 +119,6 @@
                             <div id="inputQodLimitSlider" class="slider"></div>
                         </div>
                     </div>
-                    <!--
-                    <div class="form-group">
-                        <label for="inputStdDev" class="col-sm-5 control-label">
-                            <span class="pull-left"><input type="checkbox" id="use_std_dev_level" checked></span>
-                            <span class="pull-right">班距標準差 <i class="fa fa-fw fa-tachometer"></i></span>
-                        </label>
-                        <div class="col-sm-7">
-                            <div id="inputStdDevSlider" class="slider"></div>
-                        </div>
-                    </div>
-                    -->
                     <div class="form-group">
                         <label for="inputPeople" class="col-sm-5 control-label">人數 <i class="fa fa-fw fa-users"></i></label>
                         <div class="col-sm-7">
@@ -251,7 +240,16 @@
                 </div>
                 <div class="modal-body">
                     <h3>VGHKS Random Duty Generator <span id="appVersion"></span></h3>
-                    <p>班表產生器，以亂數排列的方式產生班表，可加上 QOD 值班及班距標準差等限制，以期獲取排班最大的公平性。目前自動產生的建議排班法使用高榮放射線部的積點方式運算。</p>
+                    <ul>
+                        <li>班表產生器，以亂數排列的方式產生班表，可預填值或不值的人。</li>
+                        <li>預設不可 QD 值班，另可加上 QOD 值班次數限制。</li>
+                        <li>目前自動產生的建議排班法使用高榮放射線部的積點方式運算。</li>
+                    </ul>
+                    <h4>積點規則</h4>
+                    <ul>
+                        <li>平日及週五為 1 點，假日為 2 點。</li>
+                        <li>假日的前一日視為週五</li>
+                    </ul>
                     <h4>Author</h4>
                     <p>I-Ta Tsai, 現為高榮放射線部住院醫師</p>
                     <p><a class="btn btn-default btn-xs" href="https://twitter.com/tsaiid" role="button"><i class="fa fa-twitter"></i> Follow @tsaiid</a> <a class="btn btn-default btn-xs" href="https://tsai.it/" role="button"><i class="fa fa-rss"></i> Blog</a></p>
@@ -259,7 +257,7 @@
                     <p>MIT</p>
                     <h4>Sources</h4>
                     <p><a class="btn btn-default btn-xs" href="https://github.com/tsaiid/vghks-random-duty" role="button"><i class="fa fa-github"></i> Hosted on GitHub</a></p>
-                    <p>如有疑問或問題，請至 <a href="https://github.com/tsaiid/vghks-random-duty/issues">GitHub Issues</a> 回報。</p>
+                    <p>如有疑問，請至 <a href="https://github.com/tsaiid/vghks-random-duty/issues">GitHub Issues</a> 回報。</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

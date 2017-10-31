@@ -15,15 +15,6 @@ $(function() {
     var deleted_holidays = []; // cache deleted gcal-holiday that will not be rendered again.
     var is_already_random_duty = false; // bool: record if random_duty executed.
 
-    $('#vghks_mode_switch').bootstrapSwitch({
-        onText: "先假日",
-        offText: "一般",
-        offColor: 'info',
-        onSwitchChange: function(event, state) {
-            Cookies.set('vghks_mode_switch', state);
-        }
-    });
-
     $('#mode_switch').bootstrapSwitch({
         onText: "2 月",
         offText: "1 月",
@@ -94,7 +85,7 @@ $(function() {
     //
     // Update Cookie Preferences
     //
-    $('#use_qod_limit, #use_std_dev_level').change(function() {
+    $('#use_qod_limit').change(function() {
         Cookies.set($(this).attr('id'), $(this).is(':checked'));
     });
 
@@ -1094,31 +1085,6 @@ $(function() {
         }
     }
 
-    function is_preset_duties_fit_pattern(presets, patterns) {
-        var groups = calculate_group_duties(presets.duties);
-        //console.log(groups);
-        if (Object.keys(groups).length != patterns.length) {
-            console.log("length not equal. groups: " + Object.keys(groups).length + ", patterns: " + patterns.length);
-            return false;
-        }
-
-        for (var i = 0; i < patterns.length; i++) {
-            var person = i + 1;
-            if (groups[person] === undefined) {
-                return false;
-            }
-            var dates = groups[person].dates;
-            var counted_pattern = count_duty_pattern(dates, presets.holidays);
-            // compare only friday and holiday now
-            if (patterns[i][1] != counted_pattern[1] || patterns[i][2] != counted_pattern[2]) {
-                console.log("person: " + person + ", pattern not fit: " + counted_pattern.join(", "));
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     function generate_duties_datatable(duties) {
         var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
         var table_html = '<table id="duties_datatable" class="table">';
@@ -1242,7 +1208,6 @@ $(function() {
         var total_days = end_date.diff(start_date, 'days');
         var filters = {
             "patterns": patterns,
-            "use_std_dev_level": $('#use_std_dev_level').is(':checked'),
             "std_dev_level": parseFloat($('#inputStdDevSlider').slider('option', 'value')),
             "use_qod_limit": use_qod_limit,
             "qod_limit": qod_limit,
@@ -1347,16 +1312,6 @@ $(function() {
         if (has_continuous_duties(groups)) {
             WarningDialog('目前排班出現連值狀況，請調整');
             return;
-        }
-
-        // VGHKS vs General mode
-        var vghks_mode = $('#vghks_mode_switch').bootstrapSwitch('state');
-        if (vghks_mode) {
-            // check if friday, weekend, holiday duties are set and fit pattern.
-            if (!is_preset_duties_fit_pattern(presets, patterns)) {
-                WarningDialog('已排班表不符合樣式，請調整');
-                return;
-            }
         }
 
         // check if already random duty and show a confirm dialog
@@ -1630,7 +1585,6 @@ $(function() {
             $('#use_qod_limit').prop("checked", pref.use_qod_limit);
             if (pref.inputQodLimitSlider !== undefined)
                 $('#inputQodLimitSlider').slider("option", "value", pref.inputQodLimitSlider);
-            $('#use_std_dev_level').prop("checked", pref.use_std_dev_level);
             if (pref.inputStdDevSlider !== undefined)
                 $('#inputStdDevSlider').slider("option", "value", pref.inputStdDevSlider);
             if (pref.inputPeopleSlider !== undefined)
