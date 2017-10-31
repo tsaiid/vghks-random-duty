@@ -1,8 +1,8 @@
 # VGHKS Random Duty Generator
 
-A single page application to assist resident duty arrangement in General or VGHKS mode.
+A single page application to assist resident duty arrangement.
 
-輔助住院醫師排班的網頁版小工具，可使用「一般」或「VGHKS」模式。[Demo Site](http://radtools.tsai.it/vghks-random-duty/)
+輔助住院醫師排班的網頁版小工具。[Demo Site](http://radtools.tsai.it/vghks-random-duty/)
 
 ## Feature
 
@@ -24,7 +24,7 @@ MIT License
 ## Install
 
 1. Install [Yarn](https://yarnpkg.com/) for dependency management
-2. Install dependencies   
+2. Install dependencies
 
    ```
    yarn install
