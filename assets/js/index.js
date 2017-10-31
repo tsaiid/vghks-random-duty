@@ -1518,7 +1518,7 @@ $(function() {
         if (start_month != end_month) {
             duration_str += '-' + end_month;
         }
-        var excel_path = duration_str + '_duties.xls';
+        var excel_path = duration_str + '_duties';
 
         var duties = get_all_duties();
 
