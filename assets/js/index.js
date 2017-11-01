@@ -983,27 +983,34 @@ $(function() {
             var groups_offs = calculate_group_offs(groups_duties);
 
             var date_range = get_current_date_range();
+            var view_start_date = $('#cal1').fullCalendar('getView').start;
             for (var p in groups_duties) {
                 // calculate week distribution
                 var week_hours = [];
                 var week_hours_pm_off = [];
-                for (var i = date_range.start_date.isoWeek(); i <= date_range.end_date.isoWeek(); i++) {
+                var __get_curr_cal_row = function(start_date, curr_date) {
+                    return Math.floor(moment.duration(curr_date.diff(start_date)).asWeeks());
+                    // calculate duration instead of isoWeek, which has problem at Dec - Jan next year.
+                };
+                var total_weeks = __get_curr_cal_row(view_start_date, date_range.end_date);
+                for (var i = 0; i <= total_weeks; i++) {
                     week_hours[i] = 0;
                     week_hours_pm_off[i] = 0;
                 }
 
                 for (var i = date_range.start_date.clone(); i < date_range.end_date; i.add(1, 'day')) {
                     var date_str = i.format("YYYY-MM-DD");
-                    var week_no = i.isoWeek();
+                    var week_no = __get_curr_cal_row(view_start_date, i);
                     if (!is_holiday(preset_holidays, date_str) && !is_weekend(date_str)) {
                         week_hours[week_no] += 8;
                         week_hours_pm_off[week_no] += 8;
                     }
                 }
+
                 var dates = $.map(groups_duties[p].dates.sort(), function(d) {
                     var moment_d = moment(d, "YYYY-MM-DD");
                     var next_d = moment_d.clone().add(1, 'day').format("YYYY-MM-DD");
-                    var week_no = moment_d.isoWeek();
+                    var week_no = __get_curr_cal_row(view_start_date, moment_d);
                     var date_html = '<span class="';
                     // colorize if friday or holiday
                     if (is_holiday(preset_holidays, d) || is_weekend(d)) {
@@ -1030,6 +1037,7 @@ $(function() {
                     date_html += '">' + date_str + '</span>';
                     return date_html;
                 }).join(', ');
+
                 var qod_count = 0;
                 var intervals = $.map(groups_duties[p].intervals, function(i) {
                     var interval_html = '<span class="';
@@ -1236,7 +1244,6 @@ $(function() {
                 case "success":
                     var duties = e.data["duties"];
                     var groups = e.data["groups"];
-                    //console.log(duties.toString());
 
                     $.each(duties, function(i, duty) {
                         var date = moment(duty[0], "YYYY-MM-DD");
