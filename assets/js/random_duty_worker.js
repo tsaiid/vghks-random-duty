@@ -132,7 +132,6 @@ function is_match_non_duties(merged_duties, preset_non_duties) {
 function is_match_filters(merged_duties, group_duties, filters) {
     var use_qod_limit = filters.use_qod_limit;
     var qod_limit = filters.qod_limit;
-    var std_dev_level = filters.std_dev_level;
 
     if (has_continuous_duties(group_duties)) {
         return false;
