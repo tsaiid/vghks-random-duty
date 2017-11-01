@@ -421,12 +421,12 @@ fs@0.0.2:
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/fs/-/fs-0.0.2.tgz#e1f244ef3933c1b2a64bd4799136060d0f5914f8"
 
-fullcalendar@^3.6.2:
-  version "3.6.2"
-  resolved "https://registry.yarnpkg.com/fullcalendar/-/fullcalendar-3.6.2.tgz#64956e7431be394b3d505b327f6b2e8f629c91da"
+fullcalendar@~2:
+  version "2.9.1"
+  resolved "https://registry.yarnpkg.com/fullcalendar/-/fullcalendar-2.9.1.tgz#dd2a84469b627749e47c5dd9fd71f56146e0651b"
   dependencies:
-    jquery "2 - 3"
-    moment "^2.9.0"
+    jquery ">=1.7.1"
+    moment ">=2.5.0"
 
 gaze@^1.0.0:
   version "1.1.2"
@@ -789,7 +789,7 @@ jquery-ui-themes@^1.12.0:
   version "1.12.0"
   resolved "https://registry.yarnpkg.com/jquery-ui-themes/-/jquery-ui-themes-1.12.0.tgz#a57ba0ad96800d84522fe76893ffcbde67081d51"
 
-"jquery@2 - 3", jquery@^3.2.1:
+jquery@>=1.7.1, jquery@^3.2.1:
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.2.1.tgz#5c4d9de652af6cd0a770154a631bba12b015c787"
 
@@ -1004,7 +1004,7 @@ minimist@*, minimist@^1.1.0, minimist@^1.1.3:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.0.tgz#a35008b20f41383eec1fb914f4cd5df79a264284"
 
-moment@^2.19.1, moment@^2.9.0:
+moment@>=2.5.0, moment@^2.19.1:
   version "2.19.1"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.19.1.tgz#56da1a2d1cbf01d38b7e1afc31c10bcfa1929167"
 
