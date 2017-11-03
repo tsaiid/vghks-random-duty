@@ -740,14 +740,14 @@ $(function() {
         while (!(patterns = random_pattern(people, ordinary_count, friday_count, holiday_count))) {
             c++;
             if (!(c % 100000)) {
-                console.log("run time: " + c + ". Still running.");
+                //console.log("run time: " + c + ". Still running.");
             }
             if (c > 999999) {
-                console.log("run time: " + c + ". More than 1000000.");
+                //console.log("run time: " + c + ". More than 1000000.");
                 return;
             }
         }
-        console.log('rander pattern run time: ' + c);
+        //console.log('rander pattern run time: ' + c);
         //console.log(patterns.toString());
         return patterns;
     }
@@ -794,7 +794,7 @@ $(function() {
                     f_span.toggleClass('bg-danger', (f_count != patterns[person - 1][1]), 800);
                     h_span.toggleClass('bg-danger', (h_count != patterns[person - 1][2]), 800);
                 } else {
-                    console.log("no such person: " + person);
+                    //console.log("no such person: " + person);
                 }
             }
         }
@@ -895,7 +895,6 @@ $(function() {
                     });
                     if (tb_o_count != o_count || tb_f_count != f_count || tb_h_count != h_count) {
                         WarningDialog('總班數錯誤，請再檢查');
-                        console.log(table_data);
                         return;
                     }
 
@@ -1288,9 +1287,9 @@ $(function() {
                     });
                     break;
                 default:
-                    console.log(e.data["msg"]);
-                    console.log(e.data["duties"]);
-                    console.log(e.data["groups"]);
+                    //console.log(e.data["msg"]);
+                    //console.log(e.data["duties"]);
+                    //console.log(e.data["groups"]);
             }
         }
     }
@@ -1485,7 +1484,7 @@ $(function() {
         var total_days = end_date.diff(start_date, 'days');
         if (total_days != duties.length) {
             _is_each_day_has_a_duty = false;
-            console.log(total_days + ' unequal: ' + duties.length);
+            //console.log(total_days + ' unequal: ' + duties.length);
         } else {
             var sorted_duties = duties.sort(function(a, b) {
                 return a[0].localeCompare(b[0])
@@ -1493,7 +1492,7 @@ $(function() {
             for (the_date = start_date.clone(), i = 0; the_date < end_date; i++, the_date.add(1, 'day')) {
                 if (sorted_duties[i][0] != the_date.format('YYYY-MM-DD')) {
                     _is_each_day_has_a_duty = false;
-                    console.log(sorted_duties[i][0] + ' diff: ' + the_date.format());
+                    //console.log(sorted_duties[i][0] + ' diff: ' + the_date.format());
                     break;
                 }
             }
