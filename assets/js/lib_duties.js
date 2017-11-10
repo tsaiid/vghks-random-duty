@@ -61,8 +61,8 @@ function count_duty_pattern(dates, preset_holidays) {
             }
         });
     }
-    //console.log("dates: " + dates);
-    //console.log("pattern: " + [o_count, f_count, h_count].toString());
+    // console.log("dates: " + dates);
+    // console.log("pattern: " + [o_count, f_count, h_count].toString());
     return [o_count, f_count, h_count];
 }
 
@@ -81,8 +81,8 @@ function calculate_group_duties(duties, is_continuous_duties) {
     is_continuous_duties = typeof is_continuous_duties !== 'undefined' ? is_continuous_duties : false;
 
     var sorted_duties = duties.sort(function(a, b) {
-        //return moment(a[0], "YYYY-MM-DD") - moment(b[0], "YYYY-MM-DD")
-        return a[0].localeCompare(b[0])
+        // return moment(a[0], "YYYY-MM-DD") - moment(b[0], "YYYY-MM-DD")
+        return a[0].localeCompare(b[0]);
     }); // sort by date
 
     // cannot use $.map or Array.map
@@ -109,7 +109,7 @@ function calculate_group_duties(duties, is_continuous_duties) {
             groups[person] = {
                 positions: [],
                 intervals: [],
-                dates: []
+                dates: [],
             };
             total_people++;
         }
@@ -123,7 +123,7 @@ function calculate_group_duties(duties, is_continuous_duties) {
             if (is_continuous_duties) {
                 var interval = index - groups[person].positions[len - 2];
             } else {
-                var interval = moment(duty[0], "YYYY-MM-DD").diff(moment(groups[person].dates[len - 2]), 'days');
+                var interval = moment(duty[0], 'YYYY-MM-DD').diff(moment(groups[person].dates[len - 2]), 'days');
             }
             groups[person].intervals.push(interval);
         }
@@ -137,10 +137,10 @@ function calculate_group_duties(duties, is_continuous_duties) {
 
     // calculate standard deviations
     for (var person in groups) {
-        //console.log(groups[person].intervals);
+        // console.log(groups[person].intervals);
         var std_dev = standardDeviation(groups[person].intervals);
         groups[person].std_dev = std_dev;
-        //console.log(person + ": " + std_dev);
+        // console.log(person + ": " + std_dev);
     }
     return groups;
 }

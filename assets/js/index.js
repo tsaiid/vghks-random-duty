@@ -41,7 +41,7 @@ $(function() {
                 });
             }
             wait_and_update_suggested_patterns();
-        }
+        },
     });
 
     $('#inputQodLimitSlider').slider({
@@ -50,9 +50,9 @@ $(function() {
         value: 1,
         change: function(event, ui) {
             Cookies.set('inputQodLimitSlider', ui.value);
-        }
-    }).slider("pips", {
-        rest: "label"
+        },
+    }).slider('pips', {
+        rest: 'label',
     });
 
     $('#inputStdDevSlider').slider({
@@ -62,10 +62,10 @@ $(function() {
         value: 1.8,
         change: function(event, ui) {
             Cookies.set('inputStdDevSlider', ui.value);
-        }
+        },
     }).slider('pips', {
         rest: 'label',
-        step: 2
+        step: 2,
     });
 
     $('#inputPeopleSlider').slider({
@@ -79,7 +79,7 @@ $(function() {
             Cookies.set('inputPeopleSlider', ui.value);
         },
     }).slider('pips', {
-        rest: 'label'
+        rest: 'label',
     });
 
     //
@@ -135,33 +135,33 @@ $(function() {
             } else if (duty_type == 'eventPropDuty') {
                 if (already_had_duty) {
                     if (title == prev_set_duty && title != orig_title) {
-                        status = "本日已有人值班";
+                        status = '本日已有人值班';
                     } else if (title != prev_set_duty && title == orig_title) {
-                        status = "本日已有人值班";
+                        status = '本日已有人值班';
                     } else if ($.inArray(parseInt(title), prev_set_non_duties) > -1) {
-                        status = "人員 " + title + " 本日已設為不可值班！";
+                        status = '人員 ' + title + ' 本日已設為不可值班！';
                     }
                 } else {
                     if ($.inArray(parseInt(title), prev_set_non_duties) > -1) {
                         if (title != orig_title) {
-                            status = "人員 " + title + " 本日已設為不可值班！";
+                            status = '人員 ' + title + ' 本日已設為不可值班！';
                         }
                     }
                 }
             }
         } else {
-            if (duty_type == "eventPropNonduty") {
+            if (duty_type == 'eventPropNonduty') {
                 if ($.inArray(parseInt(title), prev_set_non_duties) > -1) {
-                    status = "重覆設定不值班人員";
+                    status = '重覆設定不值班人員';
                 }
                 if (prev_set_duty == title) {
-                    status = "人員 " + title + " 本日已設為值班，不可再設為不值！";
+                    status = '人員 ' + title + ' 本日已設為值班，不可再設為不值！';
                 }
-            } else if (duty_type == "eventPropDuty") {
+            } else if (duty_type == 'eventPropDuty') {
                 if (already_had_duty) {
-                    status = "本日已有人值班";
+                    status = '本日已有人值班';
                 } else if ($.inArray(parseInt(title), prev_set_non_duties) > -1) {
-                    status = "人員 " + title + " 本日已設為不可值班！";
+                    status = '人員 ' + title + ' 本日已設為不可值班！';
                 }
             }
         }
@@ -187,31 +187,31 @@ $(function() {
             if (!duty_conflict_status) {
                 if (is_edit_dialog) {
                     // have to remove old and add new
-                    $("#cal1").fullCalendar('removeEvents', $('#eventId').val());
-                    $("#cal2").fullCalendar('removeEvents', $('#eventId').val());
+                    $('#cal1').fullCalendar('removeEvents', $('#eventId').val());
+                    $('#cal2').fullCalendar('removeEvents', $('#eventId').val());
                 }
 
                 var className, color, eventTitle;
                 switch (duty_type) {
-                    case "eventPropDuty":
+                    case 'eventPropDuty':
                         className = 'preset-duty-event';
                         color = duty_colors[title];
                         eventTitle = title;
                         break;
-                    case "eventPropNonduty":
+                    case 'eventPropNonduty':
                         className = 'preset-non-duty-event';
                         color = non_duty_color;
                         eventTitle = title + ' 不值';
                         break;
                     default: // eventPropHoliday
                         className = 'gcal-holiday';
-                        color = "";
+                        color = '';
                         eventTitle = '假日 ' + title;
                 }
                 // remove event.id already in the cache
                 var event_md5_id = CryptoJS.MD5(date + eventTitle).toString();
                 deleted_holidays = deleted_holidays.filter(function(e) {
-                    return e != event_md5_id
+                    return e != event_md5_id;
                 });
                 var event = {
                     id: event_md5_id,
@@ -221,30 +221,30 @@ $(function() {
                     className: className,
                     color: color,
                 };
-                $("#cal1").fullCalendar('renderEvent', event, true);
-                $("#cal2").fullCalendar('renderEvent', event, true);
+                $('#cal1').fullCalendar('renderEvent', event, true);
+                $('#cal2').fullCalendar('renderEvent', event, true);
 
                 // Holiday should add a background event
-                if (duty_type == "eventPropHoliday") {
+                if (duty_type == 'eventPropHoliday') {
                     var event = {
                         id: event_md5_id,
                         start: date,
                         backgroundColor: holiday_bg_color,
                         rendering: 'background',
-                        className: 'gcal-holiday-background'
+                        className: 'gcal-holiday-background',
                     };
-                    $("#cal1").fullCalendar('renderEvent', event, true);
-                    $("#cal2").fullCalendar('renderEvent', event, true);
+                    $('#cal1').fullCalendar('renderEvent', event, true);
+                    $('#cal2').fullCalendar('renderEvent', event, true);
 
                     // update suggested patterns
                     calculate_suggested_patterns();
                 }
             } else {
-                myGrowlUI("Warning", duty_conflict_status);
+                myGrowlUI('Warning', duty_conflict_status);
             }
         }
-        $("#cal1").fullCalendar('unselect');
-        $("#cal2").fullCalendar('unselect');
+        $('#cal1').fullCalendar('unselect');
+        $('#cal2').fullCalendar('unselect');
     }
 
     // default set dialog select options by people number
@@ -291,7 +291,7 @@ $(function() {
                 label: 'Close',
                 action: function(dialogItself) {
                     dialogItself.close();
-                }
+                },
             }],
         });
     }
@@ -306,9 +306,9 @@ $(function() {
     var calGoogleCalendarApiKey = 'AIzaSyCutCianVgUaWaCHeTDMk2VzyZ8bcNUdOY';
     var calEventSources = [{
         googleCalendarId: 'taiwan__zh-TW@holiday.calendar.google.com',
-        backgroundColor: "#f5dfe2",
+        backgroundColor: '#f5dfe2',
         rendering: 'background',
-        className: 'gcal-holiday-background'
+        className: 'gcal-holiday-background',
     }, {
         googleCalendarId: 'taiwan__zh-TW@holiday.calendar.google.com',
         className: 'gcal-holiday',
@@ -319,9 +319,9 @@ $(function() {
                 title: '假日 ' + rawEventData.title,
                 start: rawEventData.start,
                 end: rawEventData.end,
-                className: 'gcal-holiday'
+                className: 'gcal-holiday',
             };
-        }
+        },
     }];
     var calDayClick = function(date, jsEvent, view) {
         // check if is in the available date range
@@ -329,7 +329,7 @@ $(function() {
             return;
         }
 
-        $('#eventStart').val(date.format("YYYY-MM-DD"));
+        $('#eventStart').val(date.format('YYYY-MM-DD'));
 
         // set ui dialog
         $('#calEventDialog').dialog('option', 'title', 'Add Duty');
@@ -340,7 +340,7 @@ $(function() {
             },
             '取消': function() {
                 $(this).dialog('close');
-            }
+            },
         });
         $('#calEventDialog').dialog('open');
     };
@@ -348,7 +348,7 @@ $(function() {
         $('#eventStart').val(calEvent.start.format('YYYY-MM-DD'));
         $('#eventId').val(calEvent.id);
         var title, duty_type;
-        if (calEvent.title.indexOf("假日 ") > -1) {
+        if (calEvent.title.indexOf('假日 ') > -1) {
             $('#eventPropHoliday').prop('checked', true);
             title = calEvent.title.split('假日 ')[1];
             duty_type = 'eventPropHoliday';
@@ -366,15 +366,15 @@ $(function() {
         $('#eventOrigTitle').val(title);
 
         // set ui dialog
-        $("#calEventDialog").dialog("option", "title", "Edit Duty");
-        $("#calEventDialog").dialog("option", "buttons", {
+        $('#calEventDialog').dialog('option', 'title', 'Edit Duty');
+        $('#calEventDialog').dialog('option', 'buttons', {
             '更新': function() {
                 save_or_update_event(true);
-                $(this).dialog("close");
+                $(this).dialog('close');
             },
             '刪除': function() {
-                $("#cal1").fullCalendar('removeEvents', $('#eventId').val());
-                $("#cal2").fullCalendar('removeEvents', $('#eventId').val());
+                $('#cal1').fullCalendar('removeEvents', $('#eventId').val());
+                $('#cal2').fullCalendar('removeEvents', $('#eventId').val());
                 if (duty_type == 'eventPropHoliday') {
                     calculate_suggested_patterns();
                     deleted_holidays.push($('#eventId').val());
@@ -384,9 +384,9 @@ $(function() {
             },
             '取消': function() {
                 $(this).dialog('close');
-            }
+            },
         });
-        $("#calEventDialog").dialog('open');
+        $('#calEventDialog').dialog('open');
     };
     var calEventDrop = function(event, delta, revertFunc, jsEvent, ui, view) {
         // holiday can not be dragged and dropped. only can be deleted or created.
@@ -425,7 +425,7 @@ $(function() {
                 'preset-duty-event': 0,
                 'duty-event': 1,
                 'gcal-holiday': 2,
-                'preset-non-duty-event': 3
+                'preset-non-duty-event': 3,
         };
         var aClassOrder = classOrder[a.className.toString()];
         var bClassOrder = classOrder[b.className.toString()];
@@ -450,12 +450,12 @@ $(function() {
     var holiday_bg_color = '#f5dfe2';
 
     // init cal1 and cal2
-    $("#cal2").fullCalendar({
+    $('#cal2').fullCalendar({
         defaultDate: nextTwoMonth,
         header: {
             left: '',
             center: '',
-            right: 'title'
+            right: 'title',
         },
         height: 580,
         firstDay: 1,
@@ -477,7 +477,7 @@ $(function() {
             if (!is_cal2_loaded) {
                 is_cal2_loaded = true;
             }
-        }
+        },
     });
 
     $('#cal1').fullCalendar({
@@ -485,7 +485,7 @@ $(function() {
         header: {
             left: 'title',
             center: '',
-            right: ''
+            right: '',
         },
         height: 580,
         firstDay: 1,
@@ -511,7 +511,7 @@ $(function() {
             if (!is_cal1_loaded) {
                 is_cal1_loaded = true;
             }
-        }
+        },
     });
 
     function check_if_already_random() {
@@ -530,14 +530,14 @@ $(function() {
     function wait_and_update_suggested_patterns() {
         var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
         var check_cal_all_rendered = setInterval(function() {
-            //console.log("200ms passed.");
+            // console.log("200ms passed.");
             if (month_span == 1 && is_cal1_all_rendered) {
-                //console.log("detect cal1 all rendered.");
+                // console.log("detect cal1 all rendered.");
                 update_patterns();
                 check_if_already_random();
                 clearInterval(check_cal_all_rendered);
             } else if (month_span == 2 && is_cal1_all_rendered && is_cal2_all_rendered) {
-                //console.log("detect cal1 and cal2 all rendered.");
+                // console.log("detect cal1 and cal2 all rendered.");
                 update_patterns();
                 check_if_already_random();
                 clearInterval(check_cal_all_rendered);
@@ -584,7 +584,7 @@ $(function() {
 
         var preset_non_duties = [];
         $.each(preset_non_duty_events, function(i, event) {
-            var date = event.start.format("YYYY-MM-DD");
+            var date = event.start.format('YYYY-MM-DD');
             preset_non_duties.push([date, parseInt(event.title)]); // parseInt("1 不值") == 1
         });
 
@@ -602,7 +602,7 @@ $(function() {
 
         var preset_duties = [];
         $.each(preset_duty_events, function(i, event) {
-            var date = event.start.format("YYYY-MM-DD");
+            var date = event.start.format('YYYY-MM-DD');
             preset_duties.push([date, parseInt(event.title)]);
         });
 
@@ -614,14 +614,14 @@ $(function() {
         var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
         var start_date = $('#cal1').fullCalendar('getView').intervalStart;
         var end_date = start_date.clone().add(month_span, 'months');
-        var month_str = start_date.format("YYYY-MM");
+        var month_str = start_date.format('YYYY-MM');
         if (month_span > 1) {
-            month_str += '_' + end_date.clone().subtract(1, 'day').format("YYYY-MM");
+            month_str += '_' + end_date.clone().subtract(1, 'day').format('YYYY-MM');
         }
         return {
             start_date: start_date,
             end_date: end_date,
-            month_str: month_str
+            month_str: month_str,
         };
     }
 
@@ -637,7 +637,7 @@ $(function() {
 
         var all_duties = [];
         $.each(all_duty_events, function(i, event) {
-            var date = event.start.format("YYYY-MM-DD");
+            var date = event.start.format('YYYY-MM-DD');
             all_duties.push([date, parseInt(event.title)]);
         });
 
@@ -662,7 +662,7 @@ $(function() {
         });
 
         var preset_holidays = $.map(preset_holidays1.concat(preset_holidays2), function(event) {
-            return event.start.format("YYYY-MM-DD");
+            return event.start.format('YYYY-MM-DD');
         });
 
         return preset_holidays;
@@ -729,7 +729,7 @@ $(function() {
         var ordinary_count = 0;
         var the_day = start_date;
         while (the_day.format() != end_date.format()) {
-            var the_day_str = the_day.format("YYYY-MM-DD");
+            var the_day_str = the_day.format('YYYY-MM-DD');
             if (is_weekend(the_day_str) || is_holiday(preset_holidays, the_day_str)) {
                 holiday_count++;
             } else if (is_friday(preset_holidays, the_day_str)) {
@@ -745,15 +745,15 @@ $(function() {
         while (!(patterns = random_pattern(people, ordinary_count, friday_count, holiday_count))) {
             c++;
             if (!(c % 100000)) {
-                //console.log("run time: " + c + ". Still running.");
+                // console.log("run time: " + c + ". Still running.");
             }
             if (c > 999999) {
-                //console.log("run time: " + c + ". More than 1000000.");
+                // console.log("run time: " + c + ". More than 1000000.");
                 return;
             }
         }
-        //console.log('rander pattern run time: ' + c);
-        //console.log(patterns.toString());
+        // console.log('rander pattern run time: ' + c);
+        // console.log(patterns.toString());
         return patterns;
     }
 
@@ -767,7 +767,7 @@ $(function() {
 
     function update_current_duty_status() {
         // check if suggested pattern exists
-        var patterns = $('#suggested_pattern').data("patterns");
+        var patterns = $('#suggested_pattern').data('patterns');
         if (patterns === undefined) {
             calculate_suggested_patterns();
         }
@@ -777,29 +777,29 @@ $(function() {
         var groups = calculate_group_duties(all_duties);
         calculate_group_duties_status(groups, preset_holidays);
         //        console.log(groups);
-        if ($.isEmptyObject(groups)) {  // clear the table
-            $("#suggested_pattern .current_status").html('');
+        if ($.isEmptyObject(groups)) { // clear the table
+            $('#suggested_pattern .current_status').html('');
         } else {
             for (var person in groups) {
                 var person_id = '#person_' + person;
                 if ($(person_id).length == 1) {
-                    var o_span = $(person_id + " .ordinary_count .current_status");
-                    var f_span = $(person_id + " .friday_count .current_status");
-                    var h_span = $(person_id + " .holiday_count .current_status");
+                    var o_span = $(person_id + ' .ordinary_count .current_status');
+                    var f_span = $(person_id + ' .friday_count .current_status');
+                    var h_span = $(person_id + ' .holiday_count .current_status');
                     var o_count = groups[person].ordinary_count;
                     var f_count = groups[person].friday_count;
                     var h_count = groups[person].holiday_count;
 
-                    o_span.html("(" + o_count + ")");
-                    f_span.html("(" + f_count + ")");
-                    h_span.html("(" + h_count + ")");
+                    o_span.html('(' + o_count + ')');
+                    f_span.html('(' + f_count + ')');
+                    h_span.html('(' + h_count + ')');
 
                     // show background if not fit pattern
                     o_span.toggleClass('bg-danger', (o_count != patterns[person - 1][0]), 800);
                     f_span.toggleClass('bg-danger', (f_count != patterns[person - 1][1]), 800);
                     h_span.toggleClass('bg-danger', (h_count != patterns[person - 1][2]), 800);
                 } else {
-                    //console.log("no such person: " + person);
+                    // console.log("no such person: " + person);
                 }
             }
         }
@@ -827,14 +827,14 @@ $(function() {
 
     function calculate_suggested_patterns() {
         // clear previous data first
-        $('#suggested_pattern').removeData("patterns");
+        $('#suggested_pattern').removeData('patterns');
 
         var start_date = $('#cal1').fullCalendar('getDate').startOf('month');
-        var people = parseInt($('#inputPeopleSlider').slider("option", "value"));
+        var people = parseInt($('#inputPeopleSlider').slider('option', 'value'));
         var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
 
         var suggested_patterns = get_suggested_patterns(start_date, month_span, people);
-        $('#suggested_pattern').data("patterns", suggested_patterns); // save object for random duty to match
+        $('#suggested_pattern').data('patterns', suggested_patterns); // save object for random duty to match
         update_duty_patterns(suggested_patterns);
     }
 
@@ -848,7 +848,7 @@ $(function() {
     });
 
     $('#func_edit_duty_patterns').click(function() {
-        var patterns = $('#suggested_pattern').data("patterns");
+        var patterns = $('#suggested_pattern').data('patterns');
         if (patterns === undefined) {
             WarningDialog('Patterns are undefinde!');
             return;
@@ -904,18 +904,18 @@ $(function() {
                     }
 
                     // update jquery data
-                    $('#suggested_pattern').data("patterns", table_data);
+                    $('#suggested_pattern').data('patterns', table_data);
                     dialog.close();
                     update_duty_patterns(table_data);
-                }
+                },
             }],
             onshown: function(dialogRef) {
                 $('#edit_patterns_table').contentEditable().change(function(e) {
-                    //console.log(e.action);
-                    //console.log(e.changed);
-                    //console.log(e.changedField);
+                    // console.log(e.action);
+                    // console.log(e.changed);
+                    // console.log(e.changedField);
 
-                    if (e.action == "save") {
+                    if (e.action == 'save') {
                         var table_data = getPatternTableData($('#edit_patterns_table'));
                         // update point
                         var tb_o_count = 0,
@@ -930,13 +930,12 @@ $(function() {
                         });
 
                         // update total if not match
-                        $('#edit_patterns_table th .o_count').html(tb_o_count != o_count ? "(" + tb_o_count + ")" : "");
-                        $('#edit_patterns_table th .f_count').html(tb_f_count != f_count ? "(" + tb_f_count + ")" : "");
-                        $('#edit_patterns_table th .h_count').html(tb_h_count != h_count ? "(" + tb_h_count + ")" : "");
+                        $('#edit_patterns_table th .o_count').html(tb_o_count != o_count ? '(' + tb_o_count + ')' : '');
+                        $('#edit_patterns_table th .f_count').html(tb_f_count != f_count ? '(' + tb_f_count + ')' : '');
+                        $('#edit_patterns_table th .h_count').html(tb_h_count != h_count ? '(' + tb_h_count + ')' : '');
                     }
                 });
-
-            }
+            },
         });
     });
 
@@ -948,10 +947,10 @@ $(function() {
         for (var p in groups_duties) {
             groups_offs[p] = {
                 intervals: [],
-                dates: []
+                dates: [],
             };
             for (var i = date_range.start_date.clone(); i < date_range.end_date; i.add(1, 'day')) {
-                var date_str = i.format("YYYY-MM-DD");
+                var date_str = i.format('YYYY-MM-DD');
                 if ((is_holiday(preset_holidays, date_str) || is_weekend(date_str)) && $.inArray(date_str, groups_duties[p].dates) < 0) {
                     groups_offs[p].dates.push(date_str);
                 }
@@ -1003,7 +1002,7 @@ $(function() {
                 }
 
                 for (var i = date_range.start_date.clone(); i < date_range.end_date; i.add(1, 'day')) {
-                    var date_str = i.format("YYYY-MM-DD");
+                    var date_str = i.format('YYYY-MM-DD');
                     var week_no = __get_curr_cal_row(view_start_date, i);
                     if (!is_holiday(preset_holidays, date_str) && !is_weekend(date_str)) {
                         week_hours[week_no] += 8;
@@ -1012,8 +1011,8 @@ $(function() {
                 }
 
                 var dates = $.map(groups_duties[p].dates.sort(), function(d) {
-                    var moment_d = moment(d, "YYYY-MM-DD");
-                    var next_d = moment_d.clone().add(1, 'day').format("YYYY-MM-DD");
+                    var moment_d = moment(d, 'YYYY-MM-DD');
+                    var next_d = moment_d.clone().add(1, 'day').format('YYYY-MM-DD');
                     var week_no = __get_curr_cal_row(view_start_date, moment_d);
                     var date_html = '<span class="';
                     // colorize if friday or holiday
@@ -1037,7 +1036,7 @@ $(function() {
                         week_hours_pm_off[week_no] -= 4;
                     }
 
-                    var date_str = (month_span == 1 ? moment_d.format("D") : moment_d.format("M/D"));
+                    var date_str = (month_span == 1 ? moment_d.format('D') : moment_d.format('M/D'));
                     date_html += '">' + date_str + '</span>';
                     return date_html;
                 }).join(', ');
@@ -1056,7 +1055,7 @@ $(function() {
                 var __removeUndefined = function(val) {
                     return val !== undefined;
                 };
-                var week_hours_str = $.map(week_hours.filter(__removeUndefined), function(hours){
+                var week_hours_str = $.map(week_hours.filter(__removeUndefined), function(hours) {
                     var hours_html = '<span class="';
                     if (hours > 88) {
                         hours_html += 'bg-danger';
@@ -1066,7 +1065,7 @@ $(function() {
                     hours_html += '">' + hours + '</span>';
                     return hours_html;
                 }).join(', ');
-                var week_hours_pm_off_str = $.map(week_hours_pm_off.filter(__removeUndefined), function(hours){
+                var week_hours_pm_off_str = $.map(week_hours_pm_off.filter(__removeUndefined), function(hours) {
                     var hours_html = '<span class="';
                     if (hours > 88) {
                         hours_html += 'bg-danger';
@@ -1077,7 +1076,7 @@ $(function() {
                     return hours_html;
                 }).join(', ');
                 var max_cont_work_interval = Math.max.apply(null, groups_offs[p].intervals) - 1;
-                var max_cont_work_interval_str = '<span class="' + (max_cont_work_interval > 12 ? "bg-danger" : "") + '">' + max_cont_work_interval + '</span>';
+                var max_cont_work_interval_str = '<span class="' + (max_cont_work_interval > 12 ? 'bg-danger' : '') + '">' + max_cont_work_interval + '</span>';
                 var std_dev = groups_duties[p].std_dev.toFixed(2);
                 summary_duties_html += '<tr>' +
                                             '<th>' + p + '</th>' +
@@ -1093,7 +1092,7 @@ $(function() {
             summary_duties_html += '</table>';
             $('#summary_duties').html(summary_duties_html);
         } else { // if clear, groups_duties is empty
-            $('#summary_duties').html("");
+            $('#summary_duties').html('');
         }
     }
 
@@ -1102,7 +1101,7 @@ $(function() {
         var table_html = '<table id="duties_datatable" class="table">';
         var duties_map = {};
         $.map(duties, function(x) {
-            return duties_map[x[0]] = x[1]
+            return duties_map[x[0]] = x[1];
         });
 
         for (var i = 1; i <= month_span; i++) {
@@ -1116,20 +1115,20 @@ $(function() {
             if (i > 1) {
                 table_html += '<tr></tr>';
             }
-            table_html += '<tr><td colspan="7">' + month_first_date.format("YYYY / MM") + '</td></tr>';
+            table_html += '<tr><td colspan="7">' + month_first_date.format('YYYY / MM') + '</td></tr>';
 
             while (the_date < end_date) {
                 table_html += '<tr>';
                 for (var j = 0; j < 7; j++, the_cal_date.add(1, 'day')) {
-                    var date_str = the_cal_date.format("MM / DD");
+                    var date_str = the_cal_date.format('MM / DD');
                     table_html += '<th>' + date_str + '</th>';
                 }
                 table_html += '</tr><tr>';
                 for (var j = 0; j < 7; j++, the_date.add(1, 'day')) {
-                    var date_str = the_date.format("YYYY-MM-DD");
+                    var date_str = the_date.format('YYYY-MM-DD');
                     var duty = duties_map[date_str];
                     if (duty === undefined) {
-                        duty = "";
+                        duty = '';
                     }
                     table_html += '<td>' + duty + '</td>';
                 }
@@ -1137,7 +1136,7 @@ $(function() {
             }
         }
         // output vghks style
-        table_html += '<tr></tr><tr></tr>'
+        table_html += '<tr></tr><tr></tr>';
         cal_html = ['', ''];
         duty_html = ['', ''];
         for (var i = 1; i <= month_span; i++) {
@@ -1146,12 +1145,12 @@ $(function() {
             var start_date = cal.fullCalendar('getView').start;
             var end_date = cal.fullCalendar('getView').end;
             var the_date = month_first_date.clone();
-            var current_month = the_date.month()
+            var current_month = the_date.month();
 
             if (i > 1) {
                 table_html += '<tr></tr>';
             }
-            table_html += '<tr><td colspan="16">' + month_first_date.format("YYYY / MM") + '</td></tr>';
+            table_html += '<tr><td colspan="16">' + month_first_date.format('YYYY / MM') + '</td></tr>';
 
             table_html += '<tr>';
             for (var j = 0, row = 0; the_date.month() == current_month; j++, the_date.add(1, 'day')) {
@@ -1161,13 +1160,13 @@ $(function() {
                     row++;
                 }
 
-                var date_str = the_date.format("MM / DD");
+                var date_str = the_date.format('MM / DD');
                 cal_html[row] += '<th>' + date_str + '</th>';
 
-                date_str = the_date.format("YYYY-MM-DD");
+                date_str = the_date.format('YYYY-MM-DD');
                 var duty = duties_map[date_str];
                 if (duty === undefined) {
-                    duty = "";
+                    duty = '';
                 }
                 duty_html[row] += '<td>' + duty + '</td>';
             }
@@ -1210,7 +1209,7 @@ $(function() {
     var random_duty_worker;
 
     function do_random_duty() {
-        var patterns = $('#suggested_pattern').data("patterns");
+        var patterns = $('#suggested_pattern').data('patterns');
         var use_qod_limit = $('#use_qod_limit').is(':checked');
         var qod_limit = parseInt($('#inputQodLimitSlider').slider('option', 'value'));
         var presets = get_presets();
@@ -1219,38 +1218,38 @@ $(function() {
         var end_date = start_date.clone().add(month_span, 'months');
         var total_days = end_date.diff(start_date, 'days');
         var filters = {
-            "patterns": patterns,
-            "std_dev_level": parseFloat($('#inputStdDevSlider').slider('option', 'value')),
-            "use_qod_limit": use_qod_limit,
-            "qod_limit": qod_limit,
+            'patterns': patterns,
+            'std_dev_level': parseFloat($('#inputStdDevSlider').slider('option', 'value')),
+            'use_qod_limit': use_qod_limit,
+            'qod_limit': qod_limit,
         };
 
         clear_random_duties(); // always clean previous random duties
         is_already_random_duty = false; // reset global var
 
         // block ui
-        $('#block_ui_message').html("Please wait...");
+        $('#block_ui_message').html('Please wait...');
         $.blockUI({
             theme: true,
             title: 'Generating Duties',
-            message: $('#block_ui_box')
+            message: $('#block_ui_box'),
         });
 
-        random_duty_worker = new Worker("assets/js/random_duty_worker.js");
+        random_duty_worker = new Worker('assets/js/random_duty_worker.js');
         random_duty_worker.postMessage({
-            "presets": presets,
-            "since_date_str": start_date.format("YYYY-MM-DD"),
-            "total_days": total_days,
-            "filters": filters,
+            'presets': presets,
+            'since_date_str': start_date.format('YYYY-MM-DD'),
+            'total_days': total_days,
+            'filters': filters,
         });
         random_duty_worker.onmessage = function(e) {
             switch (e.data.status) {
-                case "success":
-                    var duties = e.data["duties"];
-                    var groups = e.data["groups"];
+                case 'success':
+                    var duties = e.data['duties'];
+                    var groups = e.data['groups'];
 
                     $.each(duties, function(i, duty) {
-                        var date = moment(duty[0], "YYYY-MM-DD");
+                        var date = moment(duty[0], 'YYYY-MM-DD');
                         if (get_preset_duty(presets.duties, duty[0]) === undefined) {
                             var eventTitle = duty[1].toString();
                             var event = {
@@ -1259,11 +1258,11 @@ $(function() {
                                 start: date,
                                 allDay: true,
                                 color: duty_colors[duty[1]],
-                                className: "duty-event"
+                                className: 'duty-event',
                             };
                             $('#cal1').fullCalendar('renderEvent', event, true);
                             $('#cal2').fullCalendar('renderEvent', event, true);
-                            //console.log(duty[0] + ": " + duty[1]);
+                            // console.log(duty[0] + ": " + duty[1]);
                         }
                     });
 
@@ -1277,13 +1276,13 @@ $(function() {
                     $.unblockUI({
                         onUnblock: function() {
                             myGrowlUI('Success', '自動排班已完成');
-                        }
+                        },
                     });
                     break;
-                case "running":
+                case 'running':
                     $('#block_ui_message').html(e.data.msg);
                     break;
-                case "fail":
+                case 'fail':
                     $('#block_ui_dialog_message').html(e.data.msg);
                     $.blockUI({
                         theme: true,
@@ -1292,16 +1291,16 @@ $(function() {
                     });
                     break;
                 default:
-                    //console.log(e.data["msg"]);
-                    //console.log(e.data["duties"]);
-                    //console.log(e.data["groups"]);
+                    // console.log(e.data["msg"]);
+                    // console.log(e.data["duties"]);
+                    // console.log(e.data["groups"]);
             }
-        }
+        };
     }
 
     $('#func_random_duty').click(function() {
         // check if calculated patterns.
-        var patterns = $('#suggested_pattern').data("patterns");
+        var patterns = $('#suggested_pattern').data('patterns');
         if (patterns === undefined) {
             WarningDialog('請先更新排班樣式');
             return;
@@ -1338,7 +1337,7 @@ $(function() {
                     if (result) {
                         do_random_duty();
                     }
-                }
+                },
             });
         } else {
             do_random_duty();
@@ -1360,64 +1359,64 @@ $(function() {
         switch (people) {
             case 4:
                 test_data = [
-                    [1, "2015-08-08"],
-                    [1, "2015-08-16"],
-                    [1, "2015-08-21"],
-                    [1, "2015-08-28"],
-                    [2, "2015-08-02"],
-                    [2, "2015-08-15"],
-                    [2, "2015-08-30"],
-                    [3, "2015-08-09"],
-                    [3, "2015-08-14"],
-                    [3, "2015-08-23"],
-                    [3, "2015-08-29"],
-                    [4, "2015-08-01"],
-                    [4, "2015-08-07"],
-                    [4, "2015-08-22"],
-                    [4, "2015-08-27"],
+                    [1, '2015-08-08'],
+                    [1, '2015-08-16'],
+                    [1, '2015-08-21'],
+                    [1, '2015-08-28'],
+                    [2, '2015-08-02'],
+                    [2, '2015-08-15'],
+                    [2, '2015-08-30'],
+                    [3, '2015-08-09'],
+                    [3, '2015-08-14'],
+                    [3, '2015-08-23'],
+                    [3, '2015-08-29'],
+                    [4, '2015-08-01'],
+                    [4, '2015-08-07'],
+                    [4, '2015-08-22'],
+                    [4, '2015-08-27'],
                 ];
 
                 if (month_span > 1) {
                     test_data = test_data.concat([
-                        [1, "2015-09-04"],
-                        [1, "2015-09-06"],
-                        [1, "2015-09-19"],
-                        [2, "2015-09-02"],
-                        [2, "2015-09-11"],
-                        [2, "2015-09-13"],
-                        [2, "2015-09-25"],
-                        [2, "2015-09-28"],
-                        [3, "2015-09-05"],
-                        [3, "2015-09-20"],
-                        [3, "2015-09-27"],
-                        [4, "2015-09-03"],
-                        [4, "2015-09-12"],
-                        [4, "2015-09-18"],
-                        [4, "2015-09-26"],
+                        [1, '2015-09-04'],
+                        [1, '2015-09-06'],
+                        [1, '2015-09-19'],
+                        [2, '2015-09-02'],
+                        [2, '2015-09-11'],
+                        [2, '2015-09-13'],
+                        [2, '2015-09-25'],
+                        [2, '2015-09-28'],
+                        [3, '2015-09-05'],
+                        [3, '2015-09-20'],
+                        [3, '2015-09-27'],
+                        [4, '2015-09-03'],
+                        [4, '2015-09-12'],
+                        [4, '2015-09-18'],
+                        [4, '2015-09-26'],
                     ]);
                 }
                 break;
             case 5:
                 test_data = [
-                    [1, "2015-08-16"],
-                    [1, "2015-08-21"],
-                    [1, "2015-08-28"],
-                    [2, "2015-08-02"],
-                    [2, "2015-08-15"],
-                    [2, "2015-08-27"],
-                    [3, "2015-08-09"],
-                    [3, "2015-08-14"],
-                    [3, "2015-08-29"],
-                    [4, "2015-08-01"],
-                    [4, "2015-08-07"],
-                    [4, "2015-08-22"],
-                    [5, "2015-08-08"],
-                    [5, "2015-08-23"],
-                    [5, "2015-08-30"],
+                    [1, '2015-08-16'],
+                    [1, '2015-08-21'],
+                    [1, '2015-08-28'],
+                    [2, '2015-08-02'],
+                    [2, '2015-08-15'],
+                    [2, '2015-08-27'],
+                    [3, '2015-08-09'],
+                    [3, '2015-08-14'],
+                    [3, '2015-08-29'],
+                    [4, '2015-08-01'],
+                    [4, '2015-08-07'],
+                    [4, '2015-08-22'],
+                    [5, '2015-08-08'],
+                    [5, '2015-08-23'],
+                    [5, '2015-08-30'],
                 ];
                 break;
             default:
-                alert("Please set deploy data for " + people + ".");
+                alert('Please set deploy data for ' + people + '.');
                 return;
         }
 
@@ -1428,11 +1427,11 @@ $(function() {
                 title: eventTitle,
                 start: data[1],
                 allDay: true,
-                className: "preset-duty-event",
-                color: duty_colors[data[0]]
+                className: 'preset-duty-event',
+                color: duty_colors[data[0]],
             };
-            $("#cal1").fullCalendar('renderEvent', event, true);
-            $("#cal2").fullCalendar('renderEvent', event, true);
+            $('#cal1').fullCalendar('renderEvent', event, true);
+            $('#cal2').fullCalendar('renderEvent', event, true);
         });
     });
 
@@ -1443,29 +1442,29 @@ $(function() {
         switch (people) {
             case 4:
                 test_data = [
-                    [1, "2015-08-03"],
-                    [1, "2015-08-13"],
-                    [1, "2015-08-19"],
-                    [1, "2015-08-24"],
-                    [2, "2015-08-06"],
-                    [2, "2015-08-11"],
-                    [2, "2015-08-20"],
-                    [2, "2015-08-25"],
-                    [3, "2015-08-05"],
-                    [3, "2015-08-18"],
-                    [3, "2015-08-26"],
-                    [3, "2015-08-31"],
-                    [4, "2015-08-04"],
-                    [4, "2015-08-10"],
-                    [4, "2015-08-12"],
-                    [4, "2015-08-17"],
+                    [1, '2015-08-03'],
+                    [1, '2015-08-13'],
+                    [1, '2015-08-19'],
+                    [1, '2015-08-24'],
+                    [2, '2015-08-06'],
+                    [2, '2015-08-11'],
+                    [2, '2015-08-20'],
+                    [2, '2015-08-25'],
+                    [3, '2015-08-05'],
+                    [3, '2015-08-18'],
+                    [3, '2015-08-26'],
+                    [3, '2015-08-31'],
+                    [4, '2015-08-04'],
+                    [4, '2015-08-10'],
+                    [4, '2015-08-12'],
+                    [4, '2015-08-17'],
                 ];
 
                 break;
             case 5:
                 break;
             default:
-                alert("Please set deploy data for " + people + ".");
+                alert('Please set deploy data for ' + people + '.');
                 return;
         }
 
@@ -1475,11 +1474,11 @@ $(function() {
                 title: eventTitle,
                 start: data[1],
                 allDay: true,
-                className: "duty-event",
-                color: duty_colors[data[0]]
+                className: 'duty-event',
+                color: duty_colors[data[0]],
             };
-            $("#cal1").fullCalendar('renderEvent', event, true);
-            $("#cal2").fullCalendar('renderEvent', event, true);
+            $('#cal1').fullCalendar('renderEvent', event, true);
+            $('#cal2').fullCalendar('renderEvent', event, true);
         });
     });
 
@@ -1489,15 +1488,15 @@ $(function() {
         var total_days = end_date.diff(start_date, 'days');
         if (total_days != duties.length) {
             _is_each_day_has_a_duty = false;
-            //console.log(total_days + ' unequal: ' + duties.length);
+            // console.log(total_days + ' unequal: ' + duties.length);
         } else {
             var sorted_duties = duties.sort(function(a, b) {
-                return a[0].localeCompare(b[0])
+                return a[0].localeCompare(b[0]);
             });
             for (the_date = start_date.clone(), i = 0; the_date < end_date; i++, the_date.add(1, 'day')) {
                 if (sorted_duties[i][0] != the_date.format('YYYY-MM-DD')) {
                     _is_each_day_has_a_duty = false;
-                    //console.log(sorted_duties[i][0] + ' diff: ' + the_date.format());
+                    // console.log(sorted_duties[i][0] + ' diff: ' + the_date.format());
                     break;
                 }
             }
@@ -1511,20 +1510,20 @@ $(function() {
             onrendered: function(canvas) {
                 var range = get_current_date_range();
                 filename = 'random_duty_' + range.month_str + '.png';
-                $("#screenshot_download_link").attr('href', canvas.toDataURL("image/png"));
-                $("#screenshot_download_link").attr('download', filename);
-                lnk = document.getElementById("screenshot_download_link");
+                $('#screenshot_download_link').attr('href', canvas.toDataURL('image/png'));
+                $('#screenshot_download_link').attr('download', filename);
+                lnk = document.getElementById('screenshot_download_link');
                 lnk.click();
-            }
+            },
         });
     });
 
     $('#func_download_excel').click(function(event) {
         // set duration as file name.
         var start_date = $('#cal1').fullCalendar('getDate').startOf('month');
-        var start_month = start_date.format("YYYY-MM");
+        var start_month = start_date.format('YYYY-MM');
         var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
-        var end_month = start_date.clone().add(month_span, 'months').subtract(1, 'day').format("YYYY-MM");
+        var end_month = start_date.clone().add(month_span, 'months').subtract(1, 'day').format('YYYY-MM');
         var duration_str = start_month;
         if (start_month != end_month) {
             duration_str += '-' + end_month;
@@ -1536,10 +1535,10 @@ $(function() {
         function export_excel() {
             // write table for downloading
             generate_duties_datatable(duties);
-            __html_a__ = document.createElement("a");
+            __html_a__ = document.createElement('a');
             __html_a__.download = excel_path;
             ExcellentExport.convert(
-                { anchor: __html_a__, filename: excel_path, format: 'xlsx'},
+                {anchor: __html_a__, filename: excel_path, format: 'xlsx'},
                 [{name: duration_str, from: {table: 'duties_datatable'}}]
             );
             __html_a__.click();
@@ -1559,7 +1558,7 @@ $(function() {
                     if (result) {
                         export_excel();
                     }
-                }
+                },
             });
         }
     });
@@ -1573,11 +1572,11 @@ $(function() {
             $.unblockUI();
 
             // check if browser supports web workers.
-            if (typeof window.Worker === "undefined") {
+            if (typeof window.Worker === 'undefined') {
                 $.blockUI({
                     theme: true,
                     title: 'Error',
-                    message: '<h4><i class="fa fa-exclamation-circle"></i> 此瀏覽器不支援 Web Worker 技術</h4><p>請使用下列版本以上的瀏覽器：</p><div class="row"><div class="col-sm-4 text-center"><img src="https://raw.githubusercontent.com/alrra/browser-logos/master/chrome/chrome_64x64.png"><br>Chrome<br>&ge; 4.0</div><div class="col-sm-4 text-center"><img src="https://raw.githubusercontent.com/alrra/browser-logos/master/firefox/firefox_64x64.png"><br>Firefox<br>&ge; 3.5</div><div class="col-sm-4 text-center"><img src="https://raw.githubusercontent.com/alrra/browser-logos/master/internet-explorer/internet-explorer_64x64.png"><br>Internet Explorer<br>&ge; 10.0</div></div>'
+                    message: '<h4><i class="fa fa-exclamation-circle"></i> 此瀏覽器不支援 Web Worker 技術</h4><p>請使用下列版本以上的瀏覽器：</p><div class="row"><div class="col-sm-4 text-center"><img src="https://raw.githubusercontent.com/alrra/browser-logos/master/chrome/chrome_64x64.png"><br>Chrome<br>&ge; 4.0</div><div class="col-sm-4 text-center"><img src="https://raw.githubusercontent.com/alrra/browser-logos/master/firefox/firefox_64x64.png"><br>Firefox<br>&ge; 3.5</div><div class="col-sm-4 text-center"><img src="https://raw.githubusercontent.com/alrra/browser-logos/master/internet-explorer/internet-explorer_64x64.png"><br>Internet Explorer<br>&ge; 10.0</div></div>',
                 });
             }
 
@@ -1586,20 +1585,23 @@ $(function() {
             //
             var pref = Cookies.get();
             $.each(pref, function(key, value) {
-                if (value == "true" || value == "false") {
-                    pref[key] = (value === "true");
+                if (value == 'true' || value == 'false') {
+                    pref[key] = (value === 'true');
                 }
             });
             if (pref.mode_switch !== undefined) {
                 $('#mode_switch').bootstrapSwitch('state', pref.mode_switch);
             }
-            $('#use_qod_limit').prop("checked", pref.use_qod_limit);
-            if (pref.inputQodLimitSlider !== undefined)
-                $('#inputQodLimitSlider').slider("option", "value", pref.inputQodLimitSlider);
-            if (pref.inputStdDevSlider !== undefined)
-                $('#inputStdDevSlider').slider("option", "value", pref.inputStdDevSlider);
-            if (pref.inputPeopleSlider !== undefined)
-                $('#inputPeopleSlider').slider("option", "value", pref.inputPeopleSlider);
+            $('#use_qod_limit').prop('checked', pref.use_qod_limit);
+            if (pref.inputQodLimitSlider !== undefined) {
+$('#inputQodLimitSlider').slider('option', 'value', pref.inputQodLimitSlider);
+}
+            if (pref.inputStdDevSlider !== undefined) {
+$('#inputStdDevSlider').slider('option', 'value', pref.inputStdDevSlider);
+}
+            if (pref.inputPeopleSlider !== undefined) {
+$('#inputPeopleSlider').slider('option', 'value', pref.inputPeopleSlider);
+}
 
             clearInterval(check_cal_loaded);
         }
@@ -1616,6 +1618,6 @@ $(function() {
         dataType: 'text',
         success: function(data) {
             $('#changeLogModal .modal-body').html(marked(data));
-        }
+        },
     });
 });

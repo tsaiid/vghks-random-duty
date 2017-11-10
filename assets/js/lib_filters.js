@@ -14,7 +14,7 @@ function has_continuous_duties(group_duties) {
     for (var person in group_duties) {
         var qd_times = group_duties[person].intervals.multiIndexOf(1).length;
         if (qd_times > 0) {
-            //console.log("qd_times: " + qd_times + ", intervals: " + group_duties[person].intervals.toString());
+            // console.log("qd_times: " + qd_times + ", intervals: " + group_duties[person].intervals.toString());
             return true;
         }
     }
