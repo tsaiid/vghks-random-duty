@@ -16,11 +16,11 @@ $(function() {
     var is_already_random_duty = false; // bool: record if random_duty executed.
 
     $('#mode_switch').bootstrapSwitch({
-        onText: "2 月",
-        offText: "1 月",
+        onText: '2 月',
+        offText: '1 月',
         offColor: 'info',
         onSwitchChange: function(event, state) {
-            //console.log(state); // true | false
+            // console.log(state); // true | false
             Cookies.set('mode_switch', state);
             if (state) { // 2-month mode
                 is_cal2_all_rendered = false;
@@ -63,8 +63,8 @@ $(function() {
         change: function(event, ui) {
             Cookies.set('inputStdDevSlider', ui.value);
         }
-    }).slider("pips", {
-        rest: "label",
+    }).slider('pips', {
+        rest: 'label',
         step: 2
     });
 
@@ -78,8 +78,8 @@ $(function() {
             update_dialog_title_type();
             Cookies.set('inputPeopleSlider', ui.value);
         },
-    }).slider("pips", {
-        rest: "label"
+    }).slider('pips', {
+        rest: 'label'
     });
 
     //
@@ -92,8 +92,13 @@ $(function() {
     $.blockUI.defaults.growlCSS.top = '60px'; // show below the nav bar.
     $.blockUI.defaults.growlCSS.opacity = 0.8;
 
+    /**
+     * Show a customized Growl UI.
+     * @param {string} status The status string.
+     * @param {string} msg The message to be shown.
+     */
     function myGrowlUI(status, msg) {
-        var className = "growlUI " + status.toLowerCase();
+        var className = 'growlUI ' + status.toLowerCase();
         $.growlUI(status, msg);
         $('div.growlUI').attr('class', className); // use class to control background image
     }
@@ -121,13 +126,13 @@ $(function() {
     function get_duty_conflict_status(title, orig_title, is_edit_dialog, duty_type, prev_set_duty, prev_set_non_duties, already_had_duty) {
         var status;
         if (is_edit_dialog) {
-            if (duty_type == "eventPropNonduty") {
+            if (duty_type == 'eventPropNonduty') {
                 if ($.inArray(parseInt(title), prev_set_non_duties) > -1) {
-                    status = "重覆設定不值班人員";
+                    status = '重覆設定不值班人員';
                 } else if (prev_set_duty == title && title != orig_title) {
-                    status = "人員 " + title + " 本日已設為值班，不可再設為不值！";
+                    status = '人員 ' + title + ' 本日已設為值班，不可再設為不值！';
                 }
-            } else if (duty_type == "eventPropDuty") {
+            } else if (duty_type == 'eventPropDuty') {
                 if (already_had_duty) {
                     if (title == prev_set_duty && title != orig_title) {
                         status = "本日已有人值班";
@@ -249,7 +254,7 @@ $(function() {
         if (duty_type == 'eventPropHoliday') {
             title_html = '<input type="text" class="form-control" id="eventTitle" />';
         } else {
-            var people = parseInt($('#inputPeopleSlider').slider("option", "value"));
+            var people = parseInt($('#inputPeopleSlider').slider('option', 'value'));
             title_html = '<select type="text" class="form-control" name="eventTitle" id="eventTitle">';
             for (var i = 1; i <= people; i++) {
                 title_html += '<option>' + i + '</option>';
@@ -320,15 +325,15 @@ $(function() {
     }];
     var calDayClick = function(date, jsEvent, view) {
         // check if is in the available date range
-        if (date.format("YYYY-MM") != view.intervalStart.format("YYYY-MM")) {
+        if (date.format('YYYY-MM') != view.intervalStart.format('YYYY-MM')) {
             return;
         }
 
         $('#eventStart').val(date.format("YYYY-MM-DD"));
 
         // set ui dialog
-        $("#calEventDialog").dialog("option", "title", "Add Duty");
-        $("#calEventDialog").dialog("option", "buttons", {
+        $('#calEventDialog').dialog('option', 'title', 'Add Duty');
+        $('#calEventDialog').dialog('option', 'buttons', {
             '新增': function() {
                 save_or_update_event(false);
                 $(this).dialog('close');
@@ -340,19 +345,19 @@ $(function() {
         $('#calEventDialog').dialog('open');
     };
     var calEventClick = function(calEvent, jsEvent, view) {
-        $('#eventStart').val(calEvent.start.format("YYYY-MM-DD"));
+        $('#eventStart').val(calEvent.start.format('YYYY-MM-DD'));
         $('#eventId').val(calEvent.id);
         var title, duty_type;
         if (calEvent.title.indexOf("假日 ") > -1) {
-            $('#eventPropHoliday').prop("checked", true);
-            title = calEvent.title.split("假日 ")[1];
+            $('#eventPropHoliday').prop('checked', true);
+            title = calEvent.title.split('假日 ')[1];
             duty_type = 'eventPropHoliday';
-        } else if (calEvent.title.indexOf(" 不值") > -1) {
-            $('#eventPropNonduty').prop("checked", true);
-            title = calEvent.title.trim().split(" 不值")[0]; // trim for a space prepend to non-duty
+        } else if (calEvent.title.indexOf(' 不值') > -1) {
+            $('#eventPropNonduty').prop('checked', true);
+            title = calEvent.title.trim().split(' 不值')[0]; // trim for a space prepend to non-duty
             duty_type = 'eventPropNonduty';
         } else {
-            $('#eventPropDuty').prop("checked", true);
+            $('#eventPropDuty').prop('checked', true);
             title = calEvent.title;
             duty_type = 'eventPropDuty';
         }
@@ -375,7 +380,7 @@ $(function() {
                     deleted_holidays.push($('#eventId').val());
                 }
                 update_current_duty_status();
-                $(this).dialog("close");
+                $(this).dialog('close');
             },
             '取消': function() {
                 $(this).dialog('close');
@@ -417,10 +422,10 @@ $(function() {
     };
     var myEventOrder = function(a, b) {
         var classOrder = {
-                "preset-duty-event": 0,
-                "duty-event": 1,
-                "gcal-holiday": 2,
-                "preset-non-duty-event": 3
+                'preset-duty-event': 0,
+                'duty-event': 1,
+                'gcal-holiday': 2,
+                'preset-non-duty-event': 3
         };
         var aClassOrder = classOrder[a.className.toString()];
         var bClassOrder = classOrder[b.className.toString()];
@@ -430,19 +435,19 @@ $(function() {
         return a.title >= b.title;
     };
     var duty_colors = [
-        "#000000",
-        "#2D6100",
-        "#705A00",
-        "#943700",
-        "#FFA000",
-        "#20006E",
-        "#AFB42B",
-        "#E64A19",
-        "#2196F3",
-        "#FF4081",
+        '#000000',
+        '#2D6100',
+        '#705A00',
+        '#943700',
+        '#FFA000',
+        '#20006E',
+        '#AFB42B',
+        '#E64A19',
+        '#2196F3',
+        '#FF4081',
     ];
-    var non_duty_color = "#000000";
-    var holiday_bg_color = "#f5dfe2";
+    var non_duty_color = '#000000';
+    var holiday_bg_color = '#f5dfe2';
 
     // init cal1 and cal2
     $("#cal2").fullCalendar({
@@ -466,7 +471,7 @@ $(function() {
         eventRender: myEventRender,
         eventOrder: myEventOrder,
         eventAfterAllRender: function() {
-            //console.log('cal2 eventAfterAllRender');
+            // console.log('cal2 eventAfterAllRender');
             is_cal2_all_rendered = true;
 
             if (!is_cal2_loaded) {
@@ -475,7 +480,7 @@ $(function() {
         }
     });
 
-    $("#cal1").fullCalendar({
+    $('#cal1').fullCalendar({
         defaultDate: nextMonth,
         header: {
             left: 'title',
@@ -496,7 +501,7 @@ $(function() {
         eventRender: myEventRender,
         eventOrder: myEventOrder,
         eventAfterAllRender: function() {
-            //console.log("eventAfterAllRender");
+            // console.log("eventAfterAllRender");
             is_cal1_all_rendered = true;
 
             update_current_duty_status();
