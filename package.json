@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/tsaiid/vghks-random-duty#readme",
   "devDependencies": {
+    "eslint": "^4.10.0",
+    "eslint-config-google": "^0.9.1",
     "grunt": "latest",
     "grunt-contrib-connect": "latest",
     "grunt-contrib-copy": "latest",
