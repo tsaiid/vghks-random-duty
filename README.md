@@ -2,7 +2,7 @@
 
 A single page application to assist resident duty arrangement in General or VGHKS mode.
 
-輔助住院醫師排班的網頁版小工具，可使用「一般」或「VGHKS」模式。[Demo Site](http://radtools.tsai.it/vghks-random-duty/)
+輔助住院醫師排班的網頁版小工具，可使用「一般」或「VGHKS」模式。[Demo Site](https://radtools.tsai.it/vghks-random-duty/)
 
 ## Feature
 
