@@ -1218,8 +1218,6 @@ $(function() {
         }
         // output vghks style
         table_html += '<tr></tr><tr></tr>';
-        cal_html = ['', ''];
-        duty_html = ['', ''];
         for (var i = 1; i <= month_span; i++) {
             var cal = $('#cal' + i);
             var month_first_date = cal.fullCalendar('getView').intervalStart;
@@ -1227,6 +1225,9 @@ $(function() {
             var end_date = cal.fullCalendar('getView').end;
             var the_date = month_first_date.clone();
             var current_month = the_date.month();
+
+            var cal_html = ['', ''];
+            var duty_html = ['', ''];
 
             if (i > 1) {
                 table_html += '<tr></tr>';
