@@ -3,6 +3,8 @@
     "rules": {
         "no-var": "off",
         "max-len": "off",
-        "camelcase": "off"
+        "camelcase": "off",
+        "new-cap": "off",
+        "no-extend-native": ["error", { "exceptions": ["Array"] }]
     }
 }
