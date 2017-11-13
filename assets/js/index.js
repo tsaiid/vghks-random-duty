@@ -273,6 +273,13 @@ $(function() {
         width: 400,
         modal: true,
     });
+    // prevent submit while pressing enter in event dialog
+    $('#calEventDialogForm').submit(function(e) {
+        e.preventDefault();
+        save_or_update_event(false);
+        $('#calEventDialog').dialog('close');
+    });
+
 
     $('input[name=eventProp]').change(function() {
         var duty_type = $(this).val();
