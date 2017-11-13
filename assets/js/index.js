@@ -54,19 +54,6 @@ $(function() {
         rest: 'label',
     });
 
-    $('#inputStdDevSlider').slider({
-        max: 2,
-        min: 1,
-        step: 0.1,
-        value: 1.8,
-        change: function(event, ui) {
-            Cookies.set('inputStdDevSlider', ui.value);
-        },
-    }).slider('pips', {
-        rest: 'label',
-        step: 2,
-    });
-
     $('#inputPeopleSlider').slider({
         max: 9,
         min: 3,
@@ -1319,7 +1306,6 @@ $(function() {
         var total_days = end_date.diff(start_date, 'days');
         var filters = {
             'patterns': patterns,
-            'std_dev_level': parseFloat($('#inputStdDevSlider').slider('option', 'value')),
             'use_qod_limit': use_qod_limit,
             'qod_limit': qod_limit,
         };
@@ -1704,9 +1690,6 @@ $(function() {
             $('#use_qod_limit').prop('checked', pref.use_qod_limit);
             if (pref.inputQodLimitSlider !== undefined) {
                 $('#inputQodLimitSlider').slider('option', 'value', pref.inputQodLimitSlider);
-            }
-            if (pref.inputStdDevSlider !== undefined) {
-                $('#inputStdDevSlider').slider('option', 'value', pref.inputStdDevSlider);
             }
             if (pref.inputPeopleSlider !== undefined) {
                 $('#inputPeopleSlider').slider('option', 'value', pref.inputPeopleSlider);
