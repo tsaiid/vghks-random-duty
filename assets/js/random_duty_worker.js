@@ -6,7 +6,6 @@ importScripts(
     'lib_filters.js'
 );
 
-var ENABLE_CONDITIONING = true;
 var TEST_CONDITIONING_FUNCTION = false;
 
 onmessage = function(oEvent) {
@@ -25,6 +24,14 @@ onmessage = function(oEvent) {
     });
 };
 
+/**
+ * Generate patterns that non preset duty matches.
+ * @param {number} total_days The total days.
+ * @param {string} since_date_str The begin date string.
+ * @param {Object} presets The preset duties and holidays.
+ * @param {Array} patterns The array of pattern to be matched.
+ * @return {Object} The generated non preset duties.
+ */
 function generate_non_preset_duty_match_patterns(total_days, since_date_str, presets, patterns) {
     var non_preset_duties = {
         ordinary: [],
@@ -34,9 +41,9 @@ function generate_non_preset_duty_match_patterns(total_days, since_date_str, pre
 
     // console.log(preset_duties.toString());
 
-    var tmp_duties_ordinary = [],
-        tmp_duties_friday = [],
-        tmp_duties_holiday = [];
+    var tmp_duties_ordinary = [];
+    var tmp_duties_friday = [];
+    var tmp_duties_holiday = [];
     var groups = calculate_group_duties_status(calculate_group_duties(presets.duties, false), presets.holidays);
     patterns.forEach(function(pattern, index) {
         var person_no = index + 1;
@@ -82,9 +89,15 @@ function generate_non_preset_duty_match_patterns(total_days, since_date_str, pre
     return non_preset_duties;
 }
 
+/**
+ * Shuffle the array.
+ * @param {Array} array The array to be shuffled.
+ * @return {number} The standard deviation.
+ */
 function shuffle(array) {
-    var counter = array.length,
-        temp, index;
+    var counter = array.length;
+    var temp;
+    var index;
 
     // While there are elements in the array
     while (counter > 0) {
@@ -103,19 +116,32 @@ function shuffle(array) {
     return array;
 }
 
+/**
+ * Shuffle the duty array.
+ * @param {Array} date_duties The array of duty to be shuffled.
+ * @return {Array} The array of duty had been shuffled.
+ */
 function shuffle_duties(date_duties) {
     for (date_type in date_duties) {
-        var duties = date_duties[date_type].map(function(d) {
-            return d[1];
-        });
-        shuffle(duties);
-        date_duties[date_type].forEach(function(d, i) {
-            d[1] = duties[i];
-        });
+        if ({}.hasOwnProperty.call(date_duties, date_type)) {
+            var duties = date_duties[date_type].map(function(d) {
+                return d[1];
+            });
+            shuffle(duties);
+            date_duties[date_type].forEach(function(d, i) {
+                d[1] = duties[i];
+            });
+        }
     }
     return date_duties;
 }
 
+/**
+ * Check if the duties match the preset non-duties.
+ * @param {Object[]} merged_duties The begin date string.
+ * @param {Array} preset_non_duties The filters.
+ * @return {boolean} Match or not.
+ */
 function is_match_non_duties(merged_duties, preset_non_duties) {
     var len = preset_non_duties.length;
     for (var i = 0; i < len; i++) {
@@ -129,7 +155,13 @@ function is_match_non_duties(merged_duties, preset_non_duties) {
     return true;
 }
 
-function is_match_filters(merged_duties, group_duties, filters) {
+/**
+ * Check if the duties match the filters.
+ * @param {Object[]} group_duties The begin date string.
+ * @param {Object} filters The filters.
+ * @return {boolean} Match or not.
+ */
+function is_match_filters(group_duties, filters) {
     var use_qod_limit = filters.use_qod_limit;
     var qod_limit = filters.qod_limit;
 
@@ -144,21 +176,37 @@ function is_match_filters(merged_duties, group_duties, filters) {
     return true;
 }
 
+/**
+ * Merge preset and non-preset duty arrays.
+ * @param {Object[]} preset_duties The begin date string.
+ * @param {Object[]} non_preset_duties The filters.
+ * @return {Object[]} Merged array.
+ */
 function merge_preset_non_preset_duties(preset_duties, non_preset_duties) {
     var merged_duties = preset_duties;
     for (date_type in non_preset_duties) {
-        merged_duties = merged_duties.concat(non_preset_duties[date_type]);
+        if ({}.hasOwnProperty.call(non_preset_duties, date_type)) {
+            merged_duties = merged_duties.concat(non_preset_duties[date_type]);
+        }
     }
     return merged_duties;
 }
 
+/**
+ * The main function of random duty.
+ * @param {number} total_days The total days.
+ * @param {string} since_date_str The begin date string.
+ * @param {Object} presets The preset duties and holidays.
+ * @param {Object} filters The filters.
+ * @return {Object} The random duty results.
+ */
 function random_duty(total_days, since_date_str, presets, filters) {
     var patterns = filters.patterns;
 
-    var status = 'success',
-        msg = '',
-        duties = [],
-        groups = {};
+    var status = 'success';
+    var msg = '';
+    var duties = [];
+    var groups = {};
     var non_preset_duties = generate_non_preset_duty_match_patterns(total_days, since_date_str, presets, patterns);
     var c = 0;
     while (1) {
@@ -167,7 +215,7 @@ function random_duty(total_days, since_date_str, presets, filters) {
         var merged_duties = merge_preset_non_preset_duties(presets.duties, non_preset_duties);
         // console.log(has_continuous_duties(merged_duties));
         var group_duties = calculate_group_duties(merged_duties, true);
-        if (is_match_non_duties(merged_duties, presets.non_duties) && is_match_filters(merged_duties, group_duties, filters)) {
+        if (is_match_non_duties(merged_duties, presets.non_duties) && is_match_filters(group_duties, filters)) {
             duties = merged_duties;
             groups = group_duties;
             break;

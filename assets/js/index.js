@@ -2,7 +2,6 @@ $(function() {
     //
     // flags
     //
-    var ENABLE_CONDITIONING = true;
     var ENABLE_PATTERN_CONDITIONING = true;
 
     //
@@ -103,26 +102,21 @@ $(function() {
         $('div.growlUI').attr('class', className); // use class to control background image
     }
 
-    function get_calendar_height() {
-        return $(window).height() - 300;
-    }
-
-    function check_if_has_same_non_duty(preset_non_duties, date, person) {
-        var len = preset_non_duties.length;
-        for (var i = 0; i < len; i++) {
-            var non_duty_date_str = preset_non_duties[i][0];
-            var non_duty_person = preset_non_duties[i][1];
-            if (non_duty_date_str == date && non_duty_person == person) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     //
     // Dialog related
     //
     // Dialog for insert new event
+    /**
+     * Get the status if a duty has a conflict.
+     * @param {string} title The title to be checked.
+     * @param {string} orig_title The original title.
+     * @param {boolean} is_edit_dialog Is an edit dialog or Not.
+     * @param {string} duty_type The duty type string.
+     * @param {string} prev_set_duty The previously set duty.
+     * @param {Array} prev_set_non_duties The array of previously set non-duties.
+     * @param {boolean} already_had_duty Had a duty or Not.
+     * @return {string} The status string.
+     */
     function get_duty_conflict_status(title, orig_title, is_edit_dialog, duty_type, prev_set_duty, prev_set_non_duties, already_had_duty) {
         var status;
         if (is_edit_dialog) {
@@ -169,6 +163,10 @@ $(function() {
         return status;
     }
 
+    /**
+     * Save or update the event.
+     * @param {boolean} is_edit_dialog Is an edit dialog or Not.
+     */
     function save_or_update_event(is_edit_dialog) {
         var title = $('#eventTitle').val();
         var orig_title = $('#eventOrigTitle').val();
@@ -181,7 +179,6 @@ $(function() {
             var prev_set_duty = get_preset_duty(preset_duties, date);
             var prev_set_non_duties = get_preset_non_duties_by_date(preset_non_duties, date);
             var already_had_duty = (prev_set_duty !== undefined);
-            var has_same_non_duty = check_if_has_same_non_duty(preset_non_duties, date, title);
 
             var duty_conflict_status = get_duty_conflict_status(title, orig_title, is_edit_dialog, duty_type, prev_set_duty, prev_set_non_duties, already_had_duty);
             if (!duty_conflict_status) {
@@ -191,7 +188,9 @@ $(function() {
                     $('#cal2').fullCalendar('removeEvents', $('#eventId').val());
                 }
 
-                var className, color, eventTitle;
+                var className;
+                var color;
+                var eventTitle;
                 switch (duty_type) {
                     case 'eventPropDuty':
                         className = 'preset-duty-event';
@@ -249,6 +248,10 @@ $(function() {
 
     // default set dialog select options by people number
     // or set to input text for Holiday event
+    /**
+     * Update dialog title type.
+     * @param {string} duty_type The duty type string.
+     */
     function update_dialog_title_type(duty_type) {
         var title_html;
         if (duty_type == 'eventPropHoliday') {
@@ -282,7 +285,11 @@ $(function() {
         }
     });
 
-    function WarningDialog(msg) {
+    /**
+     * Show a warning dialog.
+     * @param {string} msg The message string to be shown.
+     */
+    function warningDialog(msg) {
         BootstrapDialog.show({
             type: BootstrapDialog.TYPE_WARNING,
             title: 'Warning',
@@ -300,7 +307,6 @@ $(function() {
     // FullCalendar related
     //
     // common calendar options and callback functions
-    var currMonth = moment();
     var nextMonth = moment().add(1, 'months');
     var nextTwoMonth = moment().add(2, 'months');
     var calGoogleCalendarApiKey = 'AIzaSyCutCianVgUaWaCHeTDMk2VzyZ8bcNUdOY';
@@ -347,7 +353,8 @@ $(function() {
     var calEventClick = function(calEvent, jsEvent, view) {
         $('#eventStart').val(calEvent.start.format('YYYY-MM-DD'));
         $('#eventId').val(calEvent.id);
-        var title, duty_type;
+        var title;
+        var duty_type;
         if (calEvent.title.indexOf('假日 ') > -1) {
             $('#eventPropHoliday').prop('checked', true);
             title = calEvent.title.split('假日 ')[1];
@@ -514,6 +521,9 @@ $(function() {
         },
     });
 
+    /**
+     * check_if_already_random. // ??
+     */
     function check_if_already_random() {
         var range = get_current_date_range();
         var all_duty_events = $('#cal1').fullCalendar('clientEvents', function(event) {
@@ -527,6 +537,9 @@ $(function() {
         is_already_random_duty = (all_duty_events.length > 0);
     }
 
+    /**
+     * Set an interval to wait and update the suggested patterns.
+     */
     function wait_and_update_suggested_patterns() {
         var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
         var check_cal_all_rendered = setInterval(function() {
@@ -565,6 +578,10 @@ $(function() {
     //
     // Basic Algorithm Related
     //
+    /**
+     * Get presets.
+     * @return {Object} The presets Obj including holidays, duties, and non-duties.
+     */
     function get_presets() {
         var presets = {};
         presets.holidays = get_preset_holidays();
@@ -573,6 +590,10 @@ $(function() {
         return presets;
     }
 
+    /**
+     * Get preset non duties.
+     * @return {Array} The array of preset non duties.
+     */
     function get_preset_non_duties() {
         // consider month mode
         var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
@@ -591,6 +612,10 @@ $(function() {
         return preset_non_duties;
     }
 
+    /**
+     * Get preset duties.
+     * @return {Array} The array of preset duties.
+     */
     function get_preset_duties() {
         // consider month mode
         var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
@@ -609,6 +634,10 @@ $(function() {
         return preset_duties;
     }
 
+    /**
+     * Get current date range, including start date, end date, and month string
+     * @return {Object} The object of date range.
+     */
     function get_current_date_range() {
         // consider month mode
         var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
@@ -625,6 +654,10 @@ $(function() {
         };
     }
 
+    /**
+     * Get all the duties
+     * @return {Array} The array of all the duties.
+     */
     function get_all_duties() {
         var range = get_current_date_range();
         var all_duty_events = $('#cal1').fullCalendar('clientEvents', function(event) {
@@ -644,6 +677,10 @@ $(function() {
         return all_duties;
     }
 
+    /**
+     * Get the preset holidays
+     * @return {Array} The array of preset holidays.
+     */
     function get_preset_holidays() {
         var preset_holidays1 = $('#cal1').fullCalendar('clientEvents', function(event) {
             if ($.inArray('gcal-holiday', event.className) > -1) {
@@ -668,8 +705,15 @@ $(function() {
         return preset_holidays;
     }
 
+    /**
+     * Do random pattern
+     * @param {number} people The number of people to be random.
+     * @param {number} ordinary_count How many ordinary days.
+     * @param {number} friday_count How many fridays.
+     * @param {number} holiday_count How many holidays.
+     * @return {Array} The 2x2 array of random pattern generated.
+     */
     function random_pattern(people, ordinary_count, friday_count, holiday_count) {
-        var ordinary_duties = [];
         var friday_duties = [];
         var holiday_duties = [];
         while (friday_duties.length < friday_count) {
@@ -688,7 +732,6 @@ $(function() {
             if (ENABLE_PATTERN_CONDITIONING) {
                 var total_points = 2 * holiday_count + 1 * friday_count + 1 * ordinary_count;
                 var points = 2 * h_count + 1 * f_count + 1 * o_count;
-                var ratio = total_points / people;
                 var threshold = {};
                 if (total_points / people < 6) { // in extreme condition (too many people), use loose threshold
                     threshold.lower = parseInt(total_points / people) - 1;
@@ -720,6 +763,13 @@ $(function() {
         return patterns;
     }
 
+    /**
+     * Get suggested patterns
+     * @param {Object} start_date The moment.js object of start date.
+     * @param {number} month_span One or two months.
+     * @param {number} people How many people are involved in the pattern.
+     * @return {Array} The 2x2 array of random pattern generated.
+     */
     function get_suggested_patterns(start_date, month_span, people) {
         var end_date = start_date.clone().add(month_span, 'months');
         var preset_holidays = get_preset_holidays();
@@ -765,6 +815,9 @@ $(function() {
         clear_random_duties();
     });
 
+    /**
+     * Update current duty status
+     */
     function update_current_duty_status() {
         // check if suggested pattern exists
         var patterns = $('#suggested_pattern').data('patterns');
@@ -780,38 +833,44 @@ $(function() {
         if ($.isEmptyObject(groups)) { // clear the table
             $('#suggested_pattern .current_status').html('');
         } else {
-            for (var person in groups) {
-                var person_id = '#person_' + person;
-                if ($(person_id).length == 1) {
-                    var o_span = $(person_id + ' .ordinary_count .current_status');
-                    var f_span = $(person_id + ' .friday_count .current_status');
-                    var h_span = $(person_id + ' .holiday_count .current_status');
-                    var o_count = groups[person].ordinary_count;
-                    var f_count = groups[person].friday_count;
-                    var h_count = groups[person].holiday_count;
+            for (person in groups) {
+                if ({}.hasOwnProperty.call(groups, person)) {
+                    var person_id = '#person_' + person;
+                    if ($(person_id).length == 1) {
+                        var o_span = $(person_id + ' .ordinary_count .current_status');
+                        var f_span = $(person_id + ' .friday_count .current_status');
+                        var h_span = $(person_id + ' .holiday_count .current_status');
+                        var o_count = groups[person].ordinary_count;
+                        var f_count = groups[person].friday_count;
+                        var h_count = groups[person].holiday_count;
 
-                    o_span.html('(' + o_count + ')');
-                    f_span.html('(' + f_count + ')');
-                    h_span.html('(' + h_count + ')');
+                        o_span.html('(' + o_count + ')');
+                        f_span.html('(' + f_count + ')');
+                        h_span.html('(' + h_count + ')');
 
-                    // show background if not fit pattern
-                    o_span.toggleClass('bg-danger', (o_count != patterns[person - 1][0]), 800);
-                    f_span.toggleClass('bg-danger', (f_count != patterns[person - 1][1]), 800);
-                    h_span.toggleClass('bg-danger', (h_count != patterns[person - 1][2]), 800);
-                } else {
-                    // console.log("no such person: " + person);
+                        // show background if not fit pattern
+                        o_span.toggleClass('bg-danger', (o_count != patterns[person - 1][0]), 800);
+                        f_span.toggleClass('bg-danger', (f_count != patterns[person - 1][1]), 800);
+                        h_span.toggleClass('bg-danger', (h_count != patterns[person - 1][2]), 800);
+                    } else {
+                        // console.log("no such person: " + person);
+                    }
                 }
             }
         }
     }
 
+    /**
+     * Update the patterns on the page
+     * @param {Array} patterns The 2x2 array of pattern, [person_index][days_count_obj].
+     */
     function update_duty_patterns(patterns) {
         if (patterns !== undefined) {
             $('#suggested_pattern table').remove();
             var pattern_html = '<table class="table table-striped"><tr><th>No.</th><th>平</th><th>五</th><th>假</th><th>P</th></tr>';
-            var o_count = 0,
-                f_count = 0,
-                h_count = 0;
+            var o_count = 0;
+            var f_count = 0;
+            var h_count = 0;
             $.each(patterns, function(index, pattern) {
                 var point = parseInt(pattern[0]) + parseInt(pattern[1]) + parseInt(pattern[2]) * 2;
                 pattern_html += '<tr id="person_' + (index + 1) + '"><td>' + (index + 1) + '</td><td class="ordinary_count">' + pattern[0] + ' <span class="current_status"></span></td><td class="friday_count">' + pattern[1] + ' <span class="current_status"></span></td><td class="holiday_count">' + pattern[2] + ' <span class="current_status"></span></td><td>' + point + '</td></tr>';
@@ -825,6 +884,9 @@ $(function() {
         }
     }
 
+    /**
+     * Calculate suggested pattern
+     */
     function calculate_suggested_patterns() {
         // clear previous data first
         $('#suggested_pattern').removeData('patterns');
@@ -838,6 +900,9 @@ $(function() {
         update_duty_patterns(suggested_patterns);
     }
 
+    /**
+     * Calculate suggested pattern, and then update the page
+     */
     function update_patterns() {
         calculate_suggested_patterns();
         update_current_duty_status();
@@ -850,13 +915,13 @@ $(function() {
     $('#func_edit_duty_patterns').click(function() {
         var patterns = $('#suggested_pattern').data('patterns');
         if (patterns === undefined) {
-            WarningDialog('Patterns are undefinde!');
+            warningDialog('Patterns are undefinde!');
             return;
         }
 
-        var o_count = 0,
-            f_count = 0,
-            h_count = 0;
+        var o_count = 0;
+        var f_count = 0;
+        var h_count = 0;
         var table_html = '<table id="edit_patterns_table" class="table"><tr><th>No.</th><th>平</th><th>五</th><th>假</th><th>P</th></tr>';
         $.each(patterns, function(i, p) {
             o_count += p[0];
@@ -868,6 +933,11 @@ $(function() {
         var t_count = o_count + f_count + h_count;
         table_html += '<tr><th>共</th><th>' + o_count + ' <span class="o_count bg-danger"></span></th><th>' + f_count + ' <span class="f_count bg-danger"></span></th><th>' + h_count + ' <span class="h_count bg-danger"></span></th><th>' + t_count + '</th></tr></table>';
 
+        /**
+         * From the page, get the pattern table data
+         * @param {string} table The html string of pattern table.
+         * @return {Array} The 2x2 pattern data array.
+         */
         function getPatternTableData(table) {
             var data = [];
             table.find('tr:has(td)').each(function(rowIndex, r) {
@@ -890,16 +960,16 @@ $(function() {
                 action: function(dialog) {
                     // check if pattern matches
                     var table_data = getPatternTableData($('#edit_patterns_table'));
-                    var tb_o_count = 0,
-                        tb_f_count = 0,
-                        tb_h_count = 0;
+                    var tb_o_count = 0;
+                    var tb_f_count = 0;
+                    var tb_h_count = 0;
                     $.each(table_data, function(i, p) {
                         tb_o_count += parseInt(p[0]);
                         tb_f_count += parseInt(p[1]);
                         tb_h_count += parseInt(p[2]);
                     });
                     if (tb_o_count != o_count || tb_f_count != f_count || tb_h_count != h_count) {
-                        WarningDialog('總班數錯誤，請再檢查');
+                        warningDialog('總班數錯誤，請再檢查');
                         return;
                     }
 
@@ -918,9 +988,9 @@ $(function() {
                     if (e.action == 'save') {
                         var table_data = getPatternTableData($('#edit_patterns_table'));
                         // update point
-                        var tb_o_count = 0,
-                            tb_f_count = 0,
-                            tb_h_count = 0;
+                        var tb_o_count = 0;
+                        var tb_f_count = 0;
+                        var tb_h_count = 0;
                         $.each(table_data, function(i, p) {
                             tb_o_count += parseInt(p[0]);
                             tb_f_count += parseInt(p[1]);
@@ -939,35 +1009,46 @@ $(function() {
         });
     });
 
+    /**
+     * Calculate group offs
+     * @param {Object} groups_duties The hash of duties grouped by people.
+     * @return {Object} The hash of offs grouped by people.
+     */
     function calculate_group_offs(groups_duties) {
         var preset_holidays = get_preset_holidays();
         var date_range = get_current_date_range();
         var groups_offs = {};
 
-        for (var p in groups_duties) {
-            groups_offs[p] = {
-                intervals: [],
-                dates: [],
-            };
-            for (var i = date_range.start_date.clone(); i < date_range.end_date; i.add(1, 'day')) {
-                var date_str = i.format('YYYY-MM-DD');
-                if ((is_holiday(preset_holidays, date_str) || is_weekend(date_str)) && $.inArray(date_str, groups_duties[p].dates) < 0) {
-                    groups_offs[p].dates.push(date_str);
+        for (p in groups_duties) {
+            if ({}.hasOwnProperty.call(groups_duties, p)) {
+                groups_offs[p] = {
+                    intervals: [],
+                    dates: [],
+                };
+                for (i = date_range.start_date.clone(); i < date_range.end_date; i.add(1, 'day')) {
+                    var date_str = i.format('YYYY-MM-DD');
+                    if ((is_holiday(preset_holidays, date_str) || is_weekend(date_str)) && $.inArray(date_str, groups_duties[p].dates) < 0) {
+                        groups_offs[p].dates.push(date_str);
+                    }
                 }
-            }
-            var duties_length = groups_offs[p].dates.length;
-            for (i = 0; i < duties_length; i++) {
-                if (i + 1 < duties_length) {
-                    var duty_date = moment(groups_offs[p].dates[i]);
-                    var next_duty_date = moment(groups_offs[p].dates[i + 1]);
-                    var date_diff = next_duty_date.diff(duty_date, 'days');
-                    groups_offs[p].intervals.push(date_diff);
+                var duties_length = groups_offs[p].dates.length;
+                for (i = 0; i < duties_length; i++) {
+                    if (i + 1 < duties_length) {
+                        var duty_date = moment(groups_offs[p].dates[i]);
+                        var next_duty_date = moment(groups_offs[p].dates[i + 1]);
+                        var date_diff = next_duty_date.diff(duty_date, 'days');
+                        groups_offs[p].intervals.push(date_diff);
+                    }
                 }
             }
         }
         return groups_offs;
     }
 
+    /**
+     * Update the table of summary duties on the page
+     * @param {Object} groups_duties The hash of duties grouped by people.
+     */
     function update_summary_duties(groups_duties) {
         if (!$.isEmptyObject(groups_duties)) {
             var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
@@ -987,107 +1068,109 @@ $(function() {
 
             var date_range = get_current_date_range();
             var view_start_date = $('#cal1').fullCalendar('getView').start;
-            for (var p in groups_duties) {
-                // calculate week distribution
-                var week_hours = [];
-                var week_hours_pm_off = [];
-                var __get_curr_cal_row = function(start_date, curr_date) {
-                    return Math.floor(moment.duration(curr_date.diff(start_date)).asWeeks());
-                    // calculate duration instead of isoWeek, which has problem at Dec - Jan next year.
-                };
-                var total_weeks = __get_curr_cal_row(view_start_date, date_range.end_date);
-                for (var i = 0; i <= total_weeks; i++) {
-                    week_hours[i] = 0;
-                    week_hours_pm_off[i] = 0;
+            for (p in groups_duties) {
+                if ({}.hasOwnProperty.call(groups_duties, p)) {
+                    // calculate week distribution
+                    var week_hours = [];
+                    var week_hours_pm_off = [];
+                    var __get_curr_cal_row = function(start_date, curr_date) {
+                        return Math.floor(moment.duration(curr_date.diff(start_date)).asWeeks());
+                        // calculate duration instead of isoWeek, which has problem at Dec - Jan next year.
+                    };
+                    var total_weeks = __get_curr_cal_row(view_start_date, date_range.end_date);
+                    for (var i = 0; i <= total_weeks; i++) {
+                        week_hours[i] = 0;
+                        week_hours_pm_off[i] = 0;
+                    }
+
+                    for (var i = date_range.start_date.clone(); i < date_range.end_date; i.add(1, 'day')) {
+                        var date_str = i.format('YYYY-MM-DD');
+                        var week_no = __get_curr_cal_row(view_start_date, i);
+                        if (!is_holiday(preset_holidays, date_str) && !is_weekend(date_str)) {
+                            week_hours[week_no] += 8;
+                            week_hours_pm_off[week_no] += 8;
+                        }
+                    }
+
+                    var dates = $.map(groups_duties[p].dates.sort(), function(d) {
+                        var moment_d = moment(d, 'YYYY-MM-DD');
+                        var next_d = moment_d.clone().add(1, 'day').format('YYYY-MM-DD');
+                        var week_no = __get_curr_cal_row(view_start_date, moment_d);
+                        var date_html = '<span class="';
+                        // colorize if friday or holiday
+                        if (is_holiday(preset_holidays, d) || is_weekend(d)) {
+                            date_html += 'bg-danger';
+                            week_hours[week_no] += 24;
+                            week_hours_pm_off[week_no] += 24;
+                        } else if (is_friday(preset_holidays, d)) {
+                            date_html += 'bg-success';
+                            week_hours[week_no] += 16;
+                            week_hours_pm_off[week_no] += 16;
+                        } else {
+                            week_hours[week_no] += 16;
+                            week_hours_pm_off[week_no] += 16;
+                        }
+
+                        // pm off
+                        // default qd duty is unacceptable. no matter if not checked
+                        // if qd duty is acceptable, the next day still can be pm off.
+                        if (!is_holiday(preset_holidays, next_d) && !is_weekend(next_d)) {
+                            week_hours_pm_off[week_no] -= 4;
+                        }
+
+                        var date_str = (month_span == 1 ? moment_d.format('D') : moment_d.format('M/D'));
+                        date_html += '">' + date_str + '</span>';
+                        return date_html;
+                    }).join(', ');
+
+                    var qod_count = 0;
+                    var intervals = $.map(groups_duties[p].intervals, function(i) {
+                        var interval_html = '<span class="';
+                        // colerize if qod
+                        if (i == 2) {
+                            interval_html += 'bg-danger';
+                            qod_count++;
+                        }
+                        interval_html += '">' + i + '</span>';
+                        return interval_html;
+                    });
+                    var __removeUndefined = function(val) {
+                        return val !== undefined;
+                    };
+                    var week_hours_str = $.map(week_hours.filter(__removeUndefined), function(hours) {
+                        var hours_html = '<span class="';
+                        if (hours > 88) {
+                            hours_html += 'bg-danger';
+                        } else if (hours >= 80) {
+                            hours_html += 'bg-warning';
+                        }
+                        hours_html += '">' + hours + '</span>';
+                        return hours_html;
+                    }).join(', ');
+                    var week_hours_pm_off_str = $.map(week_hours_pm_off.filter(__removeUndefined), function(hours) {
+                        var hours_html = '<span class="';
+                        if (hours > 88) {
+                            hours_html += 'bg-danger';
+                        } else if (hours >= 80) {
+                            hours_html += 'bg-warning';
+                        }
+                        hours_html += '">' + hours + '</span>';
+                        return hours_html;
+                    }).join(', ');
+                    var max_cont_work_interval = Math.max.apply(null, groups_offs[p].intervals) - 1;
+                    var max_cont_work_interval_str = '<span class="' + (max_cont_work_interval > 12 ? 'bg-danger' : '') + '">' + max_cont_work_interval + '</span>';
+                    var std_dev = groups_duties[p].std_dev.toFixed(2);
+                    summary_duties_html += '<tr>' +
+                                                '<th>' + p + '</th>' +
+                                                '<th>' + dates + '</th>' +
+                                                '<th>' + intervals + '</th>' +
+                                                '<th>' + week_hours_str + '</th>' +
+                                                '<th>' + week_hours_pm_off_str + '</th>' +
+                                                '<th>' + max_cont_work_interval_str + '</th>' +
+                                                '<th>' + qod_count + '</th>' +
+                                                '<th>' + std_dev + '</th>' +
+                                            '</tr>';
                 }
-
-                for (var i = date_range.start_date.clone(); i < date_range.end_date; i.add(1, 'day')) {
-                    var date_str = i.format('YYYY-MM-DD');
-                    var week_no = __get_curr_cal_row(view_start_date, i);
-                    if (!is_holiday(preset_holidays, date_str) && !is_weekend(date_str)) {
-                        week_hours[week_no] += 8;
-                        week_hours_pm_off[week_no] += 8;
-                    }
-                }
-
-                var dates = $.map(groups_duties[p].dates.sort(), function(d) {
-                    var moment_d = moment(d, 'YYYY-MM-DD');
-                    var next_d = moment_d.clone().add(1, 'day').format('YYYY-MM-DD');
-                    var week_no = __get_curr_cal_row(view_start_date, moment_d);
-                    var date_html = '<span class="';
-                    // colorize if friday or holiday
-                    if (is_holiday(preset_holidays, d) || is_weekend(d)) {
-                        date_html += 'bg-danger';
-                        week_hours[week_no] += 24;
-                        week_hours_pm_off[week_no] += 24;
-                    } else if (is_friday(preset_holidays, d)) {
-                        date_html += 'bg-success';
-                        week_hours[week_no] += 16;
-                        week_hours_pm_off[week_no] += 16;
-                    } else {
-                        week_hours[week_no] += 16;
-                        week_hours_pm_off[week_no] += 16;
-                    }
-
-                    // pm off
-                    // default qd duty is unacceptable. no matter if not checked
-                    // if qd duty is acceptable, the next day still can be pm off.
-                    if (!is_holiday(preset_holidays, next_d) && !is_weekend(next_d)) {
-                        week_hours_pm_off[week_no] -= 4;
-                    }
-
-                    var date_str = (month_span == 1 ? moment_d.format('D') : moment_d.format('M/D'));
-                    date_html += '">' + date_str + '</span>';
-                    return date_html;
-                }).join(', ');
-
-                var qod_count = 0;
-                var intervals = $.map(groups_duties[p].intervals, function(i) {
-                    var interval_html = '<span class="';
-                    // colerize if qod
-                    if (i == 2) {
-                        interval_html += 'bg-danger';
-                        qod_count++;
-                    }
-                    interval_html += '">' + i + '</span>';
-                    return interval_html;
-                });
-                var __removeUndefined = function(val) {
-                    return val !== undefined;
-                };
-                var week_hours_str = $.map(week_hours.filter(__removeUndefined), function(hours) {
-                    var hours_html = '<span class="';
-                    if (hours > 88) {
-                        hours_html += 'bg-danger';
-                    } else if (hours >= 80) {
-                        hours_html += 'bg-warning';
-                    }
-                    hours_html += '">' + hours + '</span>';
-                    return hours_html;
-                }).join(', ');
-                var week_hours_pm_off_str = $.map(week_hours_pm_off.filter(__removeUndefined), function(hours) {
-                    var hours_html = '<span class="';
-                    if (hours > 88) {
-                        hours_html += 'bg-danger';
-                    } else if (hours >= 80) {
-                        hours_html += 'bg-warning';
-                    }
-                    hours_html += '">' + hours + '</span>';
-                    return hours_html;
-                }).join(', ');
-                var max_cont_work_interval = Math.max.apply(null, groups_offs[p].intervals) - 1;
-                var max_cont_work_interval_str = '<span class="' + (max_cont_work_interval > 12 ? 'bg-danger' : '') + '">' + max_cont_work_interval + '</span>';
-                var std_dev = groups_duties[p].std_dev.toFixed(2);
-                summary_duties_html += '<tr>' +
-                                            '<th>' + p + '</th>' +
-                                            '<th>' + dates + '</th>' +
-                                            '<th>' + intervals + '</th>' +
-                                            '<th>' + week_hours_str + '</th>' +
-                                            '<th>' + week_hours_pm_off_str + '</th>' +
-                                            '<th>' + max_cont_work_interval_str + '</th>' +
-                                            '<th>' + qod_count + '</th>' +
-                                            '<th>' + std_dev + '</th>' +
-                                        '</tr>';
             }
             summary_duties_html += '</table>';
             $('#summary_duties').html(summary_duties_html);
@@ -1096,6 +1179,10 @@ $(function() {
         }
     }
 
+    /**
+     * Generate duty data table html
+     * @param {Array} duties The array of duties.
+     */
     function generate_duties_datatable(duties) {
         var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
         var table_html = '<table id="duties_datatable" class="table">';
@@ -1182,6 +1269,9 @@ $(function() {
         $('#duties_datatable_div').html(table_html);
     }
 
+    /**
+     * Clear random duties on the fullcalendars
+     */
     function clear_random_duties() {
         // clear fullCalendar
         var range = get_current_date_range();
@@ -1208,6 +1298,9 @@ $(function() {
 
     var random_duty_worker;
 
+    /**
+     * The main function to do random duty
+     */
     function do_random_duty() {
         var patterns = $('#suggested_pattern').data('patterns');
         var use_qod_limit = $('#use_qod_limit').is(':checked');
@@ -1302,7 +1395,7 @@ $(function() {
         // check if calculated patterns.
         var patterns = $('#suggested_pattern').data('patterns');
         if (patterns === undefined) {
-            WarningDialog('請先更新排班樣式');
+            warningDialog('請先更新排班樣式');
             return;
         }
 
@@ -1313,14 +1406,14 @@ $(function() {
         var groups = calculate_group_duties(presets.duties);
         if (use_qod_limit) {
             if (!less_than_qod_times(groups, qod_limit)) {
-                WarningDialog('目前排班已超過 QOD 設定上限，請調整');
+                warningDialog('目前排班已超過 QOD 設定上限，請調整');
                 return;
             }
         }
 
         // check if preset duties has qd duty
         if (has_continuous_duties(groups)) {
-            WarningDialog('目前排班出現連值狀況，請調整');
+            warningDialog('目前排班出現連值狀況，請調整');
             return;
         }
 
@@ -1437,7 +1530,6 @@ $(function() {
 
     $('#func_deploy_test_data_ordinary').click(function() {
         var people = parseInt($('#inputPeopleSlider').slider('option', 'value'));
-        var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
         var test_data;
         switch (people) {
             case 4:
@@ -1482,6 +1574,13 @@ $(function() {
         });
     });
 
+    /**
+     * Check if each day has a duty
+     * @param {Object} start_date A moment.js object of the start date.
+     * @param {number} month_span The integer of the month span: 1 or 2.
+     * @param {Array} duties The array of duties.
+     * @return {boolean} True if each day has a duty
+     */
     function is_each_day_has_a_duty(start_date, month_span, duties) {
         var _is_each_day_has_a_duty = true;
         var end_date = start_date.clone().add(month_span, 'months');
@@ -1532,6 +1631,9 @@ $(function() {
 
         var duties = get_all_duties();
 
+        /**
+         * Do export excel file of the duties
+         */
         function export_excel() {
             // write table for downloading
             generate_duties_datatable(duties);
@@ -1594,14 +1696,14 @@ $(function() {
             }
             $('#use_qod_limit').prop('checked', pref.use_qod_limit);
             if (pref.inputQodLimitSlider !== undefined) {
-$('#inputQodLimitSlider').slider('option', 'value', pref.inputQodLimitSlider);
-}
+                $('#inputQodLimitSlider').slider('option', 'value', pref.inputQodLimitSlider);
+            }
             if (pref.inputStdDevSlider !== undefined) {
-$('#inputStdDevSlider').slider('option', 'value', pref.inputStdDevSlider);
-}
+                $('#inputStdDevSlider').slider('option', 'value', pref.inputStdDevSlider);
+            }
             if (pref.inputPeopleSlider !== undefined) {
-$('#inputPeopleSlider').slider('option', 'value', pref.inputPeopleSlider);
-}
+                $('#inputPeopleSlider').slider('option', 'value', pref.inputPeopleSlider);
+            }
 
             clearInterval(check_cal_loaded);
         }

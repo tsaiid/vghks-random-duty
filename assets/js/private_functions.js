@@ -1,7 +1,23 @@
+/* exported randomIntFromInterval */
+/* exported standardDeviation */
+/* exported shuffle */
+/* exported is_worker_env */
+
+/**
+ * Get a random integer from a given interval.
+ * @param {number} min The lower limit.
+ * @param {number} max The upper limit.
+ * @return {number} The random integer.
+ */
 function randomIntFromInterval(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
+/**
+ * Get a random integer from a given interval.
+ * @param {Array} data The array of numbers.
+ * @return {number} The average number.
+ */
 function average(data) {
     var sum = data.reduce(function(sum, value) {
         return sum + value;
@@ -11,6 +27,11 @@ function average(data) {
     return avg;
 }
 
+/**
+ * Get the standard deviation of the given numbers.
+ * @param {Array} values The array of numbers.
+ * @return {number} The standard deviation.
+ */
 function standardDeviation(values) {
     var avg = average(values);
 
@@ -26,8 +47,15 @@ function standardDeviation(values) {
     return stdDev;
 }
 
+/**
+ * Shuffle the array.
+ * @param {Array} array The array to be shuffled.
+ * @return {number} The standard deviation.
+ */
 function shuffle(array) {
-    var counter = array.length, temp, index;
+    var counter = array.length;
+    var temp;
+    var index;
 
     // While there are elements in the array
     while (counter > 0) {
@@ -56,7 +84,11 @@ Array.prototype.multiIndexOf = function(el) {
     return idxs;
 };
 
-function is_worker_env() {
+/**
+ * Check current thread Is or Not in a worker environment.
+ * @return {boolean} Is or Not in a worker environment.
+ */
+ function is_worker_env() {
     return typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
 }
 
