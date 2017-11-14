@@ -1127,7 +1127,7 @@ $(function() {
                         }
                         interval_html += '">' + i + '</span>';
                         return interval_html;
-                    });
+                    }).join(', ');
                     var __removeUndefined = function(val) {
                         return val !== undefined;
                     };
