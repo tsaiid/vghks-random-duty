@@ -1,8 +1,8 @@
 # VGHKS Random Duty Generator
 
-A single page application to assist resident duty arrangement in General or VGHKS mode.
+A single page application to assist resident duty arrangement.
 
-輔助住院醫師排班的網頁版小工具，可使用「一般」或「VGHKS」模式。[Demo Site](http://radtools.tsai.it/vghks-random-duty/)
+輔助住院醫師排班的網頁版小工具。[Demo Site](http://radtools.tsai.it/vghks-random-duty/)
 
 ## Feature
 
@@ -20,3 +20,18 @@ A single page application to assist resident duty arrangement in General or VGHK
 ## License
 
 MIT License
+
+## Install
+
+1. Install [Yarn](https://yarnpkg.com/) for dependency management
+2. Install dependencies
+
+   ```bash
+   yarn install
+   ```
+
+## Testing Locally
+
+1. Run `grunt` will start a testing web server on <http://localhost:4000>
+2. For my own deployment purpose, the files will be copied to `_site/vghks-random-duty`, and the testing url will be <http://localhost:4000/vghks-random-duty>
+3. The path of the testing site can be changed in `Gruntfile.coffee`

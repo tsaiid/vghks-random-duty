@@ -1,3 +1,11 @@
+### [1.0.0](/vghks-random-duty/ver/1.0.0/) – 2017-11-14
+
+1. Migrate bower to yarn for dependency management.
+2. Remove vghks mode switch and standard dev setting.
+3. Change export excel format to xlsx, due to lib upgrade.
+4. Add vghks style in exporting excel.
+5. Fix event dialog behavior. (#55)
+
 ### [0.2.5](/vghks-random-duty/ver/0.2.5/) – 2017-06-20
 
 1. Change event order: duty, holiday, non-duty. (#52)

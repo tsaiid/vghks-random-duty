@@ -97,12 +97,6 @@
                 <hr>
                 <form class="form-horizontal" autocomplete="off">
                     <div class="form-group">
-                        <label for="vghksModeSwitch" class="col-sm-5 control-label">填表模式 <i class="fa fa-fw fa-balance-scale"></i></label>
-                        <div class="col-sm-7">
-                            <input type="checkbox" id="vghks_mode_switch">
-                        </div>
-                    </div>
-                    <div class="form-group">
                         <label for="modeSwitch" class="col-sm-5 control-label">月份模式 <i class="fa fa-fw fa-calendar"></i></label>
                         <div class="col-sm-7">
                             <input type="checkbox" id="mode_switch">
@@ -115,15 +109,6 @@
                         </label>
                         <div class="col-sm-7">
                             <div id="inputQodLimitSlider" class="slider"></div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="inputStdDev" class="col-sm-5 control-label">
-                            <span class="pull-left"><input type="checkbox" id="use_std_dev_level" checked></span>
-                            <span class="pull-right">班距標準差 <i class="fa fa-fw fa-tachometer"></i></span>
-                        </label>
-                        <div class="col-sm-7">
-                            <div id="inputStdDevSlider" class="slider"></div>
                         </div>
                     </div>
                     <div class="form-group">
@@ -205,7 +190,7 @@
     </div>
     <!-- Event Modal -->
     <div id="calEventDialog">
-        <form class="form-horizontal">
+        <form class="form-horizontal" id="calEventDialogForm">
             <div class="form-group">
                 <label for="eventTitle" class="col-sm-2 control-label">Title</label>
                 <div class="col-sm-10">
@@ -247,7 +232,16 @@
                 </div>
                 <div class="modal-body">
                     <h3>VGHKS Random Duty Generator <span id="appVersion"></span></h3>
-                    <p>班表產生器，以亂數排列的方式產生班表，可加上 QOD 值班及班距標準差等限制，以期獲取排班最大的公平性。目前自動產生的建議排班法使用高榮放射線部的積點方式運算。</p>
+                    <ul>
+                        <li>班表產生器，以亂數排列的方式產生班表，可預填值或不值的人。</li>
+                        <li>預設不可 QD 值班，另可加上 QOD 值班次數限制。</li>
+                        <li>目前自動產生的建議排班法使用高榮放射線部的積點方式運算。</li>
+                    </ul>
+                    <h4>積點規則</h4>
+                    <ul>
+                        <li>平日及週五為 1 點，假日為 2 點。</li>
+                        <li>假日的前一日視為週五</li>
+                    </ul>
                     <h4>Author</h4>
                     <p>I-Ta Tsai, 現為高榮放射線部住院醫師</p>
                     <p><a class="btn btn-default btn-xs" href="https://twitter.com/tsaiid" role="button"><i class="fa fa-twitter"></i> Follow @tsaiid</a> <a class="btn btn-default btn-xs" href="https://tsai.it/" role="button"><i class="fa fa-rss"></i> Blog</a></p>
@@ -255,7 +249,7 @@
                     <p>MIT</p>
                     <h4>Sources</h4>
                     <p><a class="btn btn-default btn-xs" href="https://github.com/tsaiid/vghks-random-duty" role="button"><i class="fa fa-github"></i> Hosted on GitHub</a></p>
-                    <p>如有疑問或問題，請至 <a href="https://github.com/tsaiid/vghks-random-duty/issues">GitHub Issues</a> 回報。</p>
+                    <p>如有疑問，請至 <a href="https://github.com/tsaiid/vghks-random-duty/issues">GitHub Issues</a> 回報。</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -290,21 +284,18 @@
                 <div class="modal-body">
                     <h4>步驟</h4>
                     <ol>
-                        <li>可設定「先假日」或「一般」模式，「先假日」模式需將星期五、六、日，及假日班填完</li>
                         <li>選擇月份模式並移至欲排班的月份</li>
                         <li>檢查月曆中的假日是否有誤，可點選做刪除的動作，或新增自訂假日</li>
                         <li>設定參與排班人數</li>
                         <li>檢查建議班表是否可以接受，可點選「更新建議班表」隨機調整或手動修改</li>
-                        <li>如使用「先假日」模式，請將所有人填入班表，直到建議班表中「五」、「假」的紅字皆消除</li>
                         <li>填入班表時，也可設定不值班的入員，在自動排班時會被排除</li>
-                        <li>選擇是否開啟「QOD 上限」或「Std Dev」，並設定其數值</li>
+                        <li>選擇是否開啟「QOD 上限」，並設定其數值</li>
                         <li>點選「自動排班」，等候亂數班表產生</li>
-                        <li>若無法產生結果，可調降或關閉參數</li>
+                        <li>若無法產生結果，可調整或關閉參數</li>
                         <li>若產生之結果不夠滿意，可以拖拽手動調整排班，下方有即時資訊表格</li>
                     </ol>
                     <h4>限制</h4>
                     <ul>
-                        <li>在「2 月」模式中，建議不要開啟「Std Dev」，非常容易跑不出結果</li>
                         <li>不論是手動填入或自動產生的班表皆無法線上儲存，可用「下載值班表 Excel」或螢幕截圖的方式儲存</li>
                     </ul>
                 </div>
@@ -315,7 +306,7 @@
         </div>
     </div>
     <script src="vendor/js/js.cookie.js"></script>
-    <script src="vendor/js/md5.js"></script>
+    <script src="vendor/js/crypto-js.js"></script>
     <!-- bootstrap should be load earlier than jquery-ui, or the dialog will be wrong. -->
     <script src="vendor/js/bootstrap.min.js"></script>
     <script src="vendor/js/jquery-ui.min.js"></script>
@@ -326,7 +317,7 @@
     <script src="vendor/js/jquery.blockUI.js"></script>
     <script src="vendor/js/fullcalendar.min.js"></script>
     <script src="vendor/js/gcal.js"></script>
-    <script src="vendor/js/excellentexport.min.js"></script>
+    <script src="vendor/js/excellentexport.js"></script>
     <script src="vendor/js/jquery.contenteditable.js"></script>
     <script src="vendor/js/marked.min.js"></script>
     <script src="vendor/js/html2canvas.min.js"></script>

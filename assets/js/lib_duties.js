@@ -1,3 +1,14 @@
+/* exported get_preset_duty */
+/* exported get_preset_non_duties_by_date */
+/* exported calculate_group_duties_status */
+/* exported calculate_group_duties */
+
+/**
+ * Get the duty by a given date.
+ * @param {Array} preset_duties The preset duties array.
+ * @param {string} date_str The given date.
+ * @return {number} The duty on the given date.
+ */
 function get_preset_duty(preset_duties, date_str) {
     var duty;
     if (is_worker_env()) { // cannot use jquery in web workers
@@ -18,6 +29,12 @@ function get_preset_duty(preset_duties, date_str) {
     return duty;
 }
 
+/**
+ * Get the preset non-duty by a given date.
+ * @param {Array} preset_non_duties The preset non duties array.
+ * @param {string} date_str The given date.
+ * @return {number[]} The non-duties array on the given date.
+ */
 function get_preset_non_duties_by_date(preset_non_duties, date_str) {
     var duties = [];
     if (is_worker_env()) { // cannot use jquery in web workers
@@ -36,10 +53,16 @@ function get_preset_non_duties_by_date(preset_non_duties, date_str) {
     return duties;
 }
 
+/**
+ * Cound duty pattern.
+ * @param {Array} dates The array of dates.
+ * @param {Array} preset_holidays The array of preset holidays.
+ * @return {number[]} The array of total numbers of Ordinary, Friday, Holiday.
+ */
 function count_duty_pattern(dates, preset_holidays) {
-    var o_count = 0,
-        f_count = 0,
-        h_count = 0;
+    var o_count = 0;
+    var f_count = 0;
+    var h_count = 0;
     if (is_worker_env()) { // cannot use jquery in web workers
         dates.forEach(function(date) {
             if (is_weekend(date) || is_holiday(preset_holidays, date)) {
@@ -61,28 +84,42 @@ function count_duty_pattern(dates, preset_holidays) {
             }
         });
     }
-    //console.log("dates: " + dates);
-    //console.log("pattern: " + [o_count, f_count, h_count].toString());
+    // console.log("dates: " + dates);
+    // console.log("pattern: " + [o_count, f_count, h_count].toString());
     return [o_count, f_count, h_count];
 }
 
+/**
+ * Calculate group duties status.
+ * @param {Array} groups The groups of duty patern.
+ * @param {Array} preset_holidays The array of preset holidays.
+ * @return {Array} The array of groups.
+ */
 function calculate_group_duties_status(groups, preset_holidays) {
-    for (var person in groups) {
-        var duty_pattern = count_duty_pattern(groups[person].dates, preset_holidays);
-        groups[person].ordinary_count = duty_pattern[0];
-        groups[person].friday_count = duty_pattern[1];
-        groups[person].holiday_count = duty_pattern[2];
+    for (person in groups) {
+        if ({}.hasOwnProperty.call(groups, person)) {
+            var duty_pattern = count_duty_pattern(groups[person].dates, preset_holidays);
+            groups[person].ordinary_count = duty_pattern[0];
+            groups[person].friday_count = duty_pattern[1];
+            groups[person].holiday_count = duty_pattern[2];
+        }
     }
     return groups;
 }
 
+/**
+ * Calculate group duties.
+ * @param {Array} duties The groups of duties.
+ * @param {boolean} is_continuous_duties Is or Not continuous duties.
+ * @return {Array} The array of groups.
+ */
 function calculate_group_duties(duties, is_continuous_duties) {
     // is_continuous_duties is used in worker, reduce moment.js obj to enhance efficiency.
     is_continuous_duties = typeof is_continuous_duties !== 'undefined' ? is_continuous_duties : false;
 
     var sorted_duties = duties.sort(function(a, b) {
-        //return moment(a[0], "YYYY-MM-DD") - moment(b[0], "YYYY-MM-DD")
-        return a[0].localeCompare(b[0])
+        // return moment(a[0], "YYYY-MM-DD") - moment(b[0], "YYYY-MM-DD")
+        return a[0].localeCompare(b[0]);
     }); // sort by date
 
     // cannot use $.map or Array.map
@@ -95,7 +132,8 @@ function calculate_group_duties(duties, is_continuous_duties) {
     var total_people = 0;
 
     var do_group_duties = function(arg1, arg2) {
-        var index, duty;
+        var index;
+        var duty;
         if (is_worker_env()) { // cannot use jquery in web workers
             index = arg2;
             duty = arg1;
@@ -109,7 +147,7 @@ function calculate_group_duties(duties, is_continuous_duties) {
             groups[person] = {
                 positions: [],
                 intervals: [],
-                dates: []
+                dates: [],
             };
             total_people++;
         }
@@ -123,7 +161,7 @@ function calculate_group_duties(duties, is_continuous_duties) {
             if (is_continuous_duties) {
                 var interval = index - groups[person].positions[len - 2];
             } else {
-                var interval = moment(duty[0], "YYYY-MM-DD").diff(moment(groups[person].dates[len - 2]), 'days');
+                var interval = moment(duty[0], 'YYYY-MM-DD').diff(moment(groups[person].dates[len - 2]), 'days');
             }
             groups[person].intervals.push(interval);
         }
@@ -136,11 +174,13 @@ function calculate_group_duties(duties, is_continuous_duties) {
     }
 
     // calculate standard deviations
-    for (var person in groups) {
-        //console.log(groups[person].intervals);
-        var std_dev = standardDeviation(groups[person].intervals);
-        groups[person].std_dev = std_dev;
-        //console.log(person + ": " + std_dev);
+    for (person in groups) {
+        if ({}.hasOwnProperty.call(groups, person)) {
+            // console.log(groups[person].intervals);
+            var std_dev = standardDeviation(groups[person].intervals);
+            groups[person].std_dev = std_dev;
+            // console.log(person + ": " + std_dev);
+        }
     }
     return groups;
 }
