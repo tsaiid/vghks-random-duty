@@ -2,14 +2,14 @@
 
 A single page application to assist resident duty arrangement.
 
-輔助住院醫師排班的網頁版小工具。[Demo Site](http://radtools.tsai.it/vghks-random-duty/)
+輔助住院醫師排班的網頁版小工具。[Demo Site](https://radtools.tsai.it/vghks-random-duty/)
 
 ## Feature
 
 1. 從 Google calendar 下載台灣版假日行事曆，如與實際有差異，也可自訂假日。
 2. 可設定不值人員。
 3. 可依該月總點數（平日及星期五為 1 點，假日為 2 點）產生建議班數分配，也可手動調整。
-4. 亂數產生班表，預設為不連值，可設定 qod 值班上限，或班距標準差上限。
+4. 亂數產生班表，預設為不連值，可設定 qod 值班上限。
 
 ## Limitation
 
