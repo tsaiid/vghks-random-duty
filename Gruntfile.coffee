@@ -9,10 +9,10 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks "grunt-sync"
 
   opts =
-    base_path: '_site/vghks-random-duty/'
-    js_path: '_site/vghks-random-duty/vendor/js/'
-    css_path: '_site/vghks-random-duty/vendor/css/'
-    font_path: '_site/vghks-random-duty/vendor/fonts/'
+    base_path: '_site/random-duty/'
+    js_path: '_site/random-duty/vendor/js/'
+    css_path: '_site/random-duty/vendor/css/'
+    font_path: '_site/random-duty/vendor/fonts/'
 
   files = [
     { expand: true, src: ['assets/**', 'index.html', 'package.json', 'ChangeLog.md'], dest: '<%= opts.base_path %>'},
@@ -20,8 +20,8 @@ module.exports = (grunt) ->
     { expand: true, cwd: 'node_modules/moment/min/', src: 'moment.min.js', dest: '<%= opts.js_path %>' },
     { expand: true, cwd: 'node_modules/jquery-ui-themes/', src: ['themes/redmond/**'], dest: '<%= opts.css_path %>' },
     { expand: true, cwd: 'node_modules/jquery-ui-dist/', src: 'jquery-ui.min.js', dest: '<%= opts.js_path %>' },
-    { expand: true, cwd: 'node_modules/jquery-ui-slider-pips/dist/', src: 'jquery-ui-slider-pips.css', dest: '<%= opts.css_path %>' },
-    { expand: true, cwd: 'node_modules/jquery-ui-slider-pips/dist/', src: 'jquery-ui-slider-pips.min.js', dest: '<%= opts.js_path %>' },
+    { expand: true, cwd: 'node_modules/jQuery-ui-Slider-Pips/dist/', src: 'jquery-ui-slider-pips.min.css', dest: '<%= opts.css_path %>' },
+    { expand: true, cwd: 'node_modules/jQuery-ui-Slider-Pips/dist/', src: 'jquery-ui-slider-pips.min.js', dest: '<%= opts.js_path %>' },
     { expand: true, cwd: 'node_modules/blockui-npm/', src: 'jquery.blockUI.js', dest: '<%= opts.js_path %>' },
     { expand: true, cwd: 'node_modules/font-awesome/css/', src: 'font-awesome.min.css', dest: '<%= opts.css_path %>' },
     { expand: true, cwd: 'node_modules/font-awesome/fonts/', src: ['*.woff*', '*.ttf', '*.eot'], dest: '<%= opts.font_path %>' },
@@ -46,6 +46,7 @@ module.exports = (grunt) ->
 
   grunt.initConfig
     opts: opts
+
     sync:
       main:
         files: files
