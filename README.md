@@ -1,6 +1,6 @@
-# VGHKS Random Duty Generator
+# Random Duty Generator
 
-A single page application to assist resident duty arrangement.
+A single page application to assist resident duty arrangement. Its rules are based on the department of radiology, KSVGH, Taiwan.
 
 輔助住院醫師排班的網頁版小工具。[Demo Site](http://radtools.tsai.it/vghks-random-duty/)
 
@@ -33,5 +33,6 @@ MIT License
 ## Testing Locally
 
 1. Run `grunt` will start a testing web server on <http://localhost:4000>
-2. For my own deployment purpose, the files will be copied to `_site/vghks-random-duty`, and the testing url will be <http://localhost:4000/vghks-random-duty>
+2. For my own deployment purpose, the files will be copied to `_site/random-duty`, and the testing url will be <http://localhost:4000/random-duty>
 3. The path of the testing site can be changed in `Gruntfile.coffee`
+
