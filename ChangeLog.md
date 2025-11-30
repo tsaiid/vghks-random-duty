@@ -1,3 +1,12 @@
+### [1.0.2](/random-duty/ver/1.0.2/) – 2025-12-01
+
+1.  Migrate project to Vite for modern development environment.
+2.  Refactor JavaScript to ES Modules.
+3.  Updated FullCalendar to v3.10.5.
+4.  Resolved jQuery and Moment.js compatibility issues with Vite.
+5.  Fixed Google Calendar holiday event rendering (background and foreground events, no redirects).
+6.  Updated README.md for new development workflow.
+
 ### [1.0.1](/random-duty/ver/1.0.1/) – 2020-01-20
 
 1. Remove VGHKS in the title and url.
