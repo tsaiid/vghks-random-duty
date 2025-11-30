@@ -1,3 +1,67 @@
+import './setup-jquery.js'; // Must be first!
+import $ from 'jquery';
+import 'bootstrap';
+import 'bootstrap/dist/css/bootstrap.css';
+import 'bootstrap-switch';
+import 'bootstrap-switch/dist/css/bootstrap3/bootstrap-switch.css';
+import BootstrapDialog from 'bootstrap3-dialog';
+import 'bootstrap3-dialog/dist/css/bootstrap-dialog.css';
+import 'jquery-ui-dist/jquery-ui';
+// import 'jquery-ui-dist/jquery-ui.css'; // Replaced by theme
+import 'jquery-ui-themes/themes/redmond/jquery-ui.css';
+import 'jquery-ui-slider-pips';
+import 'jquery-ui-slider-pips/dist/jquery-ui-slider-pips.css';
+import moment from 'moment';
+import 'blockui-npm'; // Attach to jquery
+import 'fullcalendar';
+import 'fullcalendar/dist/fullcalendar.css';
+import 'fullcalendar/dist/gcal.js'; // Attempt to import gcal
+import 'excellentexport';
+const ExcellentExport = window.ExcellentExport;
+import 'jquery-contenteditable';
+import marked from 'marked';
+import html2canvas from 'html2canvas';
+import CryptoJS from 'crypto-js';
+import Cookies from 'js-cookie';
+import 'font-awesome/css/font-awesome.css';
+import Pace from 'pace-js';
+window.Pace = Pace;
+Pace.start();
+import 'pace-js/themes/blue/pace-theme-loading-bar.css';
+
+import '../css/dashboard.css';
+import '../css/calendar.css';
+import '../css/index.css';
+
+import {
+    randomIntFromInterval,
+    is_worker_env
+} from './private_functions.js';
+import {
+    is_holiday,
+    is_friday,
+    is_weekend
+} from './lib_holidays.js';
+import {
+    get_preset_duty,
+    get_preset_non_duties_by_date,
+    calculate_group_duties,
+    calculate_group_duties_status
+} from './lib_duties.js';
+import {
+    less_than_qod_times,
+    has_continuous_duties
+} from './lib_filters.js';
+
+// Expose globals for legacy plugins if needed
+// window.$ = window.jQuery = $; // Handled by setup-jquery.js
+window.moment = moment;
+window.BootstrapDialog = BootstrapDialog;
+window.CryptoJS = CryptoJS;
+window.ExcellentExport = ExcellentExport;
+window.marked = marked;
+window.html2canvas = html2canvas;
+
 $(function() {
     //
     // flags
@@ -304,25 +368,70 @@ $(function() {
     var nextMonth = moment().add(1, 'months');
     var nextTwoMonth = moment().add(2, 'months');
     var calGoogleCalendarApiKey = 'AIzaSyCutCianVgUaWaCHeTDMk2VzyZ8bcNUdOY';
-    var calEventSources = [{
-        googleCalendarId: 'taiwan__zh-TW@holiday.calendar.google.com',
-        backgroundColor: '#f5dfe2',
-        rendering: 'background',
-        className: 'gcal-holiday-background',
-    }, {
-        googleCalendarId: 'taiwan__zh-TW@holiday.calendar.google.com',
-        className: 'gcal-holiday',
-        editable: true,
-        eventDataTransform: function(rawEventData) { // drop url from google cal
-            return {
-                id: rawEventData.id,
-                title: '假日 ' + rawEventData.title,
-                start: rawEventData.start,
-                end: rawEventData.end,
-                className: 'gcal-holiday',
-            };
-        },
-    }];
+    var calEventSources = [
+        function(start, end, timezone, callback) {
+            var calendarId = 'taiwan__zh-TW@holiday.calendar.google.com';
+            var apiKey = calGoogleCalendarApiKey;
+            var url = 'https://www.googleapis.com/calendar/v3/calendars/' + encodeURIComponent(calendarId) + '/events';
+
+            // Mimic original gcal.js logic for date formatting
+            var requestStart = start.clone();
+            var requestEnd = end.clone();
+
+            if (!requestStart.hasZone()) {
+                requestStart.local().startOf('day');
+            }
+            if (!requestEnd.hasZone()) {
+                requestEnd.local().startOf('day');
+            }
+
+            $.ajax({
+                url: url,
+                dataType: 'json',
+                data: {
+                    key: apiKey,
+                    timeMin: requestStart.format(),
+                    timeMax: requestEnd.format(),
+                    singleEvents: true,
+                    maxResults: 9999
+                },
+                success: function(doc) {
+                    var events = [];
+                    if (doc.items) {
+                        $.each(doc.items, function(i, item) {
+                            // Create Background Event (Pink)
+                            events.push({
+                                id: item.id + '_bg', // Unique ID
+                                title: '',
+                                start: item.start.date || item.start.dateTime,
+                                end: item.end.date || item.end.dateTime,
+                                rendering: 'background',
+                                color: '#f5dfe2',
+                                allDay: true
+                            });
+
+                            // Create Foreground Event (Blue Block with Text)
+                            events.push({
+                                id: item.id,
+                                title: '假日 ' + item.summary,
+                                start: item.start.date || item.start.dateTime,
+                                end: item.end.date || item.end.dateTime,
+                                color: '#3a87ad',
+                                className: 'gcal-holiday',
+                                allDay: true,
+                                url: null // Ensure no redirect
+                            });
+                        });
+                    }
+                    callback(events);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error('Google Calendar Fetch Error:', textStatus, errorThrown);
+                    myGrowlUI('Error', 'Google Calendar: ' + textStatus);
+                }
+            });
+        }
+    ];
     var calDayClick = function(date, jsEvent, view) {
         // check if is in the available date range
         if (date.format('YYYY-MM') != view.intervalStart.format('YYYY-MM')) {
@@ -345,6 +454,10 @@ $(function() {
         $('#calEventDialog').dialog('open');
     };
     var calEventClick = function(calEvent, jsEvent, view) {
+        if (!calEvent.title) {
+            // Ignore clicks on events without title (e.g. background events)
+            return;
+        }
         $('#eventStart').val(calEvent.start.format('YYYY-MM-DD'));
         $('#eventId').val(calEvent.id);
         var title;
@@ -464,6 +577,10 @@ $(function() {
         eventLimit: true, // strang bug, without this, bottom border disappears in firefox
         googleCalendarApiKey: calGoogleCalendarApiKey,
         eventSources: calEventSources,
+        googleCalendarError: function(error) {
+            console.error('Google Calendar Error:', error);
+            myGrowlUI('Error', 'Google Calendar: ' + error.message);
+        },
         selectable: true,
         dayClick: calDayClick,
         editable: true,
@@ -494,6 +611,10 @@ $(function() {
         eventLimit: true, // strang bug, without this, bottom border disappears in firefox
         googleCalendarApiKey: calGoogleCalendarApiKey,
         eventSources: calEventSources,
+        googleCalendarError: function(error) {
+            console.error('Google Calendar Error:', error);
+            myGrowlUI('Error', 'Google Calendar: ' + error.message);
+        },
         selectable: true,
         dayClick: calDayClick,
         editable: true,
@@ -718,7 +839,7 @@ $(function() {
         }
 
         var patterns = [];
-        for (i = 1; i <= people; i++) {
+        for (var i = 1; i <= people; i++) {
             var o_count;
             var f_count = friday_duties.multiIndexOf(i).length;
             var h_count = holiday_duties.multiIndexOf(i).length;
@@ -749,7 +870,7 @@ $(function() {
             patterns = patterns.sort(function(a, b) {
                 return (a[2] * 2 + a[1] + a[0]) - (b[2] * 2 + b[1] + b[0]);
             });
-            for (i = 0; i < residual_ordinary_count; i++) {
+            for (var i = 0; i < residual_ordinary_count; i++) {
                 patterns[i][0]++;
             }
         }
@@ -827,7 +948,7 @@ $(function() {
         if ($.isEmptyObject(groups)) { // clear the table
             $('#suggested_pattern .current_status').html('');
         } else {
-            for (person in groups) {
+            for (var person in groups) {
                 if ({}.hasOwnProperty.call(groups, person)) {
                     var person_id = '#person_' + person;
                     if ($(person_id).length == 1) {
@@ -1013,20 +1134,20 @@ $(function() {
         var date_range = get_current_date_range();
         var groups_offs = {};
 
-        for (p in groups_duties) {
+        for (var p in groups_duties) {
             if ({}.hasOwnProperty.call(groups_duties, p)) {
                 groups_offs[p] = {
                     intervals: [],
                     dates: [],
                 };
-                for (i = date_range.start_date.clone(); i < date_range.end_date; i.add(1, 'day')) {
+                for (var i = date_range.start_date.clone(); i < date_range.end_date; i.add(1, 'day')) {
                     var date_str = i.format('YYYY-MM-DD');
                     if ((is_holiday(preset_holidays, date_str) || is_weekend(date_str)) && $.inArray(date_str, groups_duties[p].dates) < 0) {
                         groups_offs[p].dates.push(date_str);
                     }
                 }
                 var duties_length = groups_offs[p].dates.length;
-                for (i = 0; i < duties_length; i++) {
+                for (var i = 0; i < duties_length; i++) {
                     if (i + 1 < duties_length) {
                         var duty_date = moment(groups_offs[p].dates[i]);
                         var next_duty_date = moment(groups_offs[p].dates[i + 1]);
@@ -1062,7 +1183,7 @@ $(function() {
 
             var date_range = get_current_date_range();
             var view_start_date = $('#cal1').fullCalendar('getView').start;
-            for (p in groups_duties) {
+            for (var p in groups_duties) {
                 if ({}.hasOwnProperty.call(groups_duties, p)) {
                     // calculate week distribution
                     var week_hours = [];
@@ -1322,7 +1443,9 @@ $(function() {
             message: $('#block_ui_box'),
         });
 
-        random_duty_worker = new Worker('assets/js/random_duty_worker.js');
+        // USE VITE WORKER IMPORT
+        random_duty_worker = new Worker(new URL('./random_duty_worker.js', import.meta.url), { type: 'module' });
+        
         random_duty_worker.postMessage({
             'presets': presets,
             'since_date_str': start_date.format('YYYY-MM-DD'),
@@ -1340,9 +1463,9 @@ $(function() {
                         if (get_preset_duty(presets.duties, duty[0]) === undefined) {
                             var eventTitle = duty[1].toString();
                             var event = {
-                                id: CryptoJS.MD5(date + eventTitle).toString(),
+                                id: CryptoJS.MD5(duty[0] + eventTitle).toString(),
                                 title: eventTitle,
-                                start: date,
+                                start: duty[0],
                                 allDay: true,
                                 color: duty_colors[duty[1]],
                                 className: 'duty-event',
@@ -1586,7 +1709,7 @@ $(function() {
             var sorted_duties = duties.sort(function(a, b) {
                 return a[0].localeCompare(b[0]);
             });
-            for (the_date = start_date.clone(), i = 0; the_date < end_date; i++, the_date.add(1, 'day')) {
+            for (var i = 0, the_date = start_date.clone(); the_date < end_date; i++, the_date.add(1, 'day')) {
                 if (sorted_duties[i][0] != the_date.format('YYYY-MM-DD')) {
                     _is_each_day_has_a_duty = false;
                     // console.log(sorted_duties[i][0] + ' diff: ' + the_date.format());
@@ -1602,10 +1725,10 @@ $(function() {
         html2canvas(document.body, {
             onrendered: function(canvas) {
                 var range = get_current_date_range();
-                filename = 'random_duty_' + range.month_str + '.png';
+                var filename = 'random_duty_' + range.month_str + '.png';
                 $('#screenshot_download_link').attr('href', canvas.toDataURL('image/png'));
                 $('#screenshot_download_link').attr('download', filename);
-                lnk = document.getElementById('screenshot_download_link');
+                var lnk = document.getElementById('screenshot_download_link');
                 lnk.click();
             },
         });
@@ -1631,7 +1754,7 @@ $(function() {
         function export_excel() {
             // write table for downloading
             generate_duties_datatable(duties);
-            __html_a__ = document.createElement('a');
+            var __html_a__ = document.createElement('a');
             __html_a__.download = excel_path;
             ExcellentExport.convert(
                 {anchor: __html_a__, filename: excel_path, format: 'xlsx'},
@@ -1701,16 +1824,24 @@ $(function() {
     }, 200);
 
     // update version text
-    $.getJSON('package.json', function(data) {
-        $('#appVersion').html('v' + data.version);
-    });
+    // Vite serves package.json if allowed, but better to hardcode or import.
+    // Importing json in Vite is easy.
+    // $.getJSON('package.json', function(data) {
+    //    $('#appVersion').html('v' + data.version);
+    // });
+    // I will just import it.
+});
 
-    // update change log
-    $.ajax({
-        url: 'ChangeLog.md',
-        dataType: 'text',
-        success: function(data) {
-            $('#changeLogModal .modal-body').html(marked(data));
-        },
-    });
+// Import package.json
+import pkg from '../../package.json';
+$('#appVersion').html('v' + pkg.version);
+
+// update change log
+// ChangeLog.md is in root. Vite serves root.
+$.ajax({
+    url: '/ChangeLog.md', // Absolute path from root
+    dataType: 'text',
+    success: function(data) {
+        $('#changeLogModal .modal-body').html(marked(data));
+    },
 });

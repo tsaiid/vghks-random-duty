@@ -1,5 +1,4 @@
-/* exported less_than_qod_times */
-/* exported has_continuous_duties */
+import './private_functions.js';
 
 /**
  * Check if group_duties are within the QOD limit or not.
@@ -7,8 +6,8 @@
  * @param {number} qod_limit The second number.
  * @return {boolean} The sum of the two numbers.
  */
-function less_than_qod_times(group_duties, qod_limit) {
-    for (person in group_duties) {
+export function less_than_qod_times(group_duties, qod_limit) {
+    for (var person in group_duties) {
         if ({}.hasOwnProperty.call(group_duties, person)) {
             var qod_times = group_duties[person].intervals.multiIndexOf(2).length;
             if (qod_times > parseInt(qod_limit)) {
@@ -26,8 +25,8 @@ function less_than_qod_times(group_duties, qod_limit) {
  * @param {Object[]} group_duties The duties grouped.
  * @return {boolean} has or has no continuous duties.
  */
-function has_continuous_duties(group_duties) {
-    for (person in group_duties) {
+export function has_continuous_duties(group_duties) {
+    for (var person in group_duties) {
         if ({}.hasOwnProperty.call(group_duties, person)) {
             var qd_times = group_duties[person].intervals.multiIndexOf(1).length;
             if (qd_times > 0) {

@@ -21,18 +21,55 @@ A single page application to assist resident duty arrangement. Its rules are bas
 
 MIT License
 
-## Install
+## Development
 
-1. Install [Yarn](https://yarnpkg.com/) for dependency management
-2. Install dependencies
+This project uses **pnpm** for package management and **Vite** for development and building.
 
-   ```bash
-   yarn install
-   ```
+### Prerequisites
 
-## Testing Locally
+*   Node.js (v14+ recommended)
+*   pnpm (`npm install -g pnpm`)
 
-1. Run `grunt` will start a testing web server on <http://localhost:4000>
-2. For my own deployment purpose, the files will be copied to `_site/random-duty`, and the testing url will be <http://localhost:4000/random-duty>
-3. The path of the testing site can be changed in `Gruntfile.coffee`
+### Installation
 
+Install dependencies:
+
+```bash
+pnpm install
+```
+
+### Local Development
+
+Start the development server with hot module replacement (HMR):
+
+```bash
+pnpm dev
+```
+
+Open your browser and navigate to the URL shown in the terminal (usually `http://localhost:5173`).
+
+### Building for Production
+
+Build the project for production. The output files will be in the `dist/` directory:
+
+```bash
+pnpm build
+```
+
+### Preview Production Build
+
+Preview the production build locally:
+
+```bash
+pnpm preview
+```
+
+## Project Structure
+
+*   `src/`: Source code
+    *   `js/`: JavaScript files (ES Modules)
+    *   `css/`: Stylesheets
+    *   `img/`: Image assets
+*   `dist/`: Production build output
+*   `index.html`: Main entry point
+*   `vite.config.js`: Vite configuration

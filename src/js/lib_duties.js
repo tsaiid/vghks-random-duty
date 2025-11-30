@@ -1,7 +1,6 @@
-/* exported get_preset_duty */
-/* exported get_preset_non_duties_by_date */
-/* exported calculate_group_duties_status */
-/* exported calculate_group_duties */
+import moment from 'moment';
+import { standardDeviation } from './private_functions.js';
+import { is_holiday, is_friday, is_weekend } from './lib_holidays.js';
 
 /**
  * Get the duty by a given date.
@@ -9,22 +8,14 @@
  * @param {string} date_str The given date.
  * @return {number} The duty on the given date.
  */
-function get_preset_duty(preset_duties, date_str) {
+export function get_preset_duty(preset_duties, date_str) {
     var duty;
-    if (is_worker_env()) { // cannot use jquery in web workers
-        preset_duties.some(function(d) {
-            if (d[0] == date_str) {
-                duty = parseInt(d[1]);
-                return true;
-            }
-        });
-    } else {
-        $.each(preset_duties, function(i, d) {
-            if (d[0] == date_str) {
-                duty = parseInt(d[1]);
-                return true;
-            }
-        });
+    // preset_duties is an array of [date, duty]
+    for (var i = 0; i < preset_duties.length; i++) {
+        if (preset_duties[i][0] == date_str) {
+            duty = parseInt(preset_duties[i][1]);
+            break;
+        }
     }
     return duty;
 }
@@ -35,21 +26,13 @@ function get_preset_duty(preset_duties, date_str) {
  * @param {string} date_str The given date.
  * @return {number[]} The non-duties array on the given date.
  */
-function get_preset_non_duties_by_date(preset_non_duties, date_str) {
+export function get_preset_non_duties_by_date(preset_non_duties, date_str) {
     var duties = [];
-    if (is_worker_env()) { // cannot use jquery in web workers
-        preset_non_duties.forEach(function(d) {
-            if (d[0] == date_str) {
-                duties.push(parseInt(d[1]));
-            }
-        });
-    } else {
-        $.each(preset_non_duties, function(i, d) {
-            if (d[0] == date_str) {
-                duties.push(parseInt(d[1]));
-            }
-        });
-    }
+    preset_non_duties.forEach(function(d) {
+        if (d[0] == date_str) {
+            duties.push(parseInt(d[1]));
+        }
+    });
     return duties;
 }
 
@@ -59,33 +42,21 @@ function get_preset_non_duties_by_date(preset_non_duties, date_str) {
  * @param {Array} preset_holidays The array of preset holidays.
  * @return {number[]} The array of total numbers of Ordinary, Friday, Holiday.
  */
-function count_duty_pattern(dates, preset_holidays) {
+export function count_duty_pattern(dates, preset_holidays) {
     var o_count = 0;
     var f_count = 0;
     var h_count = 0;
-    if (is_worker_env()) { // cannot use jquery in web workers
-        dates.forEach(function(date) {
-            if (is_weekend(date) || is_holiday(preset_holidays, date)) {
-                h_count++;
-            } else if (is_friday(preset_holidays, date)) {
-                f_count++;
-            } else {
-                o_count++;
-            }
-        });
-    } else {
-        $.each(dates, function(i, date) {
-            if (is_weekend(date) || is_holiday(preset_holidays, date)) {
-                h_count++;
-            } else if (is_friday(preset_holidays, date)) {
-                f_count++;
-            } else {
-                o_count++;
-            }
-        });
-    }
-    // console.log("dates: " + dates);
-    // console.log("pattern: " + [o_count, f_count, h_count].toString());
+    
+    dates.forEach(function(date) {
+        if (is_weekend(date) || is_holiday(preset_holidays, date)) {
+            h_count++;
+        } else if (is_friday(preset_holidays, date)) {
+            f_count++;
+        } else {
+            o_count++;
+        }
+    });
+    
     return [o_count, f_count, h_count];
 }
 
@@ -95,8 +66,8 @@ function count_duty_pattern(dates, preset_holidays) {
  * @param {Array} preset_holidays The array of preset holidays.
  * @return {Array} The array of groups.
  */
-function calculate_group_duties_status(groups, preset_holidays) {
-    for (person in groups) {
+export function calculate_group_duties_status(groups, preset_holidays) {
+    for (var person in groups) {
         if ({}.hasOwnProperty.call(groups, person)) {
             var duty_pattern = count_duty_pattern(groups[person].dates, preset_holidays);
             groups[person].ordinary_count = duty_pattern[0];
@@ -113,7 +84,7 @@ function calculate_group_duties_status(groups, preset_holidays) {
  * @param {boolean} is_continuous_duties Is or Not continuous duties.
  * @return {Array} The array of groups.
  */
-function calculate_group_duties(duties, is_continuous_duties) {
+export function calculate_group_duties(duties, is_continuous_duties) {
     // is_continuous_duties is used in worker, reduce moment.js obj to enhance efficiency.
     is_continuous_duties = typeof is_continuous_duties !== 'undefined' ? is_continuous_duties : false;
 
@@ -122,26 +93,10 @@ function calculate_group_duties(duties, is_continuous_duties) {
         return a[0].localeCompare(b[0]);
     }); // sort by date
 
-    // cannot use $.map or Array.map
-    var duties_simple_array = [];
-    for (var i = 0; i < sorted_duties.length; i++) {
-        duties_simple_array.push(sorted_duties[i]);
-    }
-
     var groups = {};
     var total_people = 0;
 
-    var do_group_duties = function(arg1, arg2) {
-        var index;
-        var duty;
-        if (is_worker_env()) { // cannot use jquery in web workers
-            index = arg2;
-            duty = arg1;
-        } else {
-            index = arg1;
-            duty = arg2;
-        }
-
+    var do_group_duties = function(duty, index) {
         var person = duty[1];
         if (groups[person] === undefined) {
             groups[person] = {
@@ -167,19 +122,19 @@ function calculate_group_duties(duties, is_continuous_duties) {
         }
     };
 
-    if (is_worker_env()) { // cannot use jquery in web workers
-        sorted_duties.forEach(do_group_duties);
-    } else {
-        $.each(sorted_duties, do_group_duties);
-    }
+    // Use native forEach. Note: forEach callback is (element, index)
+    // The original code had (index, element) because of $.each.
+    // I swapped arguments in my helper function above, wait.
+    // native forEach: (element, index, array)
+    // $.each: (index, element)
+    // My do_group_duties definition above: function(duty, index). This matches forEach signature!
+    sorted_duties.forEach(do_group_duties);
 
     // calculate standard deviations
-    for (person in groups) {
+    for (var person in groups) {
         if ({}.hasOwnProperty.call(groups, person)) {
-            // console.log(groups[person].intervals);
             var std_dev = standardDeviation(groups[person].intervals);
             groups[person].std_dev = std_dev;
-            // console.log(person + ": " + std_dev);
         }
     }
     return groups;

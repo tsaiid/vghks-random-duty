@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.html",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "repository": {
     "type": "git",
@@ -17,23 +19,20 @@
   },
   "homepage": "https://github.com/tsaiid/vghks-random-duty#readme",
   "devDependencies": {
+    "@rollup/plugin-inject": "^5.0.5",
     "eslint": "^4.10.0",
     "eslint-config-google": "^0.9.1",
-    "grunt": "latest",
-    "grunt-contrib-connect": "latest",
-    "grunt-contrib-copy": "latest",
-    "grunt-contrib-watch": "latest",
-    "grunt-sync": "latest"
+    "vite": "^7.2.4"
   },
   "dependencies": {
     "blockui-npm": "^1.0.0",
     "bootstrap": "^3.3.7",
     "bootstrap-switch": "^3.3.4",
     "bootstrap3-dialog": "^1.35.4",
-    "crypto-js": "^3.1.9-1",
+    "crypto-js": "^4.2.0",
     "excellentexport": "^3.0.0",
     "font-awesome": "^4.7.0",
-    "fullcalendar": "~2",
+    "fullcalendar": "~3.10.5",
     "html2canvas": "^0.5.0-beta4",
     "jQuery-ui-Slider-Pips": "https://github.com/simeydotme/jQuery-ui-Slider-Pips",
     "jquery": "^3.2.1",
