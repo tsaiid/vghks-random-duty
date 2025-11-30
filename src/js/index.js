@@ -1824,17 +1824,17 @@ $(function() {
     }, 200);
 
     // update version text
-    // Vite serves package.json if allowed, but better to hardcode or import.
+// Vite serves package.json if allowed, but better to hardcode or import.
     // Importing json in Vite is easy.
     // $.getJSON('package.json', function(data) {
     //    $('#appVersion').html('v' + data.version);
     // });
     // I will just import it.
+    $('#appVersion').html('v' + __APP_VERSION__);
 });
 
 // Import package.json
-import pkg from '../../package.json';
-$('#appVersion').html('v' + pkg.version);
+// import pkg from '../../package.json';
 
 // update change log
 // ChangeLog.md is in root. Vite serves root.

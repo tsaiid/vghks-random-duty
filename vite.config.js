@@ -1,8 +1,12 @@
 import { defineConfig } from 'vite';
 import inject from '@rollup/plugin-inject';
 import path from 'path';
+import { version } from './package.json';
 
 export default defineConfig({
+  define: {
+    '__APP_VERSION__': JSON.stringify(version),
+  },
   plugins: [
     inject({
       include: '**/*.js',
