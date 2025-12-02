@@ -54,8 +54,8 @@ importers:
         specifier: ^2.1.4
         version: 2.2.1
       marked:
-        specifier: ^0.3.6
-        version: 0.3.19
+        specifier: ^4.0.10
+        version: 4.0.10
       moment:
         specifier: ^2.19.1
         version: 2.30.1
@@ -734,9 +734,9 @@ packages:
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
 
-  marked@0.3.19:
-    resolution: {integrity: sha512-ea2eGWOqNxPcXv8dyERdSr/6FmzvWwzjMxpfGB/sbMccXoct+xY+YukPD+QTUZwyvK7BZwcr4m21WBOW41pAkg==}
-    engines: {node: '>=0.10.0'}
+  marked@4.0.10:
+    resolution: {integrity: sha512-+QvuFj0nGgO970fySghXGmuw+Fd0gD2x3+MqCWLIPf5oxdv1Ka6b2q+z9RP01P/IaKPMEramy+7cNy/Lw8c3hw==}
+    engines: {node: '>= 12'}
     hasBin: true
 
   mimic-fn@1.2.0:
@@ -1563,7 +1563,7 @@ snapshots:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  marked@0.3.19: {}
+  marked@4.0.10: {}
 
   mimic-fn@1.2.0: {}
 
