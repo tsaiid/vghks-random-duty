@@ -19,9 +19,10 @@
   },
   "homepage": "https://github.com/tsaiid/vghks-random-duty#readme",
   "devDependencies": {
+    "@eslint/js": "^9.39.2",
     "@rollup/plugin-inject": "^5.0.5",
-    "eslint": "^4.10.0",
-    "eslint-config-google": "^0.9.1",
+    "eslint": "^9.39.2",
+    "globals": "^16.5.0",
     "vite": "^7.2.4"
   },
   "dependencies": {
