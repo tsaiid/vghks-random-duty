@@ -1839,7 +1839,7 @@ $(function() {
 // update change log
 // ChangeLog.md is in root. Vite serves root.
 $.ajax({
-    url: '/ChangeLog.md', // Absolute path from root
+    url: 'ChangeLog.md', // Relative path from app root
     dataType: 'text',
     success: function(data) {
         $('#changeLogModal .modal-body').html(marked(data));

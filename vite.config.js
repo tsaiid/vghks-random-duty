@@ -3,7 +3,8 @@ import inject from '@rollup/plugin-inject';
 import path from 'path';
 import { version } from './package.json';
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
+  base: command === 'serve' ? '/random-duty/' : './',
   define: {
     '__APP_VERSION__': JSON.stringify(version),
   },
@@ -55,4 +56,4 @@ export default defineConfig({
   server: {
     open: true,
   },
-});
+}));
