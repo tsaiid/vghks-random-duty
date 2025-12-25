@@ -28,15 +28,6 @@ export default defineConfig(({ command }) => ({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            if (id.includes('fullcalendar') || id.includes('moment')) {
-              return 'calendar';
-            }
-            if (id.includes('html2canvas')) {
-              return 'html2canvas';
-            }
-            if (id.includes('crypto-js')) {
-              return 'crypto';
-            }
             return 'vendor';
           }
         },
