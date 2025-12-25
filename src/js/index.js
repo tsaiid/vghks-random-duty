@@ -19,7 +19,7 @@ import 'fullcalendar/dist/gcal.js'; // Attempt to import gcal
 import 'excellentexport';
 const ExcellentExport = window.ExcellentExport;
 import 'jquery-contenteditable';
-import marked from 'marked';
+import { marked } from 'marked';
 import html2canvas from 'html2canvas';
 import CryptoJS from 'crypto-js';
 import Cookies from 'js-cookie';
