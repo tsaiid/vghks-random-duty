@@ -76,6 +76,28 @@ Preview the production build locally:
 pnpm preview
 ```
 
+### Deployment
+
+本專案採用 **GitHub Actions** 進行自動化部署至 `radtools.tsai.it`，由 **Git Tag** 觸發：
+
+1. **更新版本號與建立標籤**：
+   使用 `pnpm version` 自動同步 `package.json` 版本號並建立 Git Commit 與 Tag：
+   ```bash
+   pnpm version patch  # 1.1.0 -> 1.1.1 (或 minor / major)
+   ```
+2. **推送標籤觸發自動部署**：
+   ```bash
+   git push
+   git push --tags
+   ```
+   GitHub Actions 會自動執行單元測試、檢查版號一致性、打包編譯，並自動推送至 `radtools.tsai.it/random-duty`，同時於 GitHub 建立 Release 附帶 `dist.zip` 備份。
+
+3. **本機備援部署 (手動)**：
+   若需在本機直接部署至同層目錄的 `radtools.tsai.it`，可執行：
+   ```bash
+   pnpm run deploy
+   ```
+
 ## Project Structure
 
 *   `src/`: Source code
