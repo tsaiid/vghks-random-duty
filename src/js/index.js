@@ -9,8 +9,8 @@ import 'bootstrap3-dialog/dist/css/bootstrap-dialog.css';
 import 'jquery-ui-dist/jquery-ui';
 // import 'jquery-ui-dist/jquery-ui.css'; // Replaced by theme
 import 'jquery-ui-themes/themes/redmond/jquery-ui.css';
-import 'jquery-ui-slider-pips';
-import 'jquery-ui-slider-pips/dist/jquery-ui-slider-pips.css';
+import 'jQuery-ui-Slider-Pips';
+import 'jQuery-ui-Slider-Pips/dist/jquery-ui-slider-pips.css';
 import moment from 'moment';
 import 'blockui-npm'; // Attach to jquery
 import 'fullcalendar';

@@ -19,6 +19,7 @@ export default defineConfig(({ command }) => ({
     alias: {
       '@': path.resolve(__dirname, './src'),
       'jquery-contenteditable': path.resolve(__dirname, 'node_modules/jquery-contenteditable/jquery.contenteditable.js'),
+      'jquery-ui-slider-pips': 'jQuery-ui-Slider-Pips',
       moment: path.resolve(__dirname, 'node_modules/moment/moment.js'),
     },
   },
