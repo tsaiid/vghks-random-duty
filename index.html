@@ -237,6 +237,114 @@
                     <div class="modal-title bootstrap-dialog-title" id="changeLogModalLabel">版本沿革</div>
                 </div>
                 <div class="modal-body">
+                    <h4>1.1.0 – 2026-10-06</h4>
+                    <ul>
+                        <li>Filter out non-holiday festival events in Taiwan holiday API response.</li>
+                        <li>Introduce Vitest and set up unit tests for core scheduling algorithms.</li>
+                    </ul>
+
+                    <h4>1.0.3 – 2026-10-06</h4>
+                    <ul>
+                        <li>Proxy Taiwan holiday events via Cloudflare Worker API gateway.</li>
+                        <li>Restore and smooth loading overlay transitions.</li>
+                        <li>Fix duty point calculation and condition threshold in random pattern generation.</li>
+                        <li>Fix background overlay residue after deleting holiday events.</li>
+                        <li>Update summary statistics immediately upon dragging or manually editing events.</li>
+                        <li>Fix ReferenceError in test data deployment.</li>
+                        <li>Refactor <code>multiIndexOf</code> as a pure utility function to prevent prototype pollution.</li>
+                        <li>Clean up legacy files (<code>random_pattern_worker.js</code>, <code>test.html</code>, <code>Rakefile</code>), IE conditional comments, and obsolete Universal Analytics.</li>
+                        <li>Optimize vendor bundle size with dynamic imports and chunk splitting.</li>
+                        <li>Upgrade <code>html2canvas</code> to v1.4.1 with modern Promise API.</li>
+                        <li>Upgrade project dependencies and modernize deployment script (<code>deploy.mjs</code>).</li>
+                    </ul>
+
+                    <h4>1.0.2 – 2025-12-01</h4>
+                    <ul>
+                        <li>Migrate project to Vite for modern development environment.</li>
+                        <li>Refactor JavaScript to ES Modules.</li>
+                        <li>Updated FullCalendar to v3.10.5.</li>
+                        <li>Resolved jQuery and Moment.js compatibility issues with Vite.</li>
+                        <li>Fixed Google Calendar holiday event rendering (background and foreground events, no redirects).</li>
+                        <li>Updated README.md for new development workflow.</li>
+                    </ul>
+
+                    <h4>1.0.1 – 2020-01-20</h4>
+                    <ul>
+                        <li>Remove VGHKS in the title and url.</li>
+                    </ul>
+
+                    <h4>1.0.0 – 2017-11-14</h4>
+                    <ul>
+                        <li>Migrate bower to yarn for dependency management.</li>
+                        <li>Remove vghks mode switch and standard dev setting.</li>
+                        <li>Change export excel format to xlsx, due to lib upgrade.</li>
+                        <li>Add vghks style in exporting excel.</li>
+                        <li>Fix event dialog behavior. (#55)</li>
+                    </ul>
+
+                    <h4>0.2.5 – 2017-06-20</h4>
+                    <ul>
+                        <li>Change event order: duty, holiday, non-duty. (#52)</li>
+                        <li>Upgrade dependency packages.</li>
+                        <li>Use iso week, starting from Monday.</li>
+                        <li>Can calculate week work hours with pm off.</li>
+                        <li>Show alert if cont workday interval is more than 12.</li>
+                    </ul>
+
+                    <h4>0.2.4 – 2016-08-16</h4>
+                    <ul>
+                        <li>Show only the DAY instead of MONTH/DAY in 1-month mode. (#51)</li>
+                        <li>Confirm that there is no friday determination error. (#47)</li>
+                    </ul>
+
+                    <h4>0.2.3 – 2015-08-22</h4>
+                    <ul>
+                        <li>Fix: should calculate ordinary duty for total points. (#45)</li>
+                        <li>Fix: ignore if clicking on day not in the month range. (#40)</li>
+                        <li>Can summarize week working hours. (#46)</li>
+                        <li>Can download screenshot for storing random duty results. (#41)</li>
+                    </ul>
+
+                    <h4>0.2.2 – 2015-08-17</h4>
+                    <ul>
+                        <li>Fix: correct the path for version info file. (#43)</li>
+                        <li>Add more colors for duties. (#38)</li>
+                        <li>Add links to all previous releases, and show change logs. (#44)</li>
+                    </ul>
+
+                    <h4>0.2.1 – 2015-08-15</h4>
+                    <ul>
+                        <li>Fix: update duty status after deleting holiday. (#42)</li>
+                        <li>Fix: check current month range if already has random duty. (#37)</li>
+                    </ul>
+
+                    <h4>0.2.0 – 2015-08-10</h4>
+                    <ul>
+                        <li>Add a switch to control if VGHKS mode or general mode. (#19)</li>
+                        <li>Show QOD status and colorize the duty dates in summary. (#30)</li>
+                        <li>Cache deleted gcal events preventing rerendering while changing month. (#32)</li>
+                        <li>Use cookie to store preferences. (#33)</li>
+                        <li>Show an alert before re-random if a result exists. (#35)</li>
+                        <li>Fix some bugs. (#31, #34)</li>
+                        <li>Show a loading page before all elements get ready.</li>
+                    </ul>
+
+                    <h4>0.1.1 – 2015-08-05</h4>
+                    <ul>
+                        <li>Fix #36: Random patterns sometimes do not have a solution!</li>
+                    </ul>
+
+                    <h4>0.1.0 – 2015-07-26</h4>
+                    <ul>
+                        <li>Initial release: official site.</li>
+                        <li>VGHKS Rad mode random duty generator.</li>
+                        <li>Use web workers for the heavy calculation of random duties.</li>
+                        <li>Can set 1-month or 2-month mode.</li>
+                        <li>A suggested duty pattern for each staff can be generted automatically or adjusted manually.</li>
+                        <li>Can filter condinuous duty, setting upper limit for QOD duty and standard deviation of duty interval.</li>
+                        <li>Can set non-duty and customize holidays.</li>
+                        <li>The manually added and automatically generated duties can be dragged, edit, and deleted.</li>
+                    </ul>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

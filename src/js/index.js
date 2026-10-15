@@ -17,7 +17,6 @@ import 'fullcalendar';
 import 'fullcalendar/dist/fullcalendar.css';
 import 'fullcalendar/dist/gcal.js'; // Attempt to import gcal
 import 'jquery-contenteditable';
-import { marked } from 'marked';
 import CryptoJS from 'crypto-js';
 import Cookies from 'js-cookie';
 import 'font-awesome/css/font-awesome.css';
@@ -56,7 +55,6 @@ import {
 window.moment = moment;
 window.BootstrapDialog = BootstrapDialog;
 window.CryptoJS = CryptoJS;
-window.marked = marked;
 
 $(function() {
     //
@@ -1841,17 +1839,4 @@ $(function() {
     // });
     // I will just import it.
     $('#appVersion').html('v' + __APP_VERSION__);
-});
-
-// Import package.json
-// import pkg from '../../package.json';
-
-// update change log
-// ChangeLog.md is in root. Vite serves root.
-$.ajax({
-    url: 'ChangeLog.md', // Relative path from app root
-    dataType: 'text',
-    success: function(data) {
-        $('#changeLogModal .modal-body').html(marked(data));
-    },
 });
