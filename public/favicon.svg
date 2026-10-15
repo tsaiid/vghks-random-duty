@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 日曆主體（高飽和醫療藍，在深淺分頁皆清晰銳利） -->
+  <rect x="4" y="8" width="56" height="52" rx="12" fill="#2563eb" stroke="#1d4ed8" stroke-width="1.5"/>
+  
+  <!-- 日曆頂部深色橫幅 -->
+  <path d="M 4 20 C 4 13.37 9.37 8 16 8 L 48 8 C 54.63 8 60 13.37 60 20 L 60 23 L 4 23 Z" fill="#1d4ed8"/>
+  
+  <!-- 日曆頂部吊環 (日曆典型特徵，實心純白) -->
+  <rect x="15" y="3" width="7" height="12" rx="3.5" fill="#ffffff"/>
+  <rect x="42" y="3" width="7" height="12" rx="3.5" fill="#ffffff"/>
+
+  <!-- 正方形白骰子 (圓角 7px) -->
+  <rect x="15" y="24" width="34" height="34" rx="7" fill="#ffffff"/>
+
+  <!-- 骰子 5 點（Quincunx 佈局） -->
+  <!-- 四角深色點 (高對比 Slate-900) -->
+  <circle cx="22" cy="32" r="3.2" fill="#0f172a"/>
+  <circle cx="42" cy="32" r="3.2" fill="#0f172a"/>
+  <circle cx="22" cy="50" r="3.2" fill="#0f172a"/>
+  <circle cx="42" cy="50" r="3.2" fill="#0f172a"/>
+
+  <!-- 中心核心紅點 (隨機核心焦點) -->
+  <circle cx="32" cy="41" r="4.2" fill="#ef4444"/>
+</svg>
