@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Checkout random-duty
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Verify Version Consistency
         if: startsWith(github.ref, 'refs/tags/v')
@@ -27,12 +27,12 @@ jobs:
           fi
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
         with:
           version: 9
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: 'pnpm'
@@ -47,7 +47,7 @@ jobs:
         run: pnpm build
 
       - name: Checkout radtools.tsai.it
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: tsaiid/radtools.tsai.it
           token: ${{ secrets.DEPLOY_KEY }}
@@ -78,7 +78,7 @@ jobs:
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: dist.zip
           generate_release_notes: true
