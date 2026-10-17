@@ -1762,13 +1762,10 @@ $(function() {
             var { default: ExcellentExportModule } = await import('excellentexport');
             var ExcellentExport = window.ExcellentExport || ExcellentExportModule;
             window.ExcellentExport = ExcellentExport;
-            var __html_a__ = document.createElement('a');
-            __html_a__.download = excel_path;
             ExcellentExport.convert(
-                {anchor: __html_a__, filename: excel_path, format: 'xlsx'},
+                {openAsDownload: true, filename: excel_path, format: 'xlsx'},
                 [{name: duration_str, from: {table: 'duties_datatable'}}]
             );
-            __html_a__.click();
         }
         // check if every date has a duty
         if (is_each_day_has_a_duty(start_date, month_span, duties)) {
