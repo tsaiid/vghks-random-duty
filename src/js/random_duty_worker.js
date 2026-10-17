@@ -2,7 +2,7 @@ import moment from 'moment';
 import { shuffle } from './private_functions.js';
 import { get_preset_duty, calculate_group_duties_status, calculate_group_duties } from './lib_duties.js';
 import { is_holiday, is_weekend, is_friday } from './lib_holidays.js';
-import { less_than_qod_times, has_continuous_duties } from './lib_filters.js';
+import { less_than_qod_times, has_continuous_duties, less_than_max_week_hours, prepare_week_hours_context } from './lib_filters.js';
 
 var TEST_CONDITIONING_FUNCTION = false;
 
@@ -131,17 +131,24 @@ function is_match_non_duties(merged_duties, preset_non_duties) {
  * Check if the duties match the filters.
  * @param {Object[]} group_duties The begin date string.
  * @param {Object} filters The filters.
+ * @param {Object} [week_hours_context] The precalculated context for week hours checking.
  * @return {boolean} Match or not.
  */
-function is_match_filters(group_duties, filters) {
+function is_match_filters(group_duties, filters, week_hours_context) {
     var use_qod_limit = filters.use_qod_limit;
     var qod_limit = filters.qod_limit;
+    var use_week_hours_limit = filters.use_week_hours_limit;
+    var max_week_hours = filters.max_week_hours;
 
     if (has_continuous_duties(group_duties)) {
         return false;
     }
 
     if (use_qod_limit && !less_than_qod_times(group_duties, qod_limit)) {
+        return false;
+    }
+
+    if (use_week_hours_limit && !less_than_max_week_hours(group_duties, max_week_hours, week_hours_context)) {
         return false;
     }
 
@@ -175,6 +182,11 @@ function merge_preset_non_preset_duties(preset_duties, non_preset_duties) {
 function random_duty(total_days, since_date_str, presets, filters) {
     var patterns = filters.patterns;
 
+    var week_hours_context;
+    if (filters.use_week_hours_limit) {
+        week_hours_context = prepare_week_hours_context(since_date_str, total_days, presets.holidays, true);
+    }
+
     var status = 'success';
     var msg = '';
     var duties = [];
@@ -187,7 +199,7 @@ function random_duty(total_days, since_date_str, presets, filters) {
         var merged_duties = merge_preset_non_preset_duties(presets.duties, non_preset_duties);
         // console.log(has_continuous_duties(merged_duties));
         var group_duties = calculate_group_duties(merged_duties, true);
-        if (is_match_non_duties(merged_duties, presets.non_duties) && is_match_filters(group_duties, filters)) {
+        if (is_match_non_duties(merged_duties, presets.non_duties) && is_match_filters(group_duties, filters, week_hours_context)) {
             duties = merged_duties;
             groups = group_duties;
             break;

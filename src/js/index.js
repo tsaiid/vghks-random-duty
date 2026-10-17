@@ -48,7 +48,8 @@ import {
 } from './lib_duties.js';
 import {
     less_than_qod_times,
-    has_continuous_duties
+    has_continuous_duties,
+    less_than_max_week_hours
 } from './lib_filters.js';
 
 // Expose globals for legacy plugins if needed
@@ -113,6 +114,18 @@ $(function() {
         rest: 'label',
     });
 
+    $('#inputWeekHoursLimitSlider').slider({
+        max: 96,
+        min: 60,
+        step: 4,
+        value: 80,
+        change: function(event, ui) {
+            Cookies.set('inputWeekHoursLimitSlider', ui.value);
+        },
+    }).slider('pips', {
+        rest: 'label',
+    });
+
     $('#inputPeopleSlider').slider({
         max: 9,
         min: 3,
@@ -131,6 +144,9 @@ $(function() {
     // Update Cookie Preferences
     //
     $('#use_qod_limit').change(function() {
+        Cookies.set($(this).attr('id'), $(this).is(':checked'));
+    });
+    $('#use_week_hours_limit').change(function() {
         Cookies.set($(this).attr('id'), $(this).is(':checked'));
     });
 
@@ -1440,6 +1456,8 @@ $(function() {
         var patterns = $('#suggested_pattern').data('patterns');
         var use_qod_limit = $('#use_qod_limit').is(':checked');
         var qod_limit = parseInt($('#inputQodLimitSlider').slider('option', 'value'));
+        var use_week_hours_limit = $('#use_week_hours_limit').is(':checked');
+        var max_week_hours = parseInt($('#inputWeekHoursLimitSlider').slider('option', 'value'));
         var presets = get_presets();
         var start_date = $('#cal1').fullCalendar('getDate').startOf('month');
         var month_span = $('#mode_switch').bootstrapSwitch('state') ? 2 : 1;
@@ -1449,6 +1467,8 @@ $(function() {
             'patterns': patterns,
             'use_qod_limit': use_qod_limit,
             'qod_limit': qod_limit,
+            'use_week_hours_limit': use_week_hours_limit,
+            'max_week_hours': max_week_hours,
         };
 
         clear_random_duties(); // always clean previous random duties
@@ -1543,6 +1563,24 @@ $(function() {
         if (use_qod_limit) {
             if (!less_than_qod_times(groups, qod_limit)) {
                 warningDialog('目前排班已超過 QOD 設定上限，請調整');
+                return;
+            }
+        }
+
+        // check if preset duties exceed week work hours limit
+        var use_week_hours_limit = $('#use_week_hours_limit').is(':checked');
+        var max_week_hours = parseInt($('#inputWeekHoursLimitSlider').slider('option', 'value'));
+        if (use_week_hours_limit) {
+            var date_range = get_current_date_range();
+            var total_days = date_range.end_date.diff(date_range.start_date, 'days');
+            var week_hours_options = {
+                preset_holidays: get_preset_holidays(),
+                since_date_str: date_range.start_date.format('YYYY-MM-DD'),
+                total_days: total_days,
+                use_pm_off: true,
+            };
+            if (!less_than_max_week_hours(groups, max_week_hours, week_hours_options)) {
+                warningDialog('目前排班已超過週工時上限，請調整');
                 return;
             }
         }
@@ -1837,6 +1875,12 @@ $(function() {
             $('#use_qod_limit').prop('checked', pref.use_qod_limit);
             if (pref.inputQodLimitSlider !== undefined) {
                 $('#inputQodLimitSlider').slider('option', 'value', pref.inputQodLimitSlider);
+            }
+            if (pref.use_week_hours_limit !== undefined) {
+                $('#use_week_hours_limit').prop('checked', pref.use_week_hours_limit);
+            }
+            if (pref.inputWeekHoursLimitSlider !== undefined) {
+                $('#inputWeekHoursLimitSlider').slider('option', 'value', pref.inputWeekHoursLimitSlider);
             }
             if (pref.inputPeopleSlider !== undefined) {
                 $('#inputPeopleSlider').slider('option', 'value', pref.inputPeopleSlider);
