@@ -139,3 +139,77 @@ export function calculate_group_duties(duties, is_continuous_duties) {
     }
     return groups;
 }
+
+/**
+ * Helper to check if event has a specific class.
+ * @param {Object} event The event object.
+ * @param {string} className The class name to check.
+ * @return {boolean} True if event has class.
+ */
+function event_has_class(event, className) {
+    if (!event || !event.className) {
+        return false;
+    }
+    if (Array.isArray(event.className)) {
+        return event.className.indexOf(className) > -1;
+    }
+    if (typeof event.className === 'string') {
+        return event.className.split(/\s+/).indexOf(className) > -1;
+    }
+    return false;
+}
+
+/**
+ * Check if there is a conflict when dropping an event onto target date's existing events.
+ * @param {Object} event The event being dropped (contains title and className).
+ * @param {Array} same_day_events The array of existing events on the target date.
+ * @return {string|undefined} The conflict message, or undefined if no conflict.
+ */
+export function get_drop_conflict_status(event, same_day_events) {
+    if (!event || !event.title) {
+        return;
+    }
+    var person = parseInt(event.title);
+    if (isNaN(person)) {
+        return;
+    }
+
+    var is_duty = event_has_class(event, 'duty-event') || event_has_class(event, 'preset-duty-event');
+    var is_non_duty = event_has_class(event, 'preset-non-duty-event');
+
+    if (!is_duty && !is_non_duty) {
+        return;
+    }
+
+    if (!same_day_events || !same_day_events.length) {
+        return;
+    }
+
+    for (var i = 0; i < same_day_events.length; i++) {
+        var other_event = same_day_events[i];
+        if (!other_event || !other_event.title) {
+            continue;
+        }
+        var other_person = parseInt(other_event.title);
+        if (other_person === person) {
+            var other_is_duty = event_has_class(other_event, 'duty-event') || event_has_class(other_event, 'preset-duty-event');
+            var other_is_non_duty = event_has_class(other_event, 'preset-non-duty-event');
+
+            if (is_duty) {
+                if (other_is_duty) {
+                    return '人員 ' + person + ' 本日已設為值班！';
+                }
+                if (other_is_non_duty) {
+                    return '人員 ' + person + ' 本日已設為不可值班！';
+                }
+            } else if (is_non_duty) {
+                if (other_is_duty) {
+                    return '人員 ' + person + ' 本日已設為值班，不可再設為不值！';
+                }
+                if (other_is_non_duty) {
+                    return '重覆設定不值班人員';
+                }
+            }
+        }
+    }
+}

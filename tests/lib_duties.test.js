@@ -5,6 +5,7 @@ import {
     count_duty_pattern,
     calculate_group_duties,
     calculate_group_duties_status,
+    get_drop_conflict_status,
 } from '../src/js/lib_duties.js';
 
 describe('lib_duties', () => {
@@ -117,4 +118,60 @@ describe('lib_duties', () => {
             expect(result['Alice'].holiday_count).toBe(1);
         });
     });
+
+    describe('get_drop_conflict_status', () => {
+        it('當拖曳值班事件且目標日該人員已排定值班時應回傳警告', () => {
+            const dropEvent = { title: '1', className: ['duty-event'] };
+            const sameDayEvents = [
+                { title: '1', className: ['duty-event'] },
+            ];
+            expect(get_drop_conflict_status(dropEvent, sameDayEvents)).toBe('人員 1 本日已設為值班！');
+
+            const sameDayPreset = [
+                { title: '1', className: 'preset-duty-event' },
+            ];
+            expect(get_drop_conflict_status(dropEvent, sameDayPreset)).toBe('人員 1 本日已設為值班！');
+        });
+
+        it('當拖曳值班事件且目標日該人員已設為不值班時應回傳不可值班警告', () => {
+            const dropEvent = { title: '2', className: ['preset-duty-event'] };
+            const sameDayEvents = [
+                { title: '2 不值', className: ['preset-non-duty-event'] },
+            ];
+            expect(get_drop_conflict_status(dropEvent, sameDayEvents)).toBe('人員 2 本日已設為不可值班！');
+        });
+
+        it('當拖曳不值班事件且目標日該人員已有值班時應回傳警告', () => {
+            const dropEvent = { title: '3 不值', className: ['preset-non-duty-event'] };
+            const sameDayEvents = [
+                { title: '3', className: ['duty-event'] },
+            ];
+            expect(get_drop_conflict_status(dropEvent, sameDayEvents)).toBe('人員 3 本日已設為值班，不可再設為不值！');
+        });
+
+        it('當拖曳不值班事件且目標日該人員已重複設定不值時應回傳警告', () => {
+            const dropEvent = { title: '4 不值', className: ['preset-non-duty-event'] };
+            const sameDayEvents = [
+                { title: '4 不值', className: ['preset-non-duty-event'] },
+            ];
+            expect(get_drop_conflict_status(dropEvent, sameDayEvents)).toBe('重覆設定不值班人員');
+        });
+
+        it('當目標日為其他人值班或無衝突時應回傳 undefined 允許拖曳', () => {
+            const dropEvent = { title: '1', className: ['duty-event'] };
+            const sameDayEvents = [
+                { title: '2', className: ['duty-event'] },
+                { title: '3 不值', className: ['preset-non-duty-event'] },
+                { title: '假日 國慶日', className: ['gcal-holiday'] },
+            ];
+            expect(get_drop_conflict_status(dropEvent, sameDayEvents)).toBeUndefined();
+            expect(get_drop_conflict_status(dropEvent, [])).toBeUndefined();
+        });
+
+        it('當事件無效或非排班事件時應回傳 undefined', () => {
+            expect(get_drop_conflict_status(null, [])).toBeUndefined();
+            expect(get_drop_conflict_status({ title: '假日 國慶日', className: ['gcal-holiday'] }, [])).toBeUndefined();
+        });
+    });
 });
+

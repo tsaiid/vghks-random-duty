@@ -43,7 +43,8 @@ import {
     get_preset_duty,
     get_preset_non_duties_by_date,
     calculate_group_duties,
-    calculate_group_duties_status
+    calculate_group_duties_status,
+    get_drop_conflict_status
 } from './lib_duties.js';
 import {
     less_than_qod_times,
@@ -506,6 +507,23 @@ $(function() {
         // holiday can not be dragged and dropped. only can be deleted or created.
         if ($.inArray('gcal-holiday', event.className) > -1) {
             myGrowlUI('Error', '不可移動假日，請使用刪除功能');
+            revertFunc();
+            return;
+        }
+
+        var this_cal = (view == $('#cal1').fullCalendar('getView')) ? $('#cal1') : $('#cal2');
+        var targetDate = event.start.format('YYYY-MM-DD');
+
+        var same_day_events = this_cal.fullCalendar('clientEvents', function(other_event) {
+            if (other_event === event || (other_event._id && other_event._id === event._id)) {
+                return false;
+            }
+            return other_event.start && other_event.start.format('YYYY-MM-DD') === targetDate;
+        });
+
+        var conflict_status = get_drop_conflict_status(event, same_day_events);
+        if (conflict_status) {
+            myGrowlUI('Warning', conflict_status);
             revertFunc();
             return;
         }
