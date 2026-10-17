@@ -7,6 +7,6 @@
     1. 更新 `package.json` 的 `version` 與 `index.html` 的版本沿革（ChangeLog）。
     2. 建立發行 Commit（例如：`chore(release): 發行 vX.Y.Z`）。
     3. 建立對應版號的 Git Tag（例如：`git tag vX.Y.Z`）。
-    4. 將分支與 Tag 推送至 GitHub（`git push origin <branch>` 及 `git push origin vX.Y.Z`）。
+    4. 將分支與 Tag 推送至 GitHub（`git push origin main` 及 `git push origin vX.Y.Z`）。
     5. 由 GitHub Actions 自動完成測試、建置，並同步發佈至 `radtools.tsai.it`。
     6. **不需**手動執行本機 `scripts/deploy.mjs`。
