@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { standardDeviation } from './private_functions.js';
+import { standardDeviation, randomIntFromInterval, multiIndexOf } from './private_functions.js';
 import { is_holiday, is_friday, is_weekend } from './lib_holidays.js';
 
 /**
@@ -212,4 +212,103 @@ export function get_drop_conflict_status(event, same_day_events) {
             }
         }
     }
+}
+
+/**
+ * Color palette for duty staff members (indices 1 to 20).
+ * Preserves historical colors for 0-9 and extends with distinct high-contrast colors up to 20.
+ */
+export const duty_colors = [
+    '#000000', // 0: Default / dummy
+    '#2D6100', // 1: Dark Green
+    '#705A00', // 2: Dark Olive
+    '#943700', // 3: Dark Rust
+    '#FFA000', // 4: Amber
+    '#20006E', // 5: Deep Indigo
+    '#AFB42B', // 6: Lime
+    '#E64A19', // 7: Deep Orange
+    '#2196F3', // 8: Blue
+    '#FF4081', // 9: Pink
+    '#00897B', // 10: Teal
+    '#5E35B1', // 11: Deep Purple
+    '#039BE5', // 12: Light Blue
+    '#6D4C41', // 13: Brown
+    '#C2185B', // 14: Berry Pink
+    '#546E7A', // 15: Blue Grey
+    '#7B1FA2', // 16: Purple
+    '#0097A7', // 17: Cyan
+    '#388E3C', // 18: Green
+    '#303F9F', // 19: Indigo
+    '#D32F2F', // 20: Red
+];
+
+/**
+ * Get duty color by person index with fallback protection.
+ * @param {number|string} person The person number/identifier.
+ * @return {string} HEX color code.
+ */
+export function get_duty_color(person) {
+    var p = parseInt(person, 10);
+    if (!isNaN(p) && p >= 0 && p < duty_colors.length) {
+        return duty_colors[p];
+    }
+    return '#546E7A';
+}
+
+/**
+ * Generate a random duty pattern configuration balancing points across all people.
+ * @param {number} people Number of people to participate.
+ * @param {number} ordinary_count Total count of ordinary weekdays.
+ * @param {number} friday_count Total count of Fridays.
+ * @param {number} holiday_count Total count of weekend/holidays.
+ * @param {boolean} [enable_conditioning=true] Whether to apply point balancing conditions.
+ * @return {Array|false} 2D array of [ordinary, friday, holiday] counts per person, or false if not satisfying threshold.
+ */
+export function random_pattern(people, ordinary_count, friday_count, holiday_count, enable_conditioning = true) {
+    var friday_duties = [];
+    var holiday_duties = [];
+    while (friday_duties.length < friday_count) {
+        friday_duties.push(randomIntFromInterval(1, people));
+    }
+    while (holiday_duties.length < holiday_count) {
+        holiday_duties.push(randomIntFromInterval(1, people));
+    }
+
+    var patterns = [];
+    var o_count = parseInt(ordinary_count / people, 10);
+    for (var i = 1; i <= people; i++) {
+        var f_count = multiIndexOf(friday_duties, i).length;
+        var h_count = multiIndexOf(holiday_duties, i).length;
+        patterns.push([o_count, f_count, h_count]);
+    }
+
+    var residual_ordinary_count = ordinary_count % people;
+    if (residual_ordinary_count !== 0) {
+        patterns = patterns.sort(function(a, b) {
+            return (a[2] * 2 + a[1] + a[0]) - (b[2] * 2 + b[1] + b[0]);
+        });
+        for (var k = 0; k < residual_ordinary_count; k++) {
+            patterns[k][0]++;
+        }
+    }
+
+    if (enable_conditioning) {
+        var total_points = 2 * holiday_count + 1 * friday_count + 1 * ordinary_count;
+        var threshold = {};
+        if (total_points / people < 6) { // in extreme condition (many people), use loose threshold
+            threshold.lower = parseInt(total_points / people, 10) - 1;
+            threshold.upper = parseInt(total_points / people, 10) + 2;
+        } else {
+            threshold.lower = total_points / people - 1;
+            threshold.upper = total_points / people + 1;
+        }
+        for (var j = 0; j < people; j++) {
+            var points = 2 * patterns[j][2] + 1 * patterns[j][1] + 1 * patterns[j][0];
+            if (points < threshold.lower || points > threshold.upper) {
+                return false;
+            }
+        }
+    }
+
+    return patterns;
 }

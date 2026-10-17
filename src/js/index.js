@@ -30,11 +30,6 @@ import '../css/calendar.css';
 import '../css/index.css';
 
 import {
-    randomIntFromInterval,
-    multiIndexOf,
-    is_worker_env
-} from './private_functions.js';
-import {
     is_holiday,
     is_friday,
     is_weekend
@@ -44,7 +39,9 @@ import {
     get_preset_non_duties_by_date,
     calculate_group_duties,
     calculate_group_duties_status,
-    get_drop_conflict_status
+    get_drop_conflict_status,
+    get_duty_color,
+    random_pattern
 } from './lib_duties.js';
 import {
     less_than_qod_times,
@@ -127,7 +124,7 @@ $(function() {
     });
 
     $('#inputPeopleSlider').slider({
-        max: 9,
+        max: 15,
         min: 3,
         value: 4,
         create: update_dialog_title_type,
@@ -256,7 +253,7 @@ $(function() {
                 switch (duty_type) {
                     case 'eventPropDuty':
                         className = 'preset-duty-event';
-                        color = duty_colors[title];
+                        color = get_duty_color(title);
                         eventTitle = title;
                         break;
                     case 'eventPropNonduty':
@@ -586,18 +583,6 @@ $(function() {
         }
         return a.title >= b.title;
     };
-    var duty_colors = [
-        '#000000',
-        '#2D6100',
-        '#705A00',
-        '#943700',
-        '#FFA000',
-        '#20006E',
-        '#AFB42B',
-        '#E64A19',
-        '#2196F3',
-        '#FF4081',
-    ];
     var non_duty_color = '#000000';
     var holiday_bg_color = '#f5dfe2';
 
@@ -856,62 +841,7 @@ $(function() {
         return preset_holidays;
     }
 
-    /**
-     * Do random pattern
-     * @param {number} people The number of people to be random.
-     * @param {number} ordinary_count How many ordinary days.
-     * @param {number} friday_count How many fridays.
-     * @param {number} holiday_count How many holidays.
-     * @return {Array} The 2x2 array of random pattern generated.
-     */
-    function random_pattern(people, ordinary_count, friday_count, holiday_count) {
-        var friday_duties = [];
-        var holiday_duties = [];
-        while (friday_duties.length < friday_count) {
-            friday_duties.push(randomIntFromInterval(1, people));
-        }
-        while (holiday_duties.length < holiday_count) {
-            holiday_duties.push(randomIntFromInterval(1, people));
-        }
 
-        var patterns = [];
-        var o_count = parseInt(ordinary_count / people);
-        for (var i = 1; i <= people; i++) {
-            var f_count = multiIndexOf(friday_duties, i).length;
-            var h_count = multiIndexOf(holiday_duties, i).length;
-            patterns.push([o_count, f_count, h_count]);
-        }
-
-        var residual_ordinary_count = ordinary_count % people;
-        if (residual_ordinary_count != 0) {
-            patterns = patterns.sort(function(a, b) {
-                return (a[2] * 2 + a[1] + a[0]) - (b[2] * 2 + b[1] + b[0]);
-            });
-            for (var i = 0; i < residual_ordinary_count; i++) {
-                patterns[i][0]++;
-            }
-        }
-
-        if (ENABLE_PATTERN_CONDITIONING) {
-            var total_points = 2 * holiday_count + 1 * friday_count + 1 * ordinary_count;
-            var threshold = {};
-            if (total_points / people < 6) { // in extreme condition (too many people), use loose threshold
-                threshold.lower = parseInt(total_points / people) - 1;
-                threshold.upper = parseInt(total_points / people) + 2;
-            } else {
-                threshold.lower = total_points / people - 1;
-                threshold.upper = total_points / people + 1;
-            }
-            for (var j = 0; j < people; j++) {
-                var points = 2 * patterns[j][2] + 1 * patterns[j][1] + 1 * patterns[j][0];
-                if (points < threshold.lower || points > threshold.upper) {
-                    return false;
-                }
-            }
-        }
-
-        return patterns;
-    }
 
     /**
      * Get suggested patterns
@@ -942,7 +872,7 @@ $(function() {
 
         var c = 0;
         var patterns;
-        while (!(patterns = random_pattern(people, ordinary_count, friday_count, holiday_count))) {
+        while (!(patterns = random_pattern(people, ordinary_count, friday_count, holiday_count, ENABLE_PATTERN_CONDITIONING))) {
             c++;
             if (!(c % 100000)) {
                 // console.log("run time: " + c + ". Still running.");
@@ -1506,7 +1436,7 @@ $(function() {
                                 title: eventTitle,
                                 start: duty[0],
                                 allDay: true,
-                                color: duty_colors[duty[1]],
+                                color: get_duty_color(duty[1]),
                                 className: 'duty-event',
                             };
                             $('#cal1').fullCalendar('renderEvent', event, true);
@@ -1695,7 +1625,7 @@ $(function() {
                 start: data[1],
                 allDay: true,
                 className: 'preset-duty-event',
-                color: duty_colors[data[0]],
+                color: get_duty_color(data[0]),
             };
             $('#cal1').fullCalendar('renderEvent', event, true);
             $('#cal2').fullCalendar('renderEvent', event, true);
@@ -1742,7 +1672,7 @@ $(function() {
                 start: data[1],
                 allDay: true,
                 className: 'duty-event',
-                color: duty_colors[data[0]],
+                color: get_duty_color(data[0]),
             };
             $('#cal1').fullCalendar('renderEvent', event, true);
             $('#cal2').fullCalendar('renderEvent', event, true);

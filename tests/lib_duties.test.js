@@ -6,6 +6,9 @@ import {
     calculate_group_duties,
     calculate_group_duties_status,
     get_drop_conflict_status,
+    duty_colors,
+    get_duty_color,
+    random_pattern,
 } from '../src/js/lib_duties.js';
 
 describe('lib_duties', () => {
@@ -171,6 +174,82 @@ describe('lib_duties', () => {
         it('當事件無效或非排班事件時應回傳 undefined', () => {
             expect(get_drop_conflict_status(null, [])).toBeUndefined();
             expect(get_drop_conflict_status({ title: '假日 國慶日', className: ['gcal-holiday'] }, [])).toBeUndefined();
+        });
+    });
+
+    describe('duty_colors 與 get_duty_color', () => {
+        it('duty_colors 應擴充至至少 21 色且皆為有效 Hex 色碼', () => {
+            expect(duty_colors.length).toBeGreaterThanOrEqual(21);
+            const hexRegex = /^#[0-9A-Fa-f]{6}$/;
+            duty_colors.forEach((color) => {
+                expect(color).toMatch(hexRegex);
+            });
+        });
+
+        it('應完整保留 0~9 號歷史顏色設定', () => {
+            expect(duty_colors[0]).toBe('#000000');
+            expect(duty_colors[1]).toBe('#2D6100');
+            expect(duty_colors[9]).toBe('#FF4081');
+        });
+
+        it('get_duty_color 應正確取得 1~15 (及以上) 人員之色碼', () => {
+            for (let i = 1; i <= 15; i++) {
+                expect(get_duty_color(i)).toBe(duty_colors[i]);
+                expect(get_duty_color(i.toString())).toBe(duty_colors[i]);
+            }
+        });
+
+        it('當傳入無效或超出範圍的人員代碼時應 fallback 回傳安全預設色', () => {
+            expect(get_duty_color(null)).toBe('#546E7A');
+            expect(get_duty_color(undefined)).toBe('#546E7A');
+            expect(get_duty_color('invalid')).toBe('#546E7A');
+            expect(get_duty_color(999)).toBe('#546E7A');
+            expect(get_duty_color(-1)).toBe('#546E7A');
+        });
+    });
+
+    describe('random_pattern', () => {
+        it('支援 10 到 15 人之排班樣式生成，且班數與點數均勻平衡', () => {
+            // 單月情境: 平日 19, 週五 4, 假日 8 (總天數 31, 總點數 39)
+            for (let people = 10; people <= 15; people++) {
+                let pattern = false;
+                let attempts = 0;
+                while (!pattern && attempts < 1000) {
+                    pattern = random_pattern(people, 19, 4, 8, true);
+                    attempts++;
+                }
+
+                expect(pattern).not.toBe(false);
+                expect(pattern.length).toBe(people);
+
+                let totalO = 0;
+                let totalF = 0;
+                let totalH = 0;
+                pattern.forEach(([o, f, h]) => {
+                    totalO += o;
+                    totalF += f;
+                    totalH += h;
+                });
+                expect(totalO).toBe(19);
+                expect(totalF).toBe(4);
+                expect(totalH).toBe(8);
+            }
+        });
+
+        it('在雙月情境 (62天) 下，10~15 人能成功生成且符合總天數', () => {
+            // 雙月情境: 平日 38, 週五 8, 假日 16 (總天數 62)
+            const people = 12;
+            let pattern = false;
+            let attempts = 0;
+            while (!pattern && attempts < 100000) {
+                pattern = random_pattern(people, 38, 8, 16, true);
+                attempts++;
+            }
+
+            expect(pattern).not.toBe(false);
+            expect(pattern.length).toBe(people);
+            const totalDays = pattern.reduce((acc, curr) => acc + curr[0] + curr[1] + curr[2], 0);
+            expect(totalDays).toBe(62);
         });
     });
 });
