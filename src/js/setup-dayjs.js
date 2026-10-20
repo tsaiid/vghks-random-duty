@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
-import isoWeek from 'dayjs/plugin/isoWeek';
-import duration from 'dayjs/plugin/duration';
+import isoWeek from 'dayjs/plugin/isoWeek.js';
+import duration from 'dayjs/plugin/duration.js';
 
 dayjs.extend(isoWeek);
 dayjs.extend(duration);
