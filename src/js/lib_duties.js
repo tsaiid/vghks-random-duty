@@ -1,4 +1,4 @@
-import moment from 'moment';
+import dayjs from './setup-dayjs.js';
 import { standardDeviation, randomIntFromInterval, multiIndexOf } from './private_functions.js';
 import { is_holiday, is_friday, is_weekend } from './lib_holidays.js';
 
@@ -116,7 +116,7 @@ export function calculate_group_duties(duties, is_continuous_duties) {
             if (is_continuous_duties) {
                 var interval = index - groups[person].positions[len - 2];
             } else {
-                var interval = moment(duty[0], 'YYYY-MM-DD').diff(moment(groups[person].dates[len - 2]), 'days');
+                var interval = dayjs(duty[0]).diff(dayjs(groups[person].dates[len - 2]), 'day');
             }
             groups[person].intervals.push(interval);
         }
@@ -312,3 +312,17 @@ export function random_pattern(people, ordinary_count, friday_count, holiday_cou
 
     return patterns;
 }
+
+/**
+ * Calculate total duty points from [ordinary, friday, holiday] tuple.
+ * Rule: ordinary = 1 pt, friday = 1 pt, holiday = 2 pts.
+ * @param {number[]} pattern Tuple of [ordinary, friday, holiday].
+ * @return {number} Total points.
+ */
+export function calculate_pattern_points(pattern) {
+    if (!Array.isArray(pattern) || pattern.length < 3) {
+        return 0;
+    }
+    return (parseInt(pattern[0], 10) || 0) + (parseInt(pattern[1], 10) || 0) + (parseInt(pattern[2], 10) || 0) * 2;
+}
+

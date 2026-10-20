@@ -22,30 +22,20 @@
   "homepage": "https://github.com/tsaiid/random-duty#readme",
   "devDependencies": {
     "@eslint/js": "^9.39.5",
-    "@rollup/plugin-inject": "^5.0.5",
     "eslint": "^9.39.5",
     "globals": "^16.5.0",
     "vite": "^7.3.6",
     "vitest": "^5.0.3"
   },
   "dependencies": {
-    "blockui-npm": "^1.0.0",
-    "bootstrap": "^3.4.1",
-    "bootstrap-switch": "^3.4.0",
-    "bootstrap3-dialog": "^1.35.4",
-    "crypto-js": "^4.2.0",
+    "@fullcalendar/core": "^6.1.15",
+    "@fullcalendar/daygrid": "^6.1.15",
+    "@fullcalendar/interaction": "^6.1.15",
+    "bootstrap": "^5.3.3",
+    "bootstrap-icons": "^1.11.3",
+    "dayjs": "^1.11.13",
     "excellentexport": "^3.9.16",
-    "font-awesome": "^4.7.0",
-    "fullcalendar": "~3.10.5",
-    "html2canvas": "^1.4.1",
-    "jQuery-ui-Slider-Pips": "github:simeydotme/jQuery-ui-Slider-Pips",
-    "jquery": "^3.7.1",
-    "jquery-contenteditable": "github:makesites/jquery-contenteditable",
-    "jquery-ui-dist": "^1.13.3",
-    "jquery-ui-themes": "^1.12.0",
-    "js-cookie": "^3.0.8",
-    "moment": "^2.31.0",
-    "pace-js": "^1.2.4"
+    "html-to-image": "^1.11.11"
   },
   "engines": {
     "yarn": ">= 1.0.0"

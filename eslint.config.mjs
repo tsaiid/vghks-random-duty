@@ -7,7 +7,6 @@ export default [
         languageOptions: {
             globals: {
                 ...globals.browser,
-                ...globals.jquery,
                 ...globals.node,
                 ...globals.worker,
                 __APP_VERSION__: 'readonly',
