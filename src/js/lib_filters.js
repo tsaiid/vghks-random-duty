@@ -1,4 +1,4 @@
-import moment from 'moment';
+import dayjs from './setup-dayjs.js';
 import { multiIndexOf } from './private_functions.js';
 import { is_holiday, is_weekend } from './lib_holidays.js';
 
@@ -12,11 +12,11 @@ import { is_holiday, is_weekend } from './lib_holidays.js';
  */
 export function prepare_week_hours_context(since_date_str, total_days, preset_holidays = [], use_pm_off = true) {
     preset_holidays = preset_holidays || [];
-    var start_date = moment(since_date_str, 'YYYY-MM-DD');
-    var end_date = start_date.clone().add(total_days, 'days');
-    var view_start_date = start_date.clone().startOf('isoWeek');
+    var start_date = dayjs(since_date_str);
+    var end_date = start_date.add(total_days, 'day');
+    var view_start_date = start_date.startOf('isoWeek');
 
-    var total_weeks = Math.floor(moment.duration(end_date.diff(view_start_date)).asWeeks());
+    var total_weeks = Math.floor(end_date.diff(view_start_date, 'day') / 7);
     var baseline_week_hours = [];
     for (var i = 0; i <= total_weeks; i++) {
         baseline_week_hours[i] = 0;
@@ -24,9 +24,9 @@ export function prepare_week_hours_context(since_date_str, total_days, preset_ho
 
     var date_info_map = {};
 
-    for (var cur = start_date.clone(); cur < end_date; cur.add(1, 'day')) {
+    for (var cur = start_date; cur.isBefore(end_date); cur = cur.add(1, 'day')) {
         var date_str = cur.format('YYYY-MM-DD');
-        var week_no = Math.floor(moment.duration(cur.diff(view_start_date)).asWeeks());
+        var week_no = Math.floor(cur.diff(view_start_date, 'day') / 7);
         var is_hol = is_holiday(preset_holidays, date_str);
         var is_wknd = is_weekend(date_str);
 
@@ -39,7 +39,7 @@ export function prepare_week_hours_context(since_date_str, total_days, preset_ho
         var duty_hours = (is_hol || is_wknd) ? 24 : 16;
 
         // PM off deduction: 4 hours if next day is a non-holiday weekday
-        var next_date = cur.clone().add(1, 'day');
+        var next_date = cur.add(1, 'day');
         var next_date_str = next_date.format('YYYY-MM-DD');
         var next_is_hol = is_holiday(preset_holidays, next_date_str);
         var next_is_wknd = is_weekend(next_date_str);
@@ -81,10 +81,10 @@ export function calculate_person_week_hours(dates, options = {}) {
         if (!since_date_str || !total_days) {
             if (dates && dates.length > 0) {
                 var sorted = dates.slice().sort();
-                var min_m = moment(sorted[0], 'YYYY-MM-DD').startOf('month');
-                var max_m = moment(sorted[sorted.length - 1], 'YYYY-MM-DD').endOf('month');
+                var min_m = dayjs(sorted[0]).startOf('month');
+                var max_m = dayjs(sorted[sorted.length - 1]).endOf('month').startOf('day');
                 since_date_str = since_date_str || min_m.format('YYYY-MM-DD');
-                total_days = total_days || max_m.diff(min_m, 'days') + 1;
+                total_days = total_days || max_m.diff(min_m, 'day') + 1;
             } else {
                 return { week_hours: [], week_hours_pm_off: [] };
             }
@@ -160,10 +160,10 @@ export function less_than_max_week_hours(group_duties, max_hours, options = {}) 
                 return true;
             }
             all_dates.sort();
-            var min_m = moment(all_dates[0], 'YYYY-MM-DD').startOf('month');
-            var max_m = moment(all_dates[all_dates.length - 1], 'YYYY-MM-DD').endOf('month');
+            var min_m = dayjs(all_dates[0]).startOf('month');
+            var max_m = dayjs(all_dates[all_dates.length - 1]).endOf('month').startOf('day');
             since_date_str = since_date_str || min_m.format('YYYY-MM-DD');
-            total_days = total_days || max_m.diff(min_m, 'days') + 1;
+            total_days = total_days || max_m.diff(min_m, 'day') + 1;
         }
 
         context = prepare_week_hours_context(since_date_str, total_days, preset_holidays, use_pm_off);
@@ -212,7 +212,7 @@ export function less_than_qod_times(group_duties, qod_limit) {
     for (var person in group_duties) {
         if ({}.hasOwnProperty.call(group_duties, person)) {
             var qod_times = multiIndexOf(group_duties[person].intervals, 2).length;
-            if (qod_times > parseInt(qod_limit)) {
+            if (qod_times > parseInt(qod_limit, 10)) {
                 // console.log("qod_times: " + qod_times + ", intervals: " + group_duties[person].intervals.toString());
                 return false;
             }

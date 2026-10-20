@@ -1,422 +1,610 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Random Duty Generator</title>
+    <title>Random Duty Generator - 智慧醫療排班表產生器</title>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg">
     <link rel="alternate icon" href="./favicon.ico">
     <link rel="apple-touch-icon" href="./apple-touch-icon.png">
-    <style>
-        /* 初次載入與 loading 期間背景變暗遮罩 */
-        body:not(.pace-done)::before {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1999;
-            pointer-events: none;
-        }
-        body:not(.pace-done) > :not(.pace) {
-            opacity: 0;
-        }
-    </style>
+    <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./node_modules/bootstrap-icons/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="./src/css/dashboard.css">
+    <link rel="stylesheet" href="./src/css/calendar.css">
+    <link rel="stylesheet" href="./src/css/index.css">
 </head>
 
 <body>
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-        <div class="container-fluid">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="./">Random Duty Generator</a>
-            </div>
-            <div id="navbar" class="navbar-collapse collapse">
-                <ul class="nav navbar-nav navbar-right">
-                    <li><a href="#" data-toggle="modal" data-target="#aboutModal"><i class="fa fa-info-circle"></i> 關於</a></li>
-                    <li><a href="#" data-toggle="modal" data-target="#changeLogModal"><i class="fa fa-history"></i> 版本沿革</a></li>
-                    <li><a href="#" data-toggle="modal" data-target="#usageModal"><i class="fa fa-book"></i> 使用說明</a></li>
+    <!-- Top Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-slate-900 sticky-top shadow-sm py-2">
+        <div class="container-fluid px-3 px-lg-4">
+            <a class="navbar-brand d-flex align-items-center fw-bold" href="./">
+                <i class="bi bi-calendar2-range text-primary fs-4 me-2"></i>
+                <span>Random Duty Generator</span>
+                <span id="appVersion" class="badge rounded-pill bg-primary-subtle text-primary-emphasis ms-2 fs-7"></span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="切換選單">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
+                    <li class="nav-item">
+                        <a class="nav-link text-light-50" href="#" data-bs-toggle="modal" data-bs-target="#usageModal">
+                            <i class="bi bi-book me-1"></i>使用說明
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-light-50" href="#" data-bs-toggle="modal" data-bs-target="#changeLogModal">
+                            <i class="bi bi-clock-history me-1"></i>版本沿革
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-light-50" href="#" data-bs-toggle="modal" data-bs-target="#aboutModal">
+                            <i class="bi bi-info-circle me-1"></i>關於
+                        </a>
+                    </li>
+                    <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
+                        <a class="btn btn-outline-warning btn-sm d-inline-flex align-items-center py-1 px-2" href="./legacy/" target="_blank" rel="noopener" title="前往舊版介面 (v1.2.0)">
+                            <i class="bi bi-box-arrow-up-right me-1"></i>舊版 (v1.2)
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
     </nav>
-    <div id="app-content" class="container-fluid">
-        <div class="row">
-            <div class="col-sm-3">
-                <nav class="navbar">
-                    <div class="container-fluid">
-                        <div class="btn-toolbar navbar-right" role="toolbar" aria-label="...">
-                            <div class="btn-group" role="group" aria-label="...">
-                                <button id="func_random_duty" class="btn btn-primary navbar-btn" type="submit"><i class="fa fa-random"></i> 自動排班</button>
-                                <button id="func_clear_calendar" class="btn btn-danger navbar-btn" type="submit"><i class="fa fa-trash"></i> 清除自動排班</button>
+
+    <!-- Main Container -->
+    <div id="app-content" class="container-fluid px-3 px-lg-4 py-4">
+        <div class="row g-4">
+            <!-- Left Sidebar Controls -->
+            <div class="col-12 col-lg-4 col-xl-3">
+                <!-- 1. 核心排班操作 -->
+                <div class="card shadow-sm border-0 mb-3">
+                    <div class="card-body p-3">
+                        <div class="d-flex gap-2">
+                            <button id="func_random_duty" class="btn btn-primary flex-grow-1 fw-semibold py-2" type="button">
+                                <i class="bi bi-shuffle me-1"></i>自動排班
+                            </button>
+                            <button id="func_clear_calendar" class="btn btn-outline-danger py-2" type="button" title="清除所有已排班次">
+                                <i class="bi bi-eraser me-1"></i>清除
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. 排班條件與參數卡片 -->
+                <div class="card shadow-sm border-0 mb-3">
+                    <div class="card-header bg-transparent border-0 pt-3 pb-1 px-3 d-flex align-items-center">
+                        <h6 class="card-title fw-bold text-secondary mb-0">
+                            <i class="bi bi-sliders me-1"></i>排班條件設定
+                        </h6>
+                    </div>
+                    <div class="card-body p-3 pt-2">
+                        <form id="schedule_params_form" autocomplete="off">
+                            <!-- 月份模式 (Segmented Buttons) -->
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-semibold d-flex align-items-center mb-1">
+                                    <i class="bi bi-calendar3 me-1"></i>月份模式
+                                </label>
+                                <!-- 隱藏的原有 checkbox 保持向後相容 -->
+                                <input type="checkbox" id="mode_switch" class="d-none">
+                                <div class="btn-group w-100" role="group" aria-label="月份模式">
+                                    <input type="radio" class="btn-check" name="modeSegment" id="mode_1m" autocomplete="off" checked>
+                                    <label class="btn btn-outline-primary btn-sm py-2" for="mode_1m">1 個月</label>
+                                    <input type="radio" class="btn-check" name="modeSegment" id="mode_2m" autocomplete="off">
+                                    <label class="btn btn-outline-primary btn-sm py-2" for="mode_2m">2 個月</label>
+                                </div>
                             </div>
-                        </div>
-                        <!--
-                <div class="btn-toolbar" role="toolbar" aria-label="...">
-                    <button id="func_deploy_test_data" class="btn btn-default" type="submit">Deploy Test Data</button>
-                    <button id="func_deploy_test_data_ordinary" class="btn btn-default" type="submit">Deploy Test Ord Data</button>
-                </div>
-                -->
-                    </div>
-                </nav>
-                <hr>
-                <form class="form-horizontal" autocomplete="off">
-                    <div class="form-group">
-                        <label for="modeSwitch" class="col-sm-5 control-label">月份模式 <i class="fa fa-fw fa-calendar"></i></label>
-                        <div class="col-sm-7">
-                            <input type="checkbox" id="mode_switch">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="inputQodLimit" class="col-sm-5 control-label">
-                            <span class="pull-left"><input type="checkbox" id="use_qod_limit" checked></span>
-                            <span class="pull-right">QOD 上限 <i class="fa fa-fw fa-bed"></i></span>
-                        </label>
-                        <div class="col-sm-7">
-                            <div id="inputQodLimitSlider" class="slider"></div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="inputWeekHoursLimit" class="col-sm-5 control-label">
-                            <span class="pull-left"><input type="checkbox" id="use_week_hours_limit" checked></span>
-                            <span class="pull-right">週工時上限 <i class="fa fa-fw fa-clock-o"></i></span>
-                        </label>
-                        <div class="col-sm-7">
-                            <div id="inputWeekHoursLimitSlider" class="slider"></div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="inputPeople" class="col-sm-5 control-label">人數 <i class="fa fa-fw fa-users"></i></label>
-                        <div class="col-sm-7">
-                            <div id="inputPeopleSlider" class="slider"></div>
-                        </div>
-                    </div>
-                </form>
-                <div class="panel panel-default" id="suggested_pattern">
-                    <div class="panel-heading">
-                        <div class="btn-toolbar pull-right" role="toolbar" aria-label="...">
-                            <div class="btn-group" role="group" aria-label="...">
-                                <button id="func_get_holiday_condition" class="btn btn-info btn-xs" type="submit"><i class="fa fa-refresh"></i> 更新</button>
-                                <button id="func_edit_duty_patterns" type="button" class="btn btn-warning btn-xs" aria-label="Edit Pattern">
-                                    <i class="fa fa-pencil-square-o"></i> 修改
-                                </button>
+
+                            <!-- 排班人數 -->
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label for="inputPeopleSlider" class="form-label text-muted small fw-semibold mb-0">
+                                        <i class="bi bi-people me-1"></i>排班人數
+                                    </label>
+                                    <span id="people_val_badge" class="badge bg-primary">4 人</span>
+                                </div>
+                                <input type="range" class="form-range" id="inputPeopleSlider" min="3" max="15" step="1" value="4">
+                                <div class="d-flex justify-content-between text-muted x-small">
+                                    <span>3 人</span>
+                                    <span>15 人</span>
+                                </div>
                             </div>
-                        </div>
-                        <h3 class="panel-title">建議排班（已排班數）</h3>
+
+                            <!-- QOD 上限 -->
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <div class="form-check form-switch mb-0">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="use_qod_limit" checked>
+                                        <label class="form-check-label text-muted small fw-semibold" for="use_qod_limit">
+                                            <i class="bi bi-moon-stars me-1"></i>QOD 上限
+                                        </label>
+                                    </div>
+                                    <span id="qod_val_badge" class="badge bg-secondary">1 次</span>
+                                </div>
+                                <input type="range" class="form-range" id="inputQodLimitSlider" min="0" max="4" step="1" value="1">
+                                <div class="d-flex justify-content-between text-muted x-small">
+                                    <span>0 次 (嚴格)</span>
+                                    <span>4 次</span>
+                                </div>
+                            </div>
+
+                            <!-- 週工時上限 -->
+                            <div class="mb-1">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <div class="form-check form-switch mb-0">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="use_week_hours_limit" checked>
+                                        <label class="form-check-label text-muted small fw-semibold" for="use_week_hours_limit">
+                                            <i class="bi bi-clock-history me-1"></i>週工時上限
+                                        </label>
+                                    </div>
+                                    <span id="week_hours_val_badge" class="badge bg-secondary">80 小時</span>
+                                </div>
+                                <input type="range" class="form-range" id="inputWeekHoursLimitSlider" min="60" max="96" step="4" value="80">
+                                <div class="d-flex justify-content-between text-muted x-small">
+                                    <span>60 小時</span>
+                                    <span>96 小時</span>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
-                <hr>
-                <div class="btn-toolbar pull-right" role="toolbar" aria-label="...">
-                    <a href="#" id="screenshot_download_link"></a>
-                    <button class="btn btn-default" id="func_download_screenshot" type="button"><i class="fa fa-camera"></i> 螢幕快照</button>
-                    <button class="btn btn-default" id="func_download_excel" type="button"><i class="fa fa-cloud-download"></i> 下載值班表 Excel</button>
-                </div>
-                <div id="block_ui_box">
-                    <div class="media">
-                        <div class="media-left">
-                            <i class="fa fa-spinner fa-spin fa-4x"></i>
-                        </div>
-                        <div class="media-body">
-                            <div class="media-heading" id="block_ui_message">Media heading</div>
-                            <button class="btn btn-warning pull-right btn_stop_random_duty_worker" type="submit">Cancel</button>
-                        </div>
-                    </div>
-                </div>
-                <div id="block_ui_dialog">
-                    <div class="media">
-                        <div class="media-left">
-                            <i class="fa fa-ban fa-4x"></i>
-                        </div>
-                        <div class="media-body">
-                            <div class="media-heading" id="block_ui_dialog_message"></div>
-                            <button class="btn btn-primary pull-right btn_stop_random_duty_worker" type="submit">Ok</button>
+
+                <!-- 3. 建議排班（已排班數）卡片 -->
+                <div class="card shadow-sm border-0 mb-3" id="suggested_pattern">
+                    <div class="card-header bg-transparent border-0 pt-3 pb-2 px-3 d-flex justify-content-between align-items-center">
+                        <h6 class="card-title fw-bold text-secondary mb-0">
+                            <i class="bi bi-pie-chart me-1"></i>建議排班樣式
+                        </h6>
+                        <div class="btn-group btn-group-sm">
+                            <button id="func_get_holiday_condition" class="btn btn-outline-secondary btn-sm" type="button" title="重新隨機生成排班樣式">
+                                <i class="bi bi-arrow-clockwise"></i> 更新
+                            </button>
+                            <button id="func_edit_duty_patterns" class="btn btn-outline-secondary btn-sm" type="button" title="手動微調各人員排班樣式">
+                                <i class="bi bi-pencil-square"></i> 修改
+                            </button>
                         </div>
                     </div>
+                    <div class="card-body p-3 pt-0" id="suggested_pattern_body">
+                        <!-- 表格將由 JavaScript 動態生成渲染 -->
+                    </div>
                 </div>
-                <div class="growlUI" style="display:none">
-                    <h1>Growl Notification</h1>
-                    <h2>Have a nice day!</h2>
+
+                <!-- 4. 匯出與本機草稿儲存管理卡片 -->
+                <div class="card shadow-sm border-0 mb-3">
+                    <div class="card-header bg-transparent border-0 pt-3 pb-1 px-3">
+                        <h6 class="card-title fw-bold text-secondary mb-0">
+                            <i class="bi bi-download me-1"></i>匯出與資料管理
+                        </h6>
+                    </div>
+                    <div class="card-body p-3 pt-2">
+                        <!-- 匯出按鈕群組 -->
+                        <div class="d-grid gap-2 mb-3">
+                            <a href="#" id="screenshot_download_link" class="d-none"></a>
+                            <button class="btn btn-outline-secondary text-start d-flex align-items-center justify-content-between py-2" id="func_download_screenshot" type="button">
+                                <span><i class="bi bi-camera me-2 text-primary"></i>輸出高畫質螢幕快照</span>
+                                <i class="bi bi-chevron-right text-muted small"></i>
+                            </button>
+                            <button class="btn btn-outline-secondary text-start d-flex align-items-center justify-content-between py-2" id="func_download_excel" type="button">
+                                <span><i class="bi bi-file-earmark-spreadsheet me-2 text-success"></i>下載排班表 Excel (.xlsx)</span>
+                                <i class="bi bi-chevron-right text-muted small"></i>
+                            </button>
+                        </div>
+
+                        <hr class="text-muted my-3 opacity-25">
+
+                        <!-- 本機草稿暫存開關 -->
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" role="switch" id="auto_save_draft_switch" checked>
+                            <label class="form-check-label text-muted small fw-semibold" for="auto_save_draft_switch">
+                                自動暫存排班草稿（重整不遺失）
+                            </label>
+                        </div>
+                        <p class="text-muted x-small mb-3">班表異動時即時儲存至瀏覽器本機儲存空間，避免誤關閉遺失進度。</p>
+
+                        <!-- 一鍵清除儲存紀錄 -->
+                        <button id="func_clear_local_storage" class="btn btn-outline-danger btn-sm w-100 py-1" type="button">
+                            <i class="bi bi-trash3 me-1"></i>清除所有本機紀錄與重置
+                        </button>
+                    </div>
                 </div>
             </div>
-            <div class="col-sm-9">
-                <div id="cal_nav">
-                    <nav>
-                        <ul class="pager">
-                            <li><a href="#" id="prev_month"><span aria-hidden="true">&larr;</span> Prev</a></li>
-                            <li><a href="#" id="next_month">Next <span aria-hidden="true">&rarr;</span></a></li>
+
+            <!-- Right Calendar & Dashboard Workspace -->
+            <div class="col-12 col-lg-8 col-xl-9">
+                <!-- 日曆導覽控制列 -->
+                <div class="card shadow-sm border-0 mb-3">
+                    <div class="card-body py-2 px-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        <div class="d-flex align-items-center gap-1">
+                            <button id="prev_month" class="btn btn-outline-secondary btn-sm px-3" type="button">
+                                <i class="bi bi-chevron-left me-1"></i>上個月
+                            </button>
+                            <button id="today_next_month" class="btn btn-outline-secondary btn-sm" type="button">
+                                回到預設月
+                            </button>
+                            <button id="next_month" class="btn btn-outline-secondary btn-sm px-3" type="button">
+                                下個月<i class="bi bi-chevron-right ms-1"></i>
+                            </button>
+                        </div>
+                        <div class="text-center">
+                            <h4 id="calendar_range_title" class="fw-bold mb-0 text-slate-800"></h4>
+                            <div class="text-muted x-small">點擊日期格可新增預排班、不值或假日；事件可直接拖曳調整</div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <span class="badge bg-light text-dark border align-self-center">
+                                <i class="bi bi-info-circle me-1"></i>每週起始：週一
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 雙月/單月日曆容器 -->
+                <div id="calendars" class="row g-3 mb-4">
+                    <div class="col-12 first_cal">
+                        <div class="card shadow-sm border-0 p-2 p-md-3">
+                            <div id="cal1"></div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-xxl-6 second_cal d-none">
+                        <div class="card shadow-sm border-0 p-2 p-md-3">
+                            <div id="cal2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 排班統計儀表板卡片 -->
+                <div class="card shadow-sm border-0 mb-4" id="summary_card">
+                    <div class="card-header bg-transparent border-0 pt-3 pb-2 px-3 d-flex justify-content-between align-items-center">
+                        <h6 class="card-title fw-bold text-secondary mb-0">
+                            <i class="bi bi-bar-chart-line me-1"></i>排班統計與工時合規儀表板
+                        </h6>
+                    </div>
+                    <div class="card-body p-3 pt-0">
+                        <div id="summary_duties"></div>
+                        <div id="duties_datatable_div" class="d-none"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+
+    <!-- 1. 新增/編輯日曆事件 Modal -->
+    <div class="modal fade" id="calEventModal" tabindex="-1" aria-labelledby="calEventModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold" id="calEventModalLabel">新增班表事件</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="calEventDialogForm" autocomplete="off">
+                        <input type="hidden" name="eventOrigTitle" id="eventOrigTitle">
+                        <input type="hidden" name="eventStart" id="eventStart">
+                        <input type="hidden" name="eventId" id="eventId">
+
+                        <!-- 類別選擇 -->
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-semibold">事件類別</label>
+                            <div class="btn-group w-100" role="group" aria-label="事件類別">
+                                <input type="radio" class="btn-check" name="eventProp" id="eventPropDuty" value="eventPropDuty" checked>
+                                <label class="btn btn-outline-primary py-2" for="eventPropDuty">
+                                    <i class="bi bi-person-badge me-1"></i>值班
+                                </label>
+                                <input type="radio" class="btn-check" name="eventProp" id="eventPropNonduty" value="eventPropNonduty">
+                                <label class="btn btn-outline-warning py-2" for="eventPropNonduty">
+                                    <i class="bi bi-person-x me-1"></i>設為不值
+                                </label>
+                                <input type="radio" class="btn-check" name="eventProp" id="eventPropHoliday" value="eventPropHoliday">
+                                <label class="btn btn-outline-danger py-2" for="eventPropHoliday">
+                                    <i class="bi bi-calendar-event me-1"></i>設為假日
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- 人員選單 (值班 / 不值) -->
+                        <div class="mb-3" id="person_select_group">
+                            <label for="eventTitleSelect" class="form-label text-muted small fw-semibold">人員編號</label>
+                            <select class="form-select" id="eventTitleSelect" name="eventTitleSelect"></select>
+                        </div>
+
+                        <!-- 假日名稱輸入框 (設為假日) -->
+                        <div class="mb-3 d-none" id="holiday_input_group">
+                            <label for="eventTitleInput" class="form-label text-muted small fw-semibold">假日名稱</label>
+                            <input type="text" class="form-control" id="eventTitleInput" name="eventTitleInput" placeholder="例如：院慶、彈性放假">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer bg-light d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-danger d-none" id="btn_delete_cal_event">
+                        <i class="bi bi-trash3 me-1"></i>刪除
+                    </button>
+                    <div class="d-flex gap-2 ms-auto">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary px-4" id="btn_save_cal_event">確定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. 修改排班樣式 Modal -->
+    <div class="modal fade" id="editPatternModal" tabindex="-1" aria-labelledby="editPatternModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold" id="editPatternModalLabel">
+                        <i class="bi bi-pencil-square me-1"></i>修改排班樣式
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="alert alert-info py-2 px-3 small d-flex align-items-center mb-3">
+                        <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+                        <div>
+                            積點規則：<strong>平 × 1 + 五 × 1 + 假 × 2</strong>。請確保所有人平、五、假加總符合當月各類別天數。
+                        </div>
+                    </div>
+                    <div class="table-responsive" id="edit_patterns_table_container">
+                        <!-- 表格將由 JavaScript 渲染 -->
+                    </div>
+                </div>
+                <div class="modal-footer bg-light d-flex justify-content-between">
+                    <span id="pattern_status_badge" class="badge"></span>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary px-4" id="btn_save_pattern">儲存變更</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. 通用警告與確認 Modal -->
+    <div class="modal fade" id="dialogModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="dialogModalTitle">提示</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-3" id="dialogModalBody"></div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-secondary btn-sm px-3" id="dialogModalCancel" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary btn-sm px-4" id="dialogModalConfirm">確定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. 關於 Modal -->
+    <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-slate-900 text-white">
+                    <h5 class="modal-title fw-bold" id="aboutModalLabel">
+                        <i class="bi bi-info-circle me-2"></i>關於 Random Duty Generator
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <h4 class="fw-bold mb-3">Random Duty Generator <span class="badge bg-primary fs-6">v1.2.0</span></h4>
+                    <p class="text-secondary leading-relaxed">
+                        專業醫療排班產生器，以亂數平衡排列與約束求解演算法自動產生公平值班表，支援預排班、排除不值班同仁與自訂國定假日。
+                    </p>
+                    <div class="card bg-light border-0 p-3 mb-3">
+                        <h6 class="fw-bold text-dark"><i class="bi bi-check2-circle text-primary me-1"></i>核心特色</h6>
+                        <ul class="mb-0 text-secondary small">
+                            <li>預設杜絕連續值班（QD 嚴禁排入）。</li>
+                            <li>支援每人隔日班（QOD）上限次數過濾設定。</li>
+                            <li>整合住院醫師每週最高總工時上限約束（預設 80 小時，含 PM Off 4 小時扣除機制）。</li>
+                            <li>建議排班採用高榮放射線部積點模型進行平日、週五及假日班平衡運算。</li>
+                            <li>全自動本機草稿暫存機制（`localStorage`），重整瀏覽器不遺失任何進度。</li>
                         </ul>
-                    </nav>
-                </div>
-                <div id="calendars" class="row">
-                    <div class="first_cal">
-                        <div id="cal1"></div>
                     </div>
-                    <div class="col-sm-6 second_cal">
-                        <div id="cal2"></div>
+                    <div class="alert alert-light border border-warning-subtle bg-warning-subtle bg-opacity-25 d-flex align-items-center justify-content-between p-3 mb-3 rounded-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-archive text-warning-emphasis fs-4 me-3"></i>
+                            <div>
+                                <div class="fw-semibold text-dark">需要使用改版前的舊版介面？</div>
+                                <div class="text-muted small">若您習慣先前的操作方式或需要對照班表，可隨時前往舊版 (v1.2.0)。</div>
+                            </div>
+                        </div>
+                        <a href="./legacy/" target="_blank" rel="noopener" class="btn btn-outline-warning btn-sm text-dark flex-shrink-0 ms-3">
+                            <i class="bi bi-box-arrow-up-right me-1"></i>前往舊版
+                        </a>
+                    </div>
+                    <h6 class="fw-bold mt-4">積點規則說明</h6>
+                    <ul class="text-secondary small">
+                        <li>平日及週五班為 <strong>1 點</strong>，假日班為 <strong>2 點</strong>。</li>
+                        <li>國定假日之前一日視同週五班（享有次日為放假之等同權重）。</li>
+                    </ul>
+                    <hr class="my-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold mb-1">作者資訊 (Author)</h6>
+                            <p class="text-muted small mb-0">I-Ta Tsai (蔡依達醫師)</p>
+                            <div class="mt-2">
+                                <a class="btn btn-outline-secondary btn-sm me-1" href="https://tsai.it/" target="_blank" rel="noopener">
+                                    <i class="bi bi-rss me-1"></i>部落格
+                                </a>
+                                <a class="btn btn-outline-secondary btn-sm" href="https://github.com/tsaiid" target="_blank" rel="noopener">
+                                    <i class="bi bi-github me-1"></i>GitHub
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                            <span class="badge bg-secondary-subtle text-secondary-emphasis">授權協定：MIT</span>
+                            <div class="small text-muted mt-1">
+                                原始碼公開於 <a href="https://github.com/tsaiid/random-duty" target="_blank" rel="noopener" class="text-decoration-none">GitHub 專案庫</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-sm-12" id="summary_duties"></div>
-                    <div id="duties_datatable_div"></div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
                 </div>
             </div>
         </div>
     </div>
-    <!-- Event Modal -->
-    <div id="calEventDialog">
-        <form class="form-horizontal" id="calEventDialogForm">
-            <div class="form-group">
-                <label for="eventTitle" class="col-sm-2 control-label">Title</label>
-                <div class="col-sm-10">
-                    <select type="text" class="form-control" name="eventTitle" id="eventTitle"></select>
-                    <input type="hidden" name="eventOrigTitle" id="eventOrigTitle" />
-                    <input type="hidden" name="eventStart" id="eventStart" />
-                    <input type="hidden" name="eventId" id="eventId" />
+
+    <!-- 5. 版本沿革 Modal -->
+    <div class="modal fade" id="changeLogModal" tabindex="-1" aria-labelledby="changeLogModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-slate-900 text-white">
+                    <h5 class="modal-title fw-bold" id="changeLogModalLabel">
+                        <i class="bi bi-clock-history me-2"></i>版本沿革 (ChangeLog)
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-            </div>
-            <div class="form-group">
-                <label for="eventProp" class="col-sm-2 control-label">類別</label>
-                <div class="col-sm-10">
-                    <div class="radio">
-                        <label>
-                            <input type="radio" name="eventProp" id="eventPropDuty" value="eventPropDuty" checked /> 值班
-                        </label>
+                <div class="modal-body p-4">
+                    <div class="alert alert-light border d-flex align-items-center justify-content-between p-3 mb-4 rounded-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-info-circle text-primary fs-4 me-3"></i>
+                            <div>
+                                <div class="fw-semibold text-dark">舊版介面 (Legacy v1.2.0) 已封存保留</div>
+                                <div class="text-muted small">系統已將改版前穩定的 v1.2.0 獨立部署於專屬目錄，供隨時查閱。</div>
+                            </div>
+                        </div>
+                        <a href="./legacy/" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm flex-shrink-0 ms-3">
+                            <i class="bi bi-box-arrow-up-right me-1"></i>開啟舊版 (v1.2)
+                        </a>
                     </div>
-                    <div class="radio">
-                        <label>
-                            <input type="radio" name="eventProp" id="eventPropNonduty" value="eventPropNonduty" /> 設為不值
-                        </label>
+                    <div class="timeline">
+                        <div class="mb-4">
+                            <h5 class="fw-bold text-primary">1.2.0 – 2026-10-17</h5>
+                            <ul class="text-secondary small">
+                                <li>全面架構現代化升級：原生 ES6+ (無 jQuery)、Bootstrap 5.3、FullCalendar v6、Day.js。</li>
+                                <li>新增本機排班草稿自動存檔機制 (`localStorage`) 與一鍵清除重置功能。</li>
+                                <li>修正「修改排班樣式」積點漏加平日點數之計算 Bug。</li>
+                                <li>擴充值班人數上限至 15 人，並新增 Material Design 高對比色票配置與單元測試。</li>
+                                <li>新增週工時上限設定（預設 80 小時），並於自動排班演算法中整合超時過濾規則。</li>
+                                <li>升級螢幕快照至 2x Retina 高解析度輸出 (`html-to-image`)。</li>
+                            </ul>
+                        </div>
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-dark">1.1.2 – 2026-10-15</h6>
+                            <ul class="text-secondary small">
+                                <li>新增代表性高對比 Favicon 圖示系統（日曆與骰子意象），強化瀏覽器分頁極限辨識度。</li>
+                            </ul>
+                        </div>
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-dark">1.1.1 – 2026-10-15</h6>
+                            <ul class="text-secondary small">
+                                <li>導入 GitHub Actions 標籤觸發自動化部署至 radtools.tsai.it。</li>
+                                <li>改由靜態 HTML 呈現版本沿革紀錄，移除 marked 依賴並縮減 bundle 體積。</li>
+                            </ul>
+                        </div>
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-dark">1.1.0 – 2026-10-06</h6>
+                            <ul class="text-secondary small">
+                                <li>過濾台灣假日 API 中非放假之紀念節日事件。</li>
+                                <li>導入 Vitest 並建立排班核心演算法之完整單元測試。</li>
+                            </ul>
+                        </div>
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-dark">1.0.3 – 2026-10-06</h6>
+                            <ul class="text-secondary small">
+                                <li>透過 Cloudflare Worker API Gateway 代理台灣國定假日事件。</li>
+                                <li>優化 Vendor Bundle 體積與程式碼分割。</li>
+                            </ul>
+                        </div>
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-dark">1.0.2 – 2025-12-01</h6>
+                            <ul class="text-secondary small">
+                                <li>遷移專案至 Vite 現代化前端建置工具，將 JavaScript 重構為 ES Modules。</li>
+                            </ul>
+                        </div>
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-dark">0.1.0 – 2015-07-26</h6>
+                            <ul class="text-secondary small">
+                                <li>首次正式發行：VGHKS 放射線部排班產生器，運用 Web Worker 進行背景亂數運算。</li>
+                            </ul>
+                        </div>
                     </div>
-                    <div class="radio">
-                        <label>
-                            <input type="radio" name="eventProp" id="eventPropHoliday" value="eventPropHoliday" /> 設為假日
-                        </label>
-                    </div>
                 </div>
-            </div>
-        </form>
-    </div>
-    <!-- About Modal -->
-    <div class="modal fade bootstrap-dialog type-info" id="aboutModal" tabindex="-1" role="dialog" aria-labelledby="aboutModalLabel">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <div class="modal-title bootstrap-dialog-title" id="aboutModalLabel">關於</div>
-                </div>
-                <div class="modal-body">
-                    <h3>Random Duty Generator <span id="appVersion"></span></h3>
-                    <ul>
-                        <li>班表產生器，以亂數排列的方式產生班表，可預填值或不值的人。</li>
-                        <li>預設不可 QD 值班，另可加上 QOD 值班次數限制。</li>
-                        <li>目前自動產生的建議排班法使用高榮放射線部的積點方式運算。</li>
-                    </ul>
-                    <h4>積點規則</h4>
-                    <ul>
-                        <li>平日及週五為 1 點，假日為 2 點。</li>
-                        <li>假日的前一日視為週五</li>
-                    </ul>
-                    <h4>Author</h4>
-                    <p>I-Ta Tsai</p>
-                    <p><a class="btn btn-default btn-xs" href="https://twitter.com/tsaiid" role="button"><i class="fa fa-twitter"></i> Follow @tsaiid</a> <a class="btn btn-default btn-xs" href="https://tsai.it/" role="button"><i class="fa fa-rss"></i> Blog</a></p>
-                    <h4>License</h4>
-                    <p>MIT</p>
-                    <h4>Sources</h4>
-                    <p><a class="btn btn-default btn-xs" href="https://github.com/tsaiid/random-duty" role="button"><i class="fa fa-github"></i> Hosted on GitHub</a></p>
-                    <p>如有疑問，請至 <a href="https://github.com/tsaiid/random-duty/issues">GitHub Issues</a> 回報。</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
                 </div>
             </div>
         </div>
     </div>
-    <!-- ChangeLog Modal -->
-    <div class="modal fade bootstrap-dialog type-info" id="changeLogModal" tabindex="-1" role="dialog" aria-labelledby="changeLogModalLabel">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <div class="modal-title bootstrap-dialog-title" id="changeLogModalLabel">版本沿革</div>
+
+    <!-- 6. 使用說明 Modal -->
+    <div class="modal fade" id="usageModal" tabindex="-1" aria-labelledby="usageModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-slate-900 text-white">
+                    <h5 class="modal-title fw-bold" id="usageModalLabel">
+                        <i class="bi bi-book me-2"></i>使用說明
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <h4>1.2.0 – 2026-10-17</h4>
-                    <ul>
-                        <li>擴充值班人數上限至 15 人，並新增 Material Design 高對比色票配置與大群組單元測試。</li>
-                        <li>新增週工時上限設定（預設 80 小時），並於自動排班演算法中整合超時過濾規則。</li>
-                        <li>強化日曆事件拖曳防呆，禁止將同仁拖曳至已有值班或已預設不值之衝突日期。</li>
-                        <li>提升 Excel 匯出於現代跨瀏覽器（含 Firefox）之相容性與下載穩定度。</li>
-                    </ul>
-
-                    <h4>1.1.2 – 2026-10-15</h4>
-                    <ul>
-                        <li>新增代表性高對比 Favicon 圖示系統（日曆與骰子意象），強化瀏覽器分頁極限辨識度。</li>
-                    </ul>
-
-                    <h4>1.1.1 – 2026-10-15</h4>
-                    <ul>
-                        <li>導入 GitHub Actions 標籤觸發自動化部署至 radtools.tsai.it。</li>
-                        <li>導覽列選單調整為直接開啟「版本沿革」。</li>
-                        <li>改由靜態 HTML 呈現版本沿革紀錄，移除 marked 依賴並縮減 bundle 體積。</li>
-                    </ul>
-
-                    <h4>1.1.0 – 2026-10-06</h4>
-                    <ul>
-                        <li>Filter out non-holiday festival events in Taiwan holiday API response.</li>
-                        <li>Introduce Vitest and set up unit tests for core scheduling algorithms.</li>
-                    </ul>
-
-                    <h4>1.0.3 – 2026-10-06</h4>
-                    <ul>
-                        <li>Proxy Taiwan holiday events via Cloudflare Worker API gateway.</li>
-                        <li>Restore and smooth loading overlay transitions.</li>
-                        <li>Fix duty point calculation and condition threshold in random pattern generation.</li>
-                        <li>Fix background overlay residue after deleting holiday events.</li>
-                        <li>Update summary statistics immediately upon dragging or manually editing events.</li>
-                        <li>Fix ReferenceError in test data deployment.</li>
-                        <li>Refactor <code>multiIndexOf</code> as a pure utility function to prevent prototype pollution.</li>
-                        <li>Clean up legacy files (<code>random_pattern_worker.js</code>, <code>test.html</code>, <code>Rakefile</code>), IE conditional comments, and obsolete Universal Analytics.</li>
-                        <li>Optimize vendor bundle size with dynamic imports and chunk splitting.</li>
-                        <li>Upgrade <code>html2canvas</code> to v1.4.1 with modern Promise API.</li>
-                        <li>Upgrade project dependencies and modernize deployment script (<code>deploy.mjs</code>).</li>
-                    </ul>
-
-                    <h4>1.0.2 – 2025-12-01</h4>
-                    <ul>
-                        <li>Migrate project to Vite for modern development environment.</li>
-                        <li>Refactor JavaScript to ES Modules.</li>
-                        <li>Updated FullCalendar to v3.10.5.</li>
-                        <li>Resolved jQuery and Moment.js compatibility issues with Vite.</li>
-                        <li>Fixed Google Calendar holiday event rendering (background and foreground events, no redirects).</li>
-                        <li>Updated README.md for new development workflow.</li>
-                    </ul>
-
-                    <h4>1.0.1 – 2020-01-20</h4>
-                    <ul>
-                        <li>Remove VGHKS in the title and url.</li>
-                    </ul>
-
-                    <h4>1.0.0 – 2017-11-14</h4>
-                    <ul>
-                        <li>Migrate bower to yarn for dependency management.</li>
-                        <li>Remove vghks mode switch and standard dev setting.</li>
-                        <li>Change export excel format to xlsx, due to lib upgrade.</li>
-                        <li>Add vghks style in exporting excel.</li>
-                        <li>Fix event dialog behavior. (#55)</li>
-                    </ul>
-
-                    <h4>0.2.5 – 2017-06-20</h4>
-                    <ul>
-                        <li>Change event order: duty, holiday, non-duty. (#52)</li>
-                        <li>Upgrade dependency packages.</li>
-                        <li>Use iso week, starting from Monday.</li>
-                        <li>Can calculate week work hours with pm off.</li>
-                        <li>Show alert if cont workday interval is more than 12.</li>
-                    </ul>
-
-                    <h4>0.2.4 – 2016-08-16</h4>
-                    <ul>
-                        <li>Show only the DAY instead of MONTH/DAY in 1-month mode. (#51)</li>
-                        <li>Confirm that there is no friday determination error. (#47)</li>
-                    </ul>
-
-                    <h4>0.2.3 – 2015-08-22</h4>
-                    <ul>
-                        <li>Fix: should calculate ordinary duty for total points. (#45)</li>
-                        <li>Fix: ignore if clicking on day not in the month range. (#40)</li>
-                        <li>Can summarize week working hours. (#46)</li>
-                        <li>Can download screenshot for storing random duty results. (#41)</li>
-                    </ul>
-
-                    <h4>0.2.2 – 2015-08-17</h4>
-                    <ul>
-                        <li>Fix: correct the path for version info file. (#43)</li>
-                        <li>Add more colors for duties. (#38)</li>
-                        <li>Add links to all previous releases, and show change logs. (#44)</li>
-                    </ul>
-
-                    <h4>0.2.1 – 2015-08-15</h4>
-                    <ul>
-                        <li>Fix: update duty status after deleting holiday. (#42)</li>
-                        <li>Fix: check current month range if already has random duty. (#37)</li>
-                    </ul>
-
-                    <h4>0.2.0 – 2015-08-10</h4>
-                    <ul>
-                        <li>Add a switch to control if VGHKS mode or general mode. (#19)</li>
-                        <li>Show QOD status and colorize the duty dates in summary. (#30)</li>
-                        <li>Cache deleted gcal events preventing rerendering while changing month. (#32)</li>
-                        <li>Use cookie to store preferences. (#33)</li>
-                        <li>Show an alert before re-random if a result exists. (#35)</li>
-                        <li>Fix some bugs. (#31, #34)</li>
-                        <li>Show a loading page before all elements get ready.</li>
-                    </ul>
-
-                    <h4>0.1.1 – 2015-08-05</h4>
-                    <ul>
-                        <li>Fix #36: Random patterns sometimes do not have a solution!</li>
-                    </ul>
-
-                    <h4>0.1.0 – 2015-07-26</h4>
-                    <ul>
-                        <li>Initial release: official site.</li>
-                        <li>VGHKS Rad mode random duty generator.</li>
-                        <li>Use web workers for the heavy calculation of random duties.</li>
-                        <li>Can set 1-month or 2-month mode.</li>
-                        <li>A suggested duty pattern for each staff can be generted automatically or adjusted manually.</li>
-                        <li>Can filter condinuous duty, setting upper limit for QOD duty and standard deviation of duty interval.</li>
-                        <li>Can set non-duty and customize holidays.</li>
-                        <li>The manually added and automatically generated duties can be dragged, edit, and deleted.</li>
-                    </ul>
+                <div class="modal-body p-4">
+                    <h5 class="fw-bold mb-3 text-primary">排班操作五步驟</h5>
+                    <div class="d-flex mb-3">
+                        <span class="badge rounded-circle bg-primary me-3 align-self-start fs-6" style="width: 28px; height: 28px; line-height: 20px;">1</span>
+                        <div>
+                            <div class="fw-bold">選擇排班月份與模式</div>
+                            <div class="text-muted small">切換 1 個月或 2 個月模式，並透過日曆上方按鈕導覽至目標月份。</div>
+                        </div>
+                    </div>
+                    <div class="d-flex mb-3">
+                        <span class="badge rounded-circle bg-primary me-3 align-self-start fs-6" style="width: 28px; height: 28px; line-height: 20px;">2</span>
+                        <div>
+                            <div class="fw-bold">校對國定假日與自訂假日</div>
+                            <div class="text-muted small">檢視日曆粉紅底色之假日；若有誤點擊該日可刪除，或點選空白日設為自訂假日。</div>
+                        </div>
+                    </div>
+                    <div class="d-flex mb-3">
+                        <span class="badge rounded-circle bg-primary me-3 align-self-start fs-6" style="width: 28px; height: 28px; line-height: 20px;">3</span>
+                        <div>
+                            <div class="fw-bold">填入預先排班與指定不值同仁</div>
+                            <div class="text-muted small">點擊日期選擇「值班」填入已確定人員；選擇「設為不值」指定該日避開之人員。</div>
+                        </div>
+                    </div>
+                    <div class="d-flex mb-3">
+                        <span class="badge rounded-circle bg-primary me-3 align-self-start fs-6" style="width: 28px; height: 28px; line-height: 20px;">4</span>
+                        <div>
+                            <div class="fw-bold">設定人數、限制條件與排班樣式</div>
+                            <div class="text-muted small">設定排班人數（3~15人）、QOD 上限與週工時上限，並可於「建議排班樣式」點選更新或修改每人平/五/假班數。</div>
+                        </div>
+                    </div>
+                    <div class="d-flex mb-3">
+                        <span class="badge rounded-circle bg-primary me-3 align-self-start fs-6" style="width: 28px; height: 28px; line-height: 20px;">5</span>
+                        <div>
+                            <div class="fw-bold">執行自動排班與手動微調</div>
+                            <div class="text-muted small">點選「自動排班」，運算完成後可直接拖曳日曆上事件進行微調，下方統計儀表板會即時更新工時與班距指標。</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
                 </div>
             </div>
         </div>
     </div>
-    <!-- Help Modal -->
-    <div class="modal fade bootstrap-dialog type-info" id="usageModal" tabindex="-1" role="dialog" aria-labelledby="usageModalLabel">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <div class="modal-title bootstrap-dialog-title" id="usageModalLabel">使用說明</div>
-                </div>
-                <div class="modal-body">
-                    <h4>步驟</h4>
-                    <ol>
-                        <li>選擇月份模式並移至欲排班的月份</li>
-                        <li>檢查月曆中的假日是否有誤，可點選做刪除的動作，或新增自訂假日</li>
-                        <li>設定參與排班人數</li>
-                        <li>檢查建議班表是否可以接受，可點選「更新建議班表」隨機調整或手動修改</li>
-                        <li>填入班表時，也可設定不值班的入員，在自動排班時會被排除</li>
-                        <li>選擇是否開啟「QOD 上限」，並設定其數值</li>
-                        <li>點選「自動排班」，等候亂數班表產生</li>
-                        <li>若無法產生結果，可調整或關閉參數</li>
-                        <li>若產生之結果不夠滿意，可以拖拽手動調整排班，下方有即時資訊表格</li>
-                    </ol>
-                    <h4>限制</h4>
-                    <ul>
-                        <li>不論是手動填入或自動產生的班表皆無法線上儲存，可用「下載值班表 Excel」或螢幕截圖的方式儲存</li>
-                    </ul>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                </div>
+
+    <!-- 7. 全螢幕運算毛玻璃遮罩 -->
+    <div id="loadingOverlay" class="loading-overlay d-none">
+        <div class="loading-card card shadow-lg border-0 p-4 text-center">
+            <div class="spinner-border text-primary mx-auto mb-3" style="width: 3rem; height: 3rem;" role="status">
+                <span class="visually-hidden">運算中...</span>
             </div>
+            <h5 class="fw-bold mb-2">排班運算中</h5>
+            <p id="block_ui_message" class="text-muted small mb-4">正在尋找最佳解...</p>
+            <button class="btn btn-outline-danger btn-sm px-4 mx-auto btn_stop_random_duty_worker" type="button">
+                <i class="bi bi-x-circle me-1"></i>取消運算
+            </button>
         </div>
     </div>
-    
+
+    <!-- 8. 右上角 Toast 提示容器 -->
+    <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 3000;"></div>
+
     <script type="module" src="src/js/index.js"></script>
 </body>
 

@@ -1,4 +1,4 @@
-import moment from 'moment';
+import dayjs from './setup-dayjs.js';
 
 /**
  * Check if the date is a holiday or not by comparing the presets.
@@ -17,8 +17,8 @@ export function is_holiday(preset_holidays, date_str) {
  * @return {boolean} is or not a friday.
  */
 export function is_friday(preset_holidays, the_day_str) {
-    var the_day = moment(the_day_str);
-    var next_day_str = the_day.clone().add(1, 'days').format('YYYY-MM-DD');
+    var the_day = dayjs(the_day_str);
+    var next_day_str = the_day.add(1, 'day').format('YYYY-MM-DD');
     return (the_day.isoWeekday() === 5 && !is_holiday(preset_holidays, the_day_str)) || is_holiday(preset_holidays, next_day_str);
 }
 
@@ -28,6 +28,6 @@ export function is_friday(preset_holidays, the_day_str) {
  * @return {boolean} is or not a weekend.
  */
 export function is_weekend(the_day_str) {
-    var the_day = moment(the_day_str);
+    var the_day = dayjs(the_day_str);
     return (the_day.isoWeekday() === 6 || the_day.isoWeekday() === 7);
 }

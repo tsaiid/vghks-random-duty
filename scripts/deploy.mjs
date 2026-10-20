@@ -42,9 +42,9 @@ console.log('\n\x1b[32m[1/3] Testing and building project...\x1b[0m');
 run('pnpm test');
 run('pnpm build');
 
-// 3. 同步到根目錄 (排除 ver 與 .git)
+// 3. 同步到根目錄 (排除 ver, legacy 與 .git)
 console.log(`\n\x1b[32m[2/3] Deploying to Root: ${deployTargetRoot}\x1b[0m`);
-const rsyncRootCmd = `rsync -av --delete --exclude 'ver' --exclude '.git' "${distDir}/" "${deployTargetRoot}/"`;
+const rsyncRootCmd = `rsync -av --delete --exclude 'ver' --exclude 'legacy' --exclude '.git' "${distDir}/" "${deployTargetRoot}/"`;
 run(rsyncRootCmd);
 
 // 4. 執行 Git Commit & Push

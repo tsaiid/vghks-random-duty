@@ -1,100 +1,118 @@
 /*
- * blockUI
+ * Modern SaaS UI Polish, Loading Overlay & Dashboard Badges
  */
 
-#block_ui_box, #block_ui_dialog {
-    display: none;
-}
-
-div.growlUI {
-    background: url(../img/success48.png) no-repeat 10px 10px;
-}
-div.growlUI.success {
-    background: url(../img/success48.png) no-repeat 10px 10px;
-}
-div.growlUI.warning {
-    background: url(../img/warning48.png) no-repeat 10px 10px;
-}
-div.growlUI.error {
-    background: url(../img/error48.png) no-repeat 10px 10px;
-}
-
-div.growlUI h1,
-div.growlUI h2 {
-    color: white;
-    padding: 6px 5px 5px 75px;
-    text-align: left;
-    margin: 0;
-    line-height: normal;
-}
-
-div.growlUI h1 {
-    font-size: 18px;
-}
-div.growlUI h2 {
-    font-size: 16px;
-}
-
-/*
- * bootstrap modal related
- */
-
-#edit_patterns_table td, #edit_patterns_table th {
-    width: 25%;
-}
-
-/* hide div initially */
-#duties_datatable_div, .second_cal, #calEventDialog, #screenshot_download_link {
-    display: none;
-}
-
-#appVersion {
-    font-size: small;
-}
-
-/*
- * blockUI overlay enhancement
- */
-.ui-widget-overlay {
-    background: #000000;
-    opacity: 0.5;
-    filter: Alpha(Opacity=50);
-}
-
-/*
- * PACE related
- */
-body > :not(.pace) {
-    -webkit-transition: opacity .4s ease-in-out;
-    -moz-transition: opacity .4s ease-in-out;
-    -o-transition: opacity .4s ease-in-out;
-    -ms-transition: opacity .4s ease-in-out;
-    transition: opacity .4s ease-in-out;
-}
-
-body:not(.pace-done) > :not(.pace) {
-    opacity: 0;
-}
-
-/* loading 遮罩：畫面 loading 時讓背景變暗 */
-body::before {
-    content: "";
+/* Fullscreen Frosted Glass Loading Overlay */
+.loading-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1999;
-    pointer-events: none;
-    opacity: 0;
-    -webkit-transition: opacity .4s ease-in-out;
-    -moz-transition: opacity .4s ease-in-out;
-    -o-transition: opacity .4s ease-in-out;
-    -ms-transition: opacity .4s ease-in-out;
-    transition: opacity .4s ease-in-out;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-body:not(.pace-done)::before {
-    opacity: 1;
+.loading-card {
+    max-width: 380px;
+    width: 90%;
+    border-radius: 1rem;
+    background: #ffffff;
+}
+
+/* Color Dot for Person Indicators */
+.color-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+/* Duty Type Badges in Summary */
+.badge-friday {
+    background-color: #ecfdf5 !important;
+    color: #047857 !important;
+    border: 1px solid #a7f3d0;
+}
+
+.badge-holiday {
+    background-color: #fef2f2 !important;
+    color: #b91c1c !important;
+    border: 1px solid #fecaca;
+}
+
+.badge-ordinary {
+    background-color: #f1f5f9 !important;
+    color: #475569 !important;
+    border: 1px solid #e2e8f0;
+}
+
+/* Soft Warning & Danger Badges */
+.badge-danger-soft {
+    background-color: #fee2e2 !important;
+    color: #dc2626 !important;
+    font-weight: 600;
+}
+
+.badge-warning-soft {
+    background-color: #fef3c7 !important;
+    color: #d97706 !important;
+    font-weight: 600;
+}
+
+.badge-mismatch {
+    background-color: #fef2f2 !important;
+    color: #b91c1c !important;
+    border: 1px solid #fca5a5 !important;
+    font-weight: 600;
+}
+
+/* Summary Dashboard Table */
+.table-summary th {
+    background-color: #f8fafc;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #475569;
+    vertical-align: middle;
+    white-space: nowrap !important;
+}
+
+.table-summary td {
+    vertical-align: middle;
+    font-size: 0.85rem;
+}
+
+.table-summary .duty-dates-cell {
+    max-width: 280px;
+    line-height: 1.6;
+}
+
+.table-summary .hours-badges-group {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    gap: 3px;
+    justify-content: center;
+    vertical-align: middle;
+}
+
+/* Pattern Edit Table */
+.duty_input {
+    width: 60px;
+    margin: 0 auto;
+}
+
+.duty_input.is-invalid {
+    border-color: #dc3545;
+    background-color: #fff5f5;
+}
+
+/* Toast Container custom styling */
+.toast {
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
 }

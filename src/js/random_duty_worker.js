@@ -1,4 +1,4 @@
-import moment from 'moment';
+import dayjs from './setup-dayjs.js';
 import { shuffle } from './private_functions.js';
 import { get_preset_duty, calculate_group_duties_status, calculate_group_duties } from './lib_duties.js';
 import { is_holiday, is_weekend, is_friday } from './lib_holidays.js';
@@ -60,7 +60,7 @@ function generate_non_preset_duty_match_patterns(total_days, since_date_str, pre
         }
     });
 
-    var since_date = moment(since_date_str, 'YYYY-MM-DD');
+    var since_date = dayjs(since_date_str);
     for (var i = 0; i < total_days; i++) {
         var the_date = since_date.format('YYYY-MM-DD');
         var duty;
@@ -76,7 +76,7 @@ function generate_non_preset_duty_match_patterns(total_days, since_date_str, pre
                 non_preset_duties.ordinary.push([the_date, duty]);
             }
         }
-        since_date.add(1, 'days');
+        since_date = since_date.add(1, 'day');
     }
 
     if (tmp_duties_ordinary.length > 0 || tmp_duties_friday.length > 0 || tmp_duties_holiday.length > 0) {
