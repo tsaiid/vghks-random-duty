@@ -166,7 +166,7 @@ describe('lib_duties', () => {
             const sameDayEvents = [
                 { title: '2', className: ['duty-event'] },
                 { title: '3 不值', className: ['preset-non-duty-event'] },
-                { title: '假日 國慶日', className: ['gcal-holiday'] },
+                { title: '國慶日', className: ['gcal-holiday'] },
             ];
             expect(get_drop_conflict_status(dropEvent, sameDayEvents)).toBeUndefined();
             expect(get_drop_conflict_status(dropEvent, [])).toBeUndefined();
@@ -174,7 +174,7 @@ describe('lib_duties', () => {
 
         it('當事件無效或非排班事件時應回傳 undefined', () => {
             expect(get_drop_conflict_status(null, [])).toBeUndefined();
-            expect(get_drop_conflict_status({ title: '假日 國慶日', className: ['gcal-holiday'] }, [])).toBeUndefined();
+            expect(get_drop_conflict_status({ title: '國慶日', className: ['gcal-holiday'] }, [])).toBeUndefined();
         });
     });
 

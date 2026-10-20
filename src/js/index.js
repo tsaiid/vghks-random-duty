@@ -372,10 +372,11 @@ async function fetchTaiwanHolidays(fetchInfo, successCallback, failureCallback) 
                     allDay: true,
                 });
 
-                // Foreground Event (badge)
+                // Foreground Event (badge) - holiday content only (without '假日 ' prefix)
+                const holidayTitle = (item.summary || '').replace(/^假日\s*/, '');
                 events.push({
                     id: item.id,
-                    title: `假日 ${item.summary || ''}`,
+                    title: holidayTitle,
                     start: startDate,
                     end: endDate,
                     classNames: ['gcal-holiday', 'holiday-event'],
@@ -803,10 +804,10 @@ function handleSaveCalEvent() {
         state.cal1.addEvent(newEvent);
         if (state.cal2) state.cal2.addEvent(newEvent);
     } else if (eventType === 'eventPropHoliday') {
-        const titleText = document.getElementById('eventTitleInput').value.trim() || '自訂';
+        const titleText = (document.getElementById('eventTitleInput').value.trim() || '自訂').replace(/^假日\s*/, '') || '自訂';
         const newId = generateEventId('custom_holiday', dateStr, titleText);
 
-        state.customHolidays.push({ id: newId, date: dateStr, title: `假日 ${titleText}` });
+        state.customHolidays.push({ id: newId, date: dateStr, title: titleText });
 
         // Add background and foreground events
         const bgEvent = {
@@ -818,7 +819,7 @@ function handleSaveCalEvent() {
         };
         const fgEvent = {
             id: newId,
-            title: `假日 ${titleText}`,
+            title: titleText,
             start: dateStr,
             classNames: ['holiday-event'],
             allDay: true,
@@ -1558,7 +1559,8 @@ function restoreDraftIfAvailable() {
         draft.customHolidays.forEach(h => {
             if (!h || !h.id || seenHolidays.has(h.id)) return;
             seenHolidays.add(h.id);
-            state.customHolidays.push(h);
+            const holidayTitle = (h.title || '').replace(/^假日\s*/, '') || '自訂';
+            state.customHolidays.push({ ...h, title: holidayTitle });
 
             const bgEvent = {
                 id: `${h.id}_bg`,
@@ -1569,7 +1571,7 @@ function restoreDraftIfAvailable() {
             };
             const fgEvent = {
                 id: h.id,
-                title: h.title,
+                title: holidayTitle,
                 start: h.date,
                 classNames: ['holiday-event'],
                 allDay: true,
