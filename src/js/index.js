@@ -368,7 +368,7 @@ async function fetchTaiwanHolidays(fetchInfo, successCallback, failureCallback) 
                     start: startDate,
                     end: endDate,
                     display: 'background',
-                    classNames: ['holiday-bg-event'],
+                    classNames: ['holiday-bg-event', 'gcal-holiday-bg'],
                     allDay: true,
                 });
 
@@ -814,14 +814,14 @@ function handleSaveCalEvent() {
             id: `${newId}_bg`,
             start: dateStr,
             display: 'background',
-            classNames: ['holiday-bg-event'],
+            classNames: ['holiday-bg-event', 'custom-holiday-bg'],
             allDay: true,
         };
         const fgEvent = {
             id: newId,
             title: titleText,
             start: dateStr,
-            classNames: ['holiday-event'],
+            classNames: ['holiday-event', 'custom-holiday'],
             allDay: true,
             editable: false,
             textColor: '#991b1b',
@@ -1138,6 +1138,9 @@ function executeRandomDuty() {
             });
 
             state.isAlreadyRandomDuty = true;
+            if (!state.customPatterns) state.customPatterns = {};
+            const patternKey = `${range.month_str}_${state.monthSpan}_${state.people}`;
+            state.customPatterns[patternKey] = patterns;
             updateSuggestedPatterns();
             updateSummaryDuties(resultGroups || calculate_group_duties(getAllDuties()));
             triggerAutoSaveDraft();
@@ -1519,21 +1522,39 @@ function handleClearAllStorage() {
 
 /**
  * Restore draft data if present in localStorage.
+ * @param {Object} [draftInput] Optional pre-loaded draft object.
  */
-function restoreDraftIfAvailable() {
-    const draft = loadDraft();
+function restoreDraftIfAvailable(draftInput) {
+    const draft = draftInput || loadDraft();
     if (!draft) return;
 
-    // 清除現有日曆上可能殘留之值班/假日事件（保留官方抓取之假日背景）
+    // 清除現有日曆上可能殘留之值班與自訂假日事件（嚴格保留 Google Calendar 官方抓取之假日）
     const cals = [state.cal1, state.cal2].filter(Boolean);
     cals.forEach(cal => {
         cal.getEvents().forEach(evt => {
+            const isCustomHoliday = evt.classNames.includes('custom-holiday') ||
+                evt.classNames.includes('custom-holiday-bg') ||
+                (evt.id && evt.id.startsWith('custom_holiday_'));
+
+            if (!isCustomHoliday && (
+                evt.classNames.includes('gcal-holiday') ||
+                evt.classNames.includes('gcal-holiday-bg') ||
+                evt.classNames.includes('holiday-event') ||
+                evt.classNames.includes('holiday-bg-event')
+            )) {
+                // 官方假日：若草稿中曾被使用者標記刪除則移除，其餘完整保留
+                const baseId = evt.id.replace(/_bg$/, '');
+                if (state.deletedHolidays.has(evt.id) || state.deletedHolidays.has(baseId)) {
+                    evt.remove();
+                }
+                return;
+            }
+
             if (
                 evt.classNames.includes('duty-event') ||
                 evt.classNames.includes('preset-duty-event') ||
                 evt.classNames.includes('preset-non-duty-event') ||
-                evt.classNames.includes('holiday-event') ||
-                evt.classNames.includes('holiday-bg-event')
+                isCustomHoliday
             ) {
                 evt.remove();
             }
@@ -1542,9 +1563,18 @@ function restoreDraftIfAvailable() {
 
     if (draft.currentMonth) {
         state.currentMonth = dayjs(draft.currentMonth);
-        state.cal1.gotoDate(draft.currentMonth);
-        if (state.cal2) {
-            state.cal2.gotoDate(state.currentMonth.clone().add(1, 'month').format('YYYY-MM-01'));
+        if (state.cal1 && typeof state.cal1.getDate === 'function') {
+            const cal1Date = dayjs(state.cal1.getDate()).format('YYYY-MM-01');
+            if (cal1Date !== draft.currentMonth) {
+                state.cal1.gotoDate(draft.currentMonth);
+            }
+        }
+        if (state.cal2 && typeof state.cal2.getDate === 'function') {
+            const nextMonth = state.currentMonth.clone().add(1, 'month').format('YYYY-MM-01');
+            const cal2Date = dayjs(state.cal2.getDate()).format('YYYY-MM-01');
+            if (cal2Date !== nextMonth) {
+                state.cal2.gotoDate(nextMonth);
+            }
         }
         updateCalendarToolbar();
     }
@@ -1566,14 +1596,14 @@ function restoreDraftIfAvailable() {
                 id: `${h.id}_bg`,
                 start: h.date,
                 display: 'background',
-                classNames: ['holiday-bg-event'],
+                classNames: ['holiday-bg-event', 'custom-holiday-bg'],
                 allDay: true,
             };
             const fgEvent = {
                 id: h.id,
                 title: holidayTitle,
                 start: h.date,
-                classNames: ['holiday-event'],
+                classNames: ['holiday-event', 'custom-holiday'],
                 allDay: true,
                 editable: false,
                 textColor: '#991b1b',
@@ -1690,6 +1720,20 @@ function initApp() {
     state.useWeekHoursLimit = prefs.use_week_hours_limit !== false;
     state.weekHoursLimit = prefs.inputWeekHoursLimitSlider || 80;
     state.autoSaveDraft = prefs.auto_save_draft !== false;
+
+    // Load draft beforehand if available so state is ready before calendars init
+    const draft = state.autoSaveDraft ? loadDraft() : null;
+    if (draft) {
+        if (draft.currentMonth) {
+            state.currentMonth = dayjs(draft.currentMonth);
+        }
+        if (Array.isArray(draft.deletedHolidays)) {
+            state.deletedHolidays = new Set(draft.deletedHolidays);
+        }
+        if (draft.customPatterns) {
+            state.customPatterns = draft.customPatterns;
+        }
+    }
 
     // Apply preferences to UI controls
     document.getElementById('inputPeopleSlider').value = state.people;
@@ -1810,11 +1854,12 @@ function initApp() {
     initCalendars();
     setMonthSpan(state.monthSpan);
 
-    // Restore draft if present
-    setTimeout(() => {
-        restoreDraftIfAvailable();
+    // Restore draft events if present
+    if (draft) {
+        restoreDraftIfAvailable(draft);
+    } else {
         updateSuggestedPatterns();
-    }, 300);
+    }
 }
 
 // Start application when DOM is ready
