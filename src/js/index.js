@@ -360,6 +360,9 @@ async function fetchTaiwanHolidays(fetchInfo, successCallback, failureCallback) 
                     classNames: ['gcal-holiday', 'holiday-event'],
                     allDay: true,
                     editable: false,
+                    textColor: '#991b1b',
+                    backgroundColor: '#fee2e2',
+                    borderColor: '#fca5a5',
                 });
             });
         }
@@ -416,14 +419,14 @@ function updateSummaryDuties(groups) {
             <table class="table table-hover table-striped align-middle table-summary mb-0">
                 <thead>
                     <tr>
-                        <th class="text-center" style="width: 70px;">人員</th>
-                        <th>值班日清單</th>
-                        <th class="text-center" style="width: 120px;">班距</th>
-                        <th class="text-center" style="width: 120px;">週工時</th>
-                        <th class="text-center" style="width: 130px;">週工時 (PM Off)</th>
-                        <th class="text-center" style="width: 110px;">最長連上日</th>
-                        <th class="text-center" style="width: 80px;">QOD</th>
-                        <th class="text-center" style="width: 90px;">班距標準差</th>
+                        <th class="text-center text-nowrap" style="width: 60px;">人員</th>
+                        <th style="min-width: 150px; max-width: 260px;">值班日清單</th>
+                        <th class="text-center text-nowrap" style="width: 120px;">班距</th>
+                        <th class="text-center text-nowrap" style="min-width: 210px;">週工時</th>
+                        <th class="text-center text-nowrap" style="min-width: 210px;">週工時 (PM Off)</th>
+                        <th class="text-center text-nowrap" style="width: 95px;">最長連上日</th>
+                        <th class="text-center text-nowrap" style="width: 70px;">QOD</th>
+                        <th class="text-center text-nowrap" style="width: 95px;">班距標準差</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -511,7 +514,7 @@ function updateSummaryDuties(groups) {
                 let badgeClass = 'bg-light text-secondary border';
                 if (h > 88) badgeClass = 'badge-danger-soft';
                 else if (h >= 80) badgeClass = 'badge-warning-soft';
-                return `<span class="badge ${badgeClass} me-1 font-monospace">${h}</span>`;
+                return `<span class="badge ${badgeClass} font-monospace">${h}</span>`;
             }).join('');
 
             const maxContinuous = groupsOffs[p].intervals.length > 0
@@ -525,16 +528,16 @@ function updateSummaryDuties(groups) {
 
             html += `
                 <tr>
-                    <td class="text-center fw-bold">
+                    <td class="text-center fw-bold text-nowrap">
                         <span class="color-dot" style="background-color: ${get_duty_color(p)};"></span>${p}
                     </td>
-                    <td>${dateBadges}</td>
-                    <td class="text-center">${intervalBadges || '<span class="text-muted">-</span>'}</td>
-                    <td class="text-center">${renderHoursBadges(weekHours)}</td>
-                    <td class="text-center">${renderHoursBadges(weekHoursPmOff)}</td>
-                    <td class="text-center">${maxContinuousBadge}</td>
-                    <td class="text-center"><span class="badge ${qodCount > 0 ? 'badge-danger-soft' : 'bg-light text-muted border'}">${qodCount}</span></td>
-                    <td class="text-center font-monospace text-muted">${stdDev}</td>
+                    <td class="duty-dates-cell">${dateBadges}</td>
+                    <td class="text-center text-nowrap">${intervalBadges || '<span class="text-muted">-</span>'}</td>
+                    <td class="text-center text-nowrap"><div class="hours-badges-group">${renderHoursBadges(weekHours)}</div></td>
+                    <td class="text-center text-nowrap"><div class="hours-badges-group">${renderHoursBadges(weekHoursPmOff)}</div></td>
+                    <td class="text-center text-nowrap">${maxContinuousBadge}</td>
+                    <td class="text-center text-nowrap"><span class="badge ${qodCount > 0 ? 'badge-danger-soft' : 'bg-light text-muted border'}">${qodCount}</span></td>
+                    <td class="text-center text-nowrap font-monospace text-muted">${stdDev}</td>
                 </tr>
             `;
         }
@@ -799,6 +802,9 @@ function handleSaveCalEvent() {
             classNames: ['holiday-event'],
             allDay: true,
             editable: false,
+            textColor: '#991b1b',
+            backgroundColor: '#fee2e2',
+            borderColor: '#fca5a5',
         };
 
         state.cal1.addEvent(bgEvent);
@@ -1505,6 +1511,9 @@ function restoreDraftIfAvailable() {
                 classNames: ['holiday-event'],
                 allDay: true,
                 editable: false,
+                textColor: '#991b1b',
+                backgroundColor: '#fee2e2',
+                borderColor: '#fca5a5',
             };
             state.cal1.addEvent(bgEvent);
             state.cal1.addEvent(fgEvent);

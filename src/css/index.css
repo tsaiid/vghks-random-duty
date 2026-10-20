@@ -79,12 +79,25 @@
     font-weight: 600;
     color: #475569;
     vertical-align: middle;
-    white-space: nowrap;
+    white-space: nowrap !important;
 }
 
 .table-summary td {
     vertical-align: middle;
     font-size: 0.85rem;
+}
+
+.table-summary .duty-dates-cell {
+    max-width: 280px;
+    line-height: 1.6;
+}
+
+.table-summary .hours-badges-group {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    gap: 3px;
+    justify-content: center;
+    vertical-align: middle;
 }
 
 /* Pattern Edit Table */

@@ -100,10 +100,34 @@
 
 /* Holiday Foreground Events */
 .holiday-event {
-    background-color: #fef2f2 !important;
-    color: #dc2626 !important;
-    border: 1px solid #fecaca !important;
+    background-color: #fee2e2 !important;
+    border: 1px solid #fca5a5 !important;
+    border-radius: 6px !important;
     box-shadow: none !important;
+}
+
+.holiday-event,
+.holiday-event * {
+    color: #991b1b !important;
+    font-weight: 600 !important;
+}
+
+.holiday-event .fc-event-main,
+.holiday-event .fc-event-title-container,
+.holiday-event .fc-event-title {
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.holiday-event:hover {
+    background-color: #fecaca !important;
+    border-color: #f87171 !important;
+}
+
+.holiday-event:hover,
+.holiday-event:hover * {
+    color: #7f1d1d !important;
 }
 
 /* Holiday Background Overlay */
