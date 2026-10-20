@@ -57,7 +57,7 @@ jobs:
         run: |
           TARGET_DIR="radtools-repo/random-duty"
           mkdir -p "$TARGET_DIR"
-          rsync -av --delete --exclude '.git' --exclude 'ver' dist/ "$TARGET_DIR/"
+          rsync -av --delete --exclude '.git' --exclude 'ver' --exclude 'legacy' dist/ "$TARGET_DIR/"
 
       - name: Commit and Push Changes
         run: |
