@@ -9,6 +9,7 @@ import {
     duty_colors,
     get_duty_color,
     random_pattern,
+    calculate_pattern_points,
 } from '../src/js/lib_duties.js';
 
 describe('lib_duties', () => {
@@ -250,6 +251,23 @@ describe('lib_duties', () => {
             expect(pattern.length).toBe(people);
             const totalDays = pattern.reduce((acc, curr) => acc + curr[0] + curr[1] + curr[2], 0);
             expect(totalDays).toBe(62);
+        });
+    });
+
+    describe('calculate_pattern_points', () => {
+        it('應正確依照平日 1 點、週五 1 點、假日 2 點計算總積點', () => {
+            // [平日=5, 週五=1, 假日=2] -> 5*1 + 1*1 + 2*2 = 10
+            expect(calculate_pattern_points([5, 1, 2])).toBe(10);
+            // [平日=4, 週五=2, 假日=1] -> 4*1 + 2*1 + 1*2 = 8
+            expect(calculate_pattern_points([4, 2, 1])).toBe(8);
+            // 字串型態數值輸入也應正常處理
+            expect(calculate_pattern_points(['3', '2', '1'])).toBe(7);
+        });
+
+        it('當輸入無效或長度不足時應回傳 0', () => {
+            expect(calculate_pattern_points(null)).toBe(0);
+            expect(calculate_pattern_points([])).toBe(0);
+            expect(calculate_pattern_points([1, 2])).toBe(0);
         });
     });
 });
