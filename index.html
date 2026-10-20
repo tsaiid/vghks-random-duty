@@ -390,7 +390,7 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <h4 class="fw-bold mb-3">Random Duty Generator <span class="badge bg-primary fs-6">v1.2.0</span></h4>
+                    <h4 class="fw-bold mb-3">Random Duty Generator <span class="badge bg-primary fs-6">v2.0.0</span></h4>
                     <p class="text-secondary leading-relaxed">
                         專業醫療排班產生器，以亂數平衡排列與約束求解演算法自動產生公平值班表，支援預排班、排除不值班同仁與自訂國定假日。
                     </p>
@@ -475,14 +475,22 @@
                     </div>
                     <div class="timeline">
                         <div class="mb-4">
-                            <h5 class="fw-bold text-primary">1.2.0 – 2026-10-17</h5>
+                            <h5 class="fw-bold text-primary">2.0.0 – 2026-10-20</h5>
                             <ul class="text-secondary small">
                                 <li>全面架構現代化升級：原生 ES6+ (無 jQuery)、Bootstrap 5.3、FullCalendar v6、Day.js。</li>
                                 <li>新增本機排班草稿自動存檔機制 (`localStorage`) 與一鍵清除重置功能。</li>
                                 <li>修正「修改排班樣式」積點漏加平日點數之計算 Bug。</li>
+                                <li>升級螢幕快照至 2x Retina 高解析度輸出 (`html-to-image`)。</li>
+                                <li>獨立封存並部署舊版 (v1.2.0) 至 <code>/random-duty/legacy/</code>，於導覽列與對話框提供回溯入口。</li>
+                            </ul>
+                        </div>
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-dark">1.2.0 – 2026-10-17</h6>
+                            <ul class="text-secondary small">
                                 <li>擴充值班人數上限至 15 人，並新增 Material Design 高對比色票配置與單元測試。</li>
                                 <li>新增週工時上限設定（預設 80 小時），並於自動排班演算法中整合超時過濾規則。</li>
-                                <li>升級螢幕快照至 2x Retina 高解析度輸出 (`html-to-image`)。</li>
+                                <li>限制拖曳排班事件至同仁已值班或不值班之日期，提供即時衝突防呆與位置還原。</li>
+                                <li>修復 Firefox 下無法匯出 Excel 的問題。</li>
                             </ul>
                         </div>
                         <div class="mb-4">
