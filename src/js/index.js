@@ -220,16 +220,23 @@ function getPresetHolidays() {
  */
 function getPresetDuties() {
     const duties = [];
+    const seen = new Set();
     const cals = [state.cal1, state.cal2].filter(Boolean);
     cals.forEach(cal => {
         const events = cal.getEvents();
         events.forEach(evt => {
             if (evt.classNames.includes('preset-duty-event')) {
-                duties.push([dayjs(evt.start).format('YYYY-MM-DD'), parseInt(evt.title, 10)]);
+                const dateStr = dayjs(evt.start).format('YYYY-MM-DD');
+                const person = parseInt(evt.title, 10);
+                const key = `${dateStr}_${person}`;
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    duties.push([dateStr, person]);
+                }
             }
         });
     });
-    return duties;
+    return duties.sort((a, b) => a[0].localeCompare(b[0]));
 }
 
 /**
@@ -238,16 +245,23 @@ function getPresetDuties() {
  */
 function getPresetNonDuties() {
     const nonDuties = [];
+    const seen = new Set();
     const cals = [state.cal1, state.cal2].filter(Boolean);
     cals.forEach(cal => {
         const events = cal.getEvents();
         events.forEach(evt => {
             if (evt.classNames.includes('preset-non-duty-event')) {
-                nonDuties.push([dayjs(evt.start).format('YYYY-MM-DD'), parseInt(evt.title, 10)]);
+                const dateStr = dayjs(evt.start).format('YYYY-MM-DD');
+                const person = parseInt(evt.title, 10);
+                const key = `${dateStr}_${person}`;
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    nonDuties.push([dateStr, person]);
+                }
             }
         });
     });
-    return nonDuties;
+    return nonDuties.sort((a, b) => a[0].localeCompare(b[0]));
 }
 
 /**
@@ -284,11 +298,18 @@ function triggerAutoSaveDraft() {
     if (!state.autoSaveDraft) return;
 
     const generatedDuties = [];
+    const seen = new Set();
     const cals = [state.cal1, state.cal2].filter(Boolean);
     cals.forEach(cal => {
         cal.getEvents().forEach(evt => {
             if (evt.classNames.includes('duty-event') && !evt.classNames.includes('preset-duty-event')) {
-                generatedDuties.push([dayjs(evt.start).format('YYYY-MM-DD'), parseInt(evt.title, 10)]);
+                const dateStr = dayjs(evt.start).format('YYYY-MM-DD');
+                const person = parseInt(evt.title, 10);
+                const key = `${dateStr}_${person}`;
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    generatedDuties.push([dateStr, person]);
+                }
             }
         });
     });
@@ -299,7 +320,7 @@ function triggerAutoSaveDraft() {
         customHolidays: state.customHolidays,
         presetDuties: getPresetDuties(),
         presetNonDuties: getPresetNonDuties(),
-        generatedDuties: generatedDuties,
+        generatedDuties: generatedDuties.sort((a, b) => a[0].localeCompare(b[0])),
         customPatterns: state.customPatterns || {},
     };
 
@@ -1431,9 +1452,7 @@ function handleClearAllStorage() {
         confirmText: '清除並重置',
         confirmClass: 'btn-danger',
         onConfirm: () => {
-            clearAllStorage();
-
-            // Reset state
+            // 1. Reset state
             state.people = 4;
             state.monthSpan = 1;
             state.useQodLimit = true;
@@ -1442,12 +1461,25 @@ function handleClearAllStorage() {
             state.weekHoursLimit = 80;
             state.autoSaveDraft = true;
             state.deletedHolidays.clear();
+            state.cachedOfficialHolidays.clear();
             state.customHolidays = [];
             state.customPatterns = null;
             state.isAlreadyRandomDuty = false;
             state.currentMonth = dayjs().add(1, 'month').startOf('month');
 
-            // Reset UI form elements
+            // 2. Clear events on calendars immediately before any view changes
+            const cals = [state.cal1, state.cal2].filter(Boolean);
+            cals.forEach(cal => cal.removeAllEvents());
+
+            // 3. Reset calendar dates without triggering draft save
+            if (state.cal1) {
+                state.cal1.gotoDate(state.currentMonth.format('YYYY-MM-01'));
+            }
+            if (state.cal2) {
+                state.cal2.gotoDate(state.currentMonth.clone().add(1, 'month').format('YYYY-MM-01'));
+            }
+
+            // 4. Reset UI form elements & month span controls without auto-save preferences
             document.getElementById('inputPeopleSlider').value = 4;
             document.getElementById('people_val_badge').textContent = '4 人';
             document.getElementById('inputQodLimitSlider').value = 1;
@@ -1460,14 +1492,24 @@ function handleClearAllStorage() {
             document.getElementById('inputWeekHoursLimitSlider').disabled = false;
             document.getElementById('auto_save_draft_switch').checked = true;
 
-            setMonthSpan(1);
-            resetToDefaultMonth();
+            const mode1m = document.getElementById('mode_1m');
+            if (mode1m) mode1m.checked = true;
+            const firstCalCol = document.querySelector('.first_cal');
+            if (firstCalCol) firstCalCol.className = 'col-12 first_cal';
+            const secondCalCol = document.querySelector('.second_cal');
+            if (secondCalCol) secondCalCol.classList.add('d-none');
+            if (state.cal1) state.cal1.updateSize();
 
-            // Clear events on calendars
-            const cals = [state.cal1, state.cal2].filter(Boolean);
-            cals.forEach(cal => cal.removeAllEvents());
+            updateCalendarToolbar();
+            updateSuggestedPatterns();
+            updateSummaryDuties(calculate_group_duties([]));
+
+            // 5. Refetch official holidays on calendars
             state.cal1.refetchEvents();
             if (state.cal2) state.cal2.refetchEvents();
+
+            // 6. Clear all local storage and cookies thoroughly at the end
+            clearAllStorage();
 
             showToast('success', '已重置', '已清除所有本機儲存紀錄並恢復預設值。');
         },
@@ -1480,6 +1522,22 @@ function handleClearAllStorage() {
 function restoreDraftIfAvailable() {
     const draft = loadDraft();
     if (!draft) return;
+
+    // 清除現有日曆上可能殘留之值班/假日事件（保留官方抓取之假日背景）
+    const cals = [state.cal1, state.cal2].filter(Boolean);
+    cals.forEach(cal => {
+        cal.getEvents().forEach(evt => {
+            if (
+                evt.classNames.includes('duty-event') ||
+                evt.classNames.includes('preset-duty-event') ||
+                evt.classNames.includes('preset-non-duty-event') ||
+                evt.classNames.includes('holiday-event') ||
+                evt.classNames.includes('holiday-bg-event')
+            ) {
+                evt.remove();
+            }
+        });
+    });
 
     if (draft.currentMonth) {
         state.currentMonth = dayjs(draft.currentMonth);
@@ -1495,8 +1553,13 @@ function restoreDraftIfAvailable() {
     }
 
     if (Array.isArray(draft.customHolidays)) {
-        state.customHolidays = draft.customHolidays;
+        const seenHolidays = new Set();
+        state.customHolidays = [];
         draft.customHolidays.forEach(h => {
+            if (!h || !h.id || seenHolidays.has(h.id)) return;
+            seenHolidays.add(h.id);
+            state.customHolidays.push(h);
+
             const bgEvent = {
                 id: `${h.id}_bg`,
                 start: h.date,
@@ -1529,7 +1592,12 @@ function restoreDraftIfAvailable() {
     }
 
     if (Array.isArray(draft.presetDuties)) {
+        const seenPresetDuties = new Set();
         draft.presetDuties.forEach(([dStr, pNo]) => {
+            const key = `${dStr}_${pNo}`;
+            if (seenPresetDuties.has(key)) return;
+            seenPresetDuties.add(key);
+
             const newEvt = {
                 id: generateEventId('preset_duty', dStr, pNo),
                 title: String(pNo),
@@ -1546,7 +1614,12 @@ function restoreDraftIfAvailable() {
     }
 
     if (Array.isArray(draft.presetNonDuties)) {
+        const seenPresetNonDuties = new Set();
         draft.presetNonDuties.forEach(([dStr, pNo]) => {
+            const key = `${dStr}_${pNo}`;
+            if (seenPresetNonDuties.has(key)) return;
+            seenPresetNonDuties.add(key);
+
             const newEvt = {
                 id: generateEventId('preset_non_duty', dStr, pNo),
                 title: String(pNo),
@@ -1561,7 +1634,12 @@ function restoreDraftIfAvailable() {
     }
 
     if (Array.isArray(draft.generatedDuties) && draft.generatedDuties.length > 0) {
+        const seenGeneratedDuties = new Set();
         draft.generatedDuties.forEach(([dStr, pNo]) => {
+            const key = `${dStr}_${pNo}`;
+            if (seenGeneratedDuties.has(key)) return;
+            seenGeneratedDuties.add(key);
+
             const newEvt = {
                 id: generateEventId('duty', dStr, pNo),
                 title: String(pNo),
@@ -1580,6 +1658,8 @@ function restoreDraftIfAvailable() {
 
     updateSuggestedPatterns();
     updateSummaryDuties(calculate_group_duties(getAllDuties()));
+    // 若本機儲存曾存在重複紀錄，還原去重後立即更新為乾淨草稿
+    triggerAutoSaveDraft();
     showToast('info', '草稿已還原', '已還原上次暫存之排班草稿。');
 }
 

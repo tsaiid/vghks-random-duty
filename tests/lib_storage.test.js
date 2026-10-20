@@ -10,6 +10,8 @@ import {
     clearDraft,
     clearAllStorage,
     parseLegacyCookies,
+    deduplicateDutyPairs,
+    deduplicateCustomHolidays,
 } from '../src/js/lib_storage.js';
 
 class MockStorage {
@@ -128,6 +130,70 @@ describe('lib_storage', () => {
 
             // 偏好設定依然保留
             expect(loadPreferences(mockStorage).inputPeopleSlider).toBe(5);
+        });
+
+        it('saveDraft 與 loadDraft 應自動去除重複的值班與自訂假日資料', () => {
+            const draftWithDuplicates = {
+                currentMonth: '2026-11-01',
+                presetDuties: [
+                    ['2026-11-01', 1],
+                    ['2026-11-01', 1], // 重複
+                    ['2026-11-02', 2],
+                ],
+                presetNonDuties: [
+                    ['2026-11-03', 3],
+                    ['2026-11-03', 3], // 重複
+                ],
+                generatedDuties: [
+                    ['2026-11-04', 4],
+                    ['2026-11-04', 4], // 重複
+                    ['2026-11-05', 1],
+                ],
+                customHolidays: [
+                    { id: 'h1', date: '2026-11-12', title: '自訂假日' },
+                    { id: 'h1', date: '2026-11-12', title: '自訂假日' }, // 重複 ID
+                ],
+                deletedHolidays: ['del1', 'del1'], // 重複
+            };
+
+            saveDraft(draftWithDuplicates, mockStorage);
+            const loaded = loadDraft(mockStorage);
+
+            expect(loaded.presetDuties).toEqual([
+                ['2026-11-01', 1],
+                ['2026-11-02', 2],
+            ]);
+            expect(loaded.presetNonDuties).toEqual([
+                ['2026-11-03', 3],
+            ]);
+            expect(loaded.generatedDuties).toEqual([
+                ['2026-11-04', 4],
+                ['2026-11-05', 1],
+            ]);
+            expect(loaded.customHolidays).toEqual([
+                { id: 'h1', date: '2026-11-12', title: '自訂假日' },
+            ]);
+            expect(loaded.deletedHolidays).toEqual(['del1']);
+        });
+
+        it('loadDraft 能修復 storage 中舊有的重複草稿資料', () => {
+            // 模擬已受污染的舊草稿 JSON 字串直接存在 storage
+            const rawDirtyJson = JSON.stringify({
+                currentMonth: '2026-11-01',
+                generatedDuties: [
+                    ['2026-11-01', 1],
+                    ['2026-11-01', 1],
+                    ['2026-11-02', 2],
+                    ['2026-11-02', 2],
+                ],
+            });
+            mockStorage.setItem(DRAFT_STORAGE_KEY, rawDirtyJson);
+
+            const loaded = loadDraft(mockStorage);
+            expect(loaded.generatedDuties).toEqual([
+                ['2026-11-01', 1],
+                ['2026-11-02', 2],
+            ]);
         });
     });
 

@@ -170,6 +170,51 @@ export function savePreferences(prefs, storage) {
 }
 
 /**
+ * Deduplicate array of [dateStr, personNo] pairs.
+ * @param {Array} list
+ * @return {Array<[string, number]>}
+ */
+export function deduplicateDutyPairs(list) {
+    if (!Array.isArray(list)) return [];
+    var seen = new Set();
+    var result = [];
+    for (var i = 0; i < list.length; i++) {
+        var item = list[i];
+        if (Array.isArray(item) && item.length >= 2) {
+            var dateStr = String(item[0]);
+            var pNo = parseInt(item[1], 10);
+            if (!isNaN(pNo)) {
+                var key = dateStr + '_' + pNo;
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    result.push([dateStr, pNo]);
+                }
+            }
+        }
+    }
+    return result;
+}
+
+/**
+ * Deduplicate custom holidays by id.
+ * @param {Array} list
+ * @return {Array<Object>}
+ */
+export function deduplicateCustomHolidays(list) {
+    if (!Array.isArray(list)) return [];
+    var seen = new Set();
+    var result = [];
+    for (var i = 0; i < list.length; i++) {
+        var item = list[i];
+        if (item && item.id && !seen.has(item.id)) {
+            seen.add(item.id);
+            result.push(item);
+        }
+    }
+    return result;
+}
+
+/**
  * Load draft data from storage if auto_save_draft is enabled.
  * @param {Storage} [storage=window.localStorage] Storage implementation.
  * @return {Object|null} Draft object if present and enabled, else null.
@@ -197,11 +242,11 @@ export function loadDraft(storage) {
         }
         return {
             currentMonth: parsed.currentMonth || DEFAULT_DRAFT.currentMonth,
-            deletedHolidays: Array.isArray(parsed.deletedHolidays) ? parsed.deletedHolidays : [],
-            customHolidays: Array.isArray(parsed.customHolidays) ? parsed.customHolidays : [],
-            presetDuties: Array.isArray(parsed.presetDuties) ? parsed.presetDuties : [],
-            presetNonDuties: Array.isArray(parsed.presetNonDuties) ? parsed.presetNonDuties : [],
-            generatedDuties: Array.isArray(parsed.generatedDuties) ? parsed.generatedDuties : [],
+            deletedHolidays: Array.isArray(parsed.deletedHolidays) ? Array.from(new Set(parsed.deletedHolidays)) : [],
+            customHolidays: deduplicateCustomHolidays(parsed.customHolidays),
+            presetDuties: deduplicateDutyPairs(parsed.presetDuties),
+            presetNonDuties: deduplicateDutyPairs(parsed.presetNonDuties),
+            generatedDuties: deduplicateDutyPairs(parsed.generatedDuties),
             customPatterns: (parsed.customPatterns && typeof parsed.customPatterns === 'object') ? parsed.customPatterns : {},
         };
     } catch {
@@ -227,6 +272,12 @@ export function saveDraft(draftData, storage) {
     }
 
     var toSave = Object.assign({}, DEFAULT_DRAFT, draftData);
+    toSave.deletedHolidays = Array.isArray(toSave.deletedHolidays) ? Array.from(new Set(toSave.deletedHolidays)) : [];
+    toSave.customHolidays = deduplicateCustomHolidays(toSave.customHolidays);
+    toSave.presetDuties = deduplicateDutyPairs(toSave.presetDuties);
+    toSave.presetNonDuties = deduplicateDutyPairs(toSave.presetNonDuties);
+    toSave.generatedDuties = deduplicateDutyPairs(toSave.generatedDuties);
+
     s.setItem(DRAFT_STORAGE_KEY, JSON.stringify(toSave));
     return true;
 }
